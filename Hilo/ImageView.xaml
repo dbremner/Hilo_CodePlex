@@ -1,0 +1,121 @@
+﻿<!--
+===============================================================================
+ Microsoft patterns & practices
+ Hilo Guidance
+===============================================================================
+ Copyright © Microsoft Corporation.  All rights reserved.
+ This code released under the terms of the 
+ Microsoft patterns & practices license (http://hilo.codeplex.com/license)
+===============================================================================
+-->
+<local:HiloPage
+    x:Name="PageRoot"
+    x:Class="Hilo.ImageView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Hilo"
+    xmlns:converters="using:Hilo.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=ImageVM}">
+
+    <UserControl.Resources>
+        <converters:ThumbnailConverter x:Key="ThumbConverter" />
+    </UserControl.Resources>
+
+    <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="140"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Back button and photo grid -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="BackButton" 
+                    AutomationProperties.AutomationId="BackButton" 
+                    Click="GoBack" 
+                    IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}" 
+                    Style="{StaticResource BackButtonStyle}"/>
+            <GridView x:Name="PhotosGridView"
+                      AutomationProperties.AutomationId="PhotosGridView"
+                      Grid.Column="1"
+                      Margin="0,0,0,0"
+                      ItemsSource="{Binding Photos}"
+                      IsItemClickEnabled="False"
+                      ItemContainerStyle="{StaticResource HiloImageGridViewItem}"
+                      VerticalAlignment="Center"
+                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                      SelectionMode="Single">
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapGrid MaximumRowsOrColumns="1" />
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbConverter}}" 
+                                   Height="138" 
+                                   Width="200" 
+                                   Stretch="UniformToFill" />
+                        </Border>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+        </Grid>
+        <Grid Grid.Row="1" 
+              Margin="50"
+              x:Name="PhotoGrid">
+            <Image x:Name="Photo" 
+                   AutomationProperties.AutomationId="ImageControl" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Source="{Binding Photo}" />
+        </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <!-- Visual states reflect the application's view state -->
+            <VisualStateGroup>
+                <VisualState x:Name="FullScreenLandscape"/>
+                <VisualState x:Name="Filled"/>
+
+                <!-- The entire page respects the narrower 100-pixel margin convention for portrait -->
+                <VisualState x:Name="FullScreenPortrait">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackButton" 
+                                                       Storyboard.TargetProperty="Style">
+                            <DiscreteObjectKeyFrame KeyTime="0" 
+                                                    Value="{StaticResource PortraitBackButtonStyle}"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+                        <!--<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PhotoGrid" 
+                                                       Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" 
+                                                    Value="96,0,10,56"/>
+                        </ObjectAnimationUsingKeyFrames>-->
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+    <local:HiloPage.BottomAppBar>
+        <AppBar x:Name="ImageViewBottomAppBar"
+                AutomationProperties.AutomationId="ImageViewBottomAppBar"
+                IsSticky="{Binding IsAppBarSticky}" 
+                Padding="10,0,10,0">
+            <Grid>
+                <StackPanel HorizontalAlignment="Right" 
+                            Orientation="Horizontal">
+                    <Button Command="{Binding EditImageCommand}" 
+                            Style="{StaticResource EditImageAppBarButtonStyle}" 
+                            Tag="EditImage" />
+                </StackPanel>
+            </Grid>
+        </AppBar>
+    </local:HiloPage.BottomAppBar>
+</local:HiloPage>

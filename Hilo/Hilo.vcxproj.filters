@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>c2d1b68a-21e0-4cf8-91be-5a28ca3fa574</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>d5c1f813-0a12-4d7f-a73a-4169e1b6944c</UniqueIdentifier>
+    </Filter>
+    <None Include="Common\ReadMe.txt">
+      <Filter>Common</Filter>
+    </None>
+    <Page Include="Common\StandardStyles.xaml">
+      <Filter>Common</Filter>
+    </Page>
+    <ClCompile Include="Common\BindableBase.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\BooleanToVisibilityConverter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\BooleanNegationConverter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\RichTextColumns.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\LayoutAwarePage.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClInclude Include="Common\BindableBase.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\BooleanToVisibilityConverter.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\BooleanNegationConverter.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RichTextColumns.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\LayoutAwarePage.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <Filter Include="Views">
+      <UniqueIdentifier>{91debede-6f97-4f39-82aa-bc899b29016f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ViewModels">
+      <UniqueIdentifier>{79ff3610-2780-4f97-8130-b88c7dff25eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{a029357f-d08b-4c5f-bf02-85ac8f628d38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XamlExtensions">
+      <UniqueIdentifier>{f9e8a720-3d1b-46f5-991b-0b23f486a944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{814d64eb-4820-4171-97e6-a299e1e2a005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="en-US">
+      <UniqueIdentifier>{3d2f588c-0a85-4784-a6d8-1bace183d19c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="ImageBrowserView.xaml.cpp" />
+    <ClCompile Include="ImageBrowserViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModelLocator.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageView.xaml.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="CountToVisibilityConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoGroup.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoReader.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Photo.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MainHubView.xaml.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageRotation.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="MainHubViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="EditImageViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="EditImageView.xaml.cpp" />
+    <ClCompile Include="ViewModelBase.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="HiloPage.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomPhotoSelector.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumnailGenerator.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="TileUpdateScheduler.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="WideTile05.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="VariableGridView.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewData.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="ImageBrowserView.xaml.h" />
+    <ClInclude Include="ImageBrowserViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModelLocator.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageView.xaml.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="DelegateCommand.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="ThumbnailConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="CountToVisibilityConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoGroup.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoReader.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Photo.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MainHubView.xaml.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageRotation.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="MainHubViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="EditImageViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskExtensions.h" />
+    <ClInclude Include="EditImageView.xaml.h" />
+    <ClInclude Include="RandomPhotoSelector.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ThumnailGenerator.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="TileUpdateScheduler.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="WideTile05.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModelBase.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="HiloPage.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="PageType.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PageType.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="VariableGridView.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageViewData.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Hilo_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="ImageBrowserView.xaml">
+      <Filter>Views</Filter>
+    </Page>
+    <Page Include="ApplicationStyles.xaml" />
+    <Page Include="ImageView.xaml">
+      <Filter>Views</Filter>
+    </Page>
+    <Page Include="MainHubView.xaml">
+      <Filter>Views</Filter>
+    </Page>
+    <Page Include="EditImageView.xaml">
+      <Filter>Views</Filter>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Hilo30.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Hilo150b.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Hilo310b.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\MSDN_Hilo_Splash_v2_022712.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\MSDN_Hilo_bgoverlay_v2_022712.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="en-US\Resources.resw">
+      <Filter>en-US</Filter>
+    </PRIResource>
+  </ItemGroup>
+</Project>

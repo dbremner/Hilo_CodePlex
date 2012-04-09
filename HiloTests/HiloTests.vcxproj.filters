@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>bb3f4822-5b75-4347-80e0-a9bcb61b8db1</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Package">
+      <UniqueIdentifier>1f9da007-a038-48d3-9ad9-1e9462eaef7b</UniqueIdentifier>
+      <Extensions>appxmanifest;tile;settings</Extensions>
+    </Filter>
+    <Filter Include="Testable">
+      <UniqueIdentifier>{d512e912-6a90-4b87-b08a-8733021752ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mocks">
+      <UniqueIdentifier>{75256941-fc4a-4330-8f41-8befae8f4a4b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="..\Hilo\ImageBrowserViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\Common\BindableBase.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\PhotoReader.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="TestHelper.h" />
+    <ClInclude Include="..\Hilo\PhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageRotation.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\Photo.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\MainHubViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\RandomPhotoSelector.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ThumnailGenerator.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\EditImageViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\TileUpdateScheduler.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ViewModelBase.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\WideTile05.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\PageType.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\TaskExtensions.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ViewModelLocator.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\DelegateCommand.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageViewData.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\Common\BindableBase.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\PhotoReader.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="TestHelper.cpp" />
+    <ClCompile Include="PhotoTests.cpp" />
+    <ClCompile Include="ImageRotationTests.cpp" />
+    <ClCompile Include="PhotoGroupTests.cpp" />
+    <ClCompile Include="PhotoReaderTests.cpp" />
+    <ClCompile Include="..\Hilo\ImageRotation.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\Photo.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\PhotoGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="MainHubViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\MainHubViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomPhotoSelectorTests.cpp" />
+    <ClCompile Include="..\Hilo\ThumnailGenerator.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\EditImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="EditViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\TileUpdateScheduler.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ViewModelBase.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\WideTile05.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="WideTile05Tests.cpp" />
+    <ClCompile Include="..\Hilo\ImageViewData.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\UnitTestLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\UnitTestSmallLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\UnitTestSplashScreen.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\UnitTestStoreLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Package</Filter>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HiloTests_TemporaryKey.pfx" />
+  </ItemGroup>
+</Project>
