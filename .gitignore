@@ -1,0 +1,11 @@
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.vspx
+
+Debug/
+Release/
+x64/
+Arm/
+ipch/
