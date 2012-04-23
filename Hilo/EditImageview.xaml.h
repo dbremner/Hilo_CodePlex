@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -28,13 +28,9 @@ namespace Hilo
         EditImageViewModel^ m_editImageViewModel;
         bool m_pointerPressed;
 
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnImagePointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnImagePointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnImagePointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnCropRectangleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
     };
 }

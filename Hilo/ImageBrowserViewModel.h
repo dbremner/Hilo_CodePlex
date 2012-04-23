@@ -21,7 +21,13 @@ namespace Hilo
         // Properties
         property Platform::Object^ Photos { Platform::Object^ get(); }
 
+        property Platform::Object^ PhotoGroups
+        {
+            Platform::Object^ get();
+        }
+
     private:
         Platform::Object^ m_photos;
+        Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ m_photoGroups;
     };
 }

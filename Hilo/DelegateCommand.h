@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -22,7 +22,6 @@ namespace Hilo
                 m_canExecuteDelegate = canExecute;
             }
 
-            // TODO: may need to raise this event
             event Windows::Foundation::EventHandler<Platform::Object^>^ CanExecuteChanged;
 
             void Execute(Platform::Object^ parameter)

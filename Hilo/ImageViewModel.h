@@ -35,7 +35,12 @@ namespace Hilo
             void set(Windows::Storage::BulkAccess::FileInformation^ value);
         }
 
-        property Windows::UI::Xaml::Input::ICommand^ EditImageCommand
+        property Windows::UI::Xaml::Input::ICommand^ CropImageCommand
+        {
+            Windows::UI::Xaml::Input::ICommand^ get();
+        }
+
+        property Windows::UI::Xaml::Input::ICommand^ RotateImageCommand
         {
             Windows::UI::Xaml::Input::ICommand^ get();
         }
@@ -46,8 +51,15 @@ namespace Hilo
         Windows::Storage::BulkAccess::FileInformation^ m_photo;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         Platform::Object^ m_photos;
-        Windows::UI::Xaml::Input::ICommand^ m_editImageCommand;
+        Windows::UI::Xaml::Input::ICommand^ m_cropImageCommand;
+        Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
+        concurrency::task<void> m_head;
 
-        void EditImage(Platform::Object^ parameter);
+        concurrency::cancellation_token_source m_cts;        
+        concurrency::critical_section m_cs;
+
+        void CropImage(Platform::Object^ parameter);
+        void RotateImage(Platform::Object^ parameter);
+        void GetPhotoAsync();
     };
 }

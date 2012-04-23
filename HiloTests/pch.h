@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -18,9 +18,9 @@
 // Headers for CppUnitTest
 #include "CppUnitTest.h"
 
-// TODO: reference additional headers your program requires here
 #include <ppltasks.h>
 #include <sstream>
 #include <array>
 #include <collection.h>
 #include "TestHelper.h"
+#include "TestImageGenerator.h"

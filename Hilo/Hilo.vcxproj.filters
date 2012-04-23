@@ -77,16 +77,7 @@
     <ClCompile Include="ImageView.xaml.cpp">
       <Filter>Views</Filter>
     </ClCompile>
-    <ClCompile Include="CountToVisibilityConverter.cpp">
-      <Filter>XamlExtensions</Filter>
-    </ClCompile>
-    <ClCompile Include="PhotoGroup.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
     <ClCompile Include="PhotoReader.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Photo.cpp">
       <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="MainHubView.xaml.cpp">
@@ -98,10 +89,6 @@
     <ClCompile Include="MainHubViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="EditImageViewModel.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="EditImageView.xaml.cpp" />
     <ClCompile Include="ViewModelBase.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
@@ -111,13 +98,7 @@
     <ClCompile Include="RandomPhotoSelector.cpp">
       <Filter>Models</Filter>
     </ClCompile>
-    <ClCompile Include="ThumnailGenerator.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
     <ClCompile Include="TileUpdateScheduler.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="WideTile05.cpp">
       <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
@@ -125,6 +106,44 @@
       <Filter>Views</Filter>
     </ClCompile>
     <ClCompile Include="ImageViewData.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhoto.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhotoGroup.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="RotateImageView.xaml.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="RotateImageViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="BrowserPhotoGroup.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailGenerator.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="WideFiveImageTile.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="CropImageViewModel.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoGroup.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="Photo.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="CropImageView.xaml.cpp" />
+    <ClCompile Include="CropImageView.xaml.cpp" />
+    <ClCompile Include="ImageBase.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
   </ItemGroup>
@@ -150,16 +169,7 @@
     <ClInclude Include="ThumbnailConverter.h">
       <Filter>XamlExtensions</Filter>
     </ClInclude>
-    <ClInclude Include="CountToVisibilityConverter.h">
-      <Filter>XamlExtensions</Filter>
-    </ClInclude>
-    <ClInclude Include="PhotoGroup.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="PhotoReader.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Photo.h">
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="MainHubView.xaml.h">
@@ -171,21 +181,11 @@
     <ClInclude Include="MainHubViewModel.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="EditImageViewModel.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="TaskExtensions.h" />
-    <ClInclude Include="EditImageView.xaml.h" />
     <ClInclude Include="RandomPhotoSelector.h">
       <Filter>Models</Filter>
     </ClInclude>
-    <ClInclude Include="ThumnailGenerator.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="TileUpdateScheduler.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="WideTile05.h">
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="ViewModelBase.h">
@@ -194,16 +194,51 @@
     <ClInclude Include="HiloPage.h">
       <Filter>Views</Filter>
     </ClInclude>
-    <ClInclude Include="PageType.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="PageType.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="VariableGridView.h">
       <Filter>Views</Filter>
     </ClInclude>
     <ClInclude Include="ImageViewData.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="PageType.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="HubPhotoGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="HubPhoto.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="RotateImageView.xaml.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="PageType.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="RotateImageViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="ThumbnailGenerator.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="BrowserPhotoGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="WideFiveImageTile.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="CropImageView.xaml.h" />
+    <ClInclude Include="PhotoGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="Photo.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="CropImageViewModel.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="CropImageView.xaml.h" />
+    <ClInclude Include="ImageBase.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
   </ItemGroup>
@@ -227,7 +262,10 @@
     <Page Include="MainHubView.xaml">
       <Filter>Views</Filter>
     </Page>
-    <Page Include="EditImageView.xaml">
+    <Page Include="RotateImageView.xaml">
+      <Filter>Views</Filter>
+    </Page>
+    <Page Include="CropImageView.xaml">
       <Filter>Views</Filter>
     </Page>
   </ItemGroup>

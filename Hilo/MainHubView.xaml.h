@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -19,9 +19,12 @@ namespace Hilo
     {
     public:
         MainHubView();
-        
+      
+    protected:
+        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
     private:
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnItemGridViewTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
     };
 }

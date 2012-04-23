@@ -9,14 +9,14 @@
 #pragma once
 
 namespace Hilo {
-    class WideTile05
+    class WideFiveImageTile
     {
     public:
         Windows::UI::Notifications::TileNotification^ GetTileNotification();
-        void SetImageFilePaths( std::vector<std::wstring> fileNames );
+        void SetImageFilePaths(const std::vector<std::wstring>& fileNames);
         
     private:
         std::vector<std::wstring> m_fileNames;
-        void UpdateContentWithValues( Windows::Data::Xml::Dom::XmlDocument^ content );
+        void UpdateContentWithValues(Windows::Data::Xml::Dom::XmlDocument^ content);
     };
 }

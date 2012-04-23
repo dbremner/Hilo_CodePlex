@@ -34,7 +34,6 @@ namespace Hilo
         virtual void GoHome();
         virtual void GoToPage(PageType page, Platform::Object^ parameter);
 
-    private:
         bool m_isAppBarSticky;
     };
 #pragma warning(pop)

@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "VariableGridView.h"
-#include "Photo.h"
+#include "HubPhoto.h"
 
 using namespace Hilo;
 
@@ -18,7 +18,7 @@ using namespace Windows::UI::Xaml::Controls;
 
 void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element, Object^ item)
 {
-    auto model = dynamic_cast<Photo^>(item);
+    auto model = dynamic_cast<HubPhoto^>(item);
 
     if (model != nullptr)
     {
@@ -26,7 +26,6 @@ void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element
         element->SetValue(VariableSizedWrapGrid::RowSpanProperty, model->RowSpan);
     }
 
-    // TODO: Fix this for RC
     //GridView::PrepareContainerForItemOverride(element, item);
     ((IItemsControlOverrides^)this->__abi_baseclass)->PrepareContainerForItemOverride(element, item);
 }

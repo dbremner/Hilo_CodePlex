@@ -16,21 +16,18 @@ using namespace concurrency;
 using namespace Platform::Collections;
 using namespace Windows::ApplicationModel::Resources;
 
-ViewModelLocator::ViewModelLocator()
-{
-}
-
 MainHubViewModel^ ViewModelLocator::MainHubVM::get()
 {
-    if (m_mainHubViewModel == nullptr)
+    if (nullptr == m_mainHubViewModel)
     {
-        auto vector = ref new Vector<PhotoGroup^>();
+        auto vector = ref new Vector<HubPhotoGroup^>();
         // Pictures Group
-        auto picturesTask = create_async([]() { 
+        auto picturesTask = create_async([]() 
+        { 
             PhotoReader reader;
-            return reader.GetPhotoGroupAsync("", 6);
+            return reader.GetPhotosAsync("", 6);
         });        
-        auto picturesGroup = ref new PhotoGroup(picturesTask);
+        auto picturesGroup = ref new HubPhotoGroup(picturesTask);
         auto loader = ref new ResourceLoader();
         auto title = loader->GetString("PicturesTitle");
         picturesGroup->Title = title;
@@ -42,7 +39,7 @@ MainHubViewModel^ ViewModelLocator::MainHubVM::get()
 
 ImageBrowserViewModel^ ViewModelLocator::ImageBrowserVM::get()
 {
-    if (m_imageBrowswerViewModel == nullptr)
+    if (nullptr == m_imageBrowswerViewModel)
     {
         m_imageBrowswerViewModel = ref new ImageBrowserViewModel();
     }
@@ -51,14 +48,27 @@ ImageBrowserViewModel^ ViewModelLocator::ImageBrowserVM::get()
 
 ImageViewModel^ ViewModelLocator::ImageVM::get()
 {
-    if (m_imageViewModel == nullptr)
+    if (nullptr == m_imageViewModel)
     {
         m_imageViewModel = ref new ImageViewModel();
     }
     return m_imageViewModel;
 }
 
-EditImageViewModel^ ViewModelLocator::EditImageVM::get()
+CropImageViewModel^ ViewModelLocator::CropImageVM::get()
 {
-    return ref new EditImageViewModel();
+    if (nullptr == m_cropImageViewModel)
+    {
+        m_cropImageViewModel = ref new CropImageViewModel();
+    }
+    return m_cropImageViewModel;
+}
+
+RotateImageViewModel^ ViewModelLocator::RotateImageVM::get()
+{
+    if (nullptr == m_rotateImageViewModel)
+    {
+        m_rotateImageViewModel = ref new RotateImageViewModel();
+    }
+    return m_rotateImageViewModel;
 }

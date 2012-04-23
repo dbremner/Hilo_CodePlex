@@ -32,13 +32,7 @@
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="TestHelper.h" />
-    <ClInclude Include="..\Hilo\PhotoGroup.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Hilo\ImageRotation.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\Photo.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\MainHubViewModel.h">
@@ -47,19 +41,10 @@
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\ThumnailGenerator.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\EditImageViewModel.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Hilo\TileUpdateScheduler.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\ViewModelBase.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\WideTile05.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\PageType.h">
@@ -75,6 +60,29 @@
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\ImageViewData.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\HubPhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\HubPhoto.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="TestImageGenerator.h" />
+    <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
+    <ClInclude Include="..\Hilo\BrowserPhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\WideFiveImageTile.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ThumbnailConverter.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\CropImageViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageBase.h">
       <Filter>Testable</Filter>
     </ClInclude>
   </ItemGroup>
@@ -94,17 +102,9 @@
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="TestHelper.cpp" />
-    <ClCompile Include="PhotoTests.cpp" />
     <ClCompile Include="ImageRotationTests.cpp" />
-    <ClCompile Include="PhotoGroupTests.cpp" />
     <ClCompile Include="PhotoReaderTests.cpp" />
     <ClCompile Include="..\Hilo\ImageRotation.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\Photo.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoGroup.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="MainHubViewModelTests.cpp" />
@@ -115,24 +115,42 @@
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="RandomPhotoSelectorTests.cpp" />
-    <ClCompile Include="..\Hilo\ThumnailGenerator.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\EditImageViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="EditViewModelTests.cpp" />
     <ClCompile Include="..\Hilo\TileUpdateScheduler.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="..\Hilo\ViewModelBase.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
-    <ClCompile Include="..\Hilo\WideTile05.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
     <ClCompile Include="WideTile05Tests.cpp" />
     <ClCompile Include="..\Hilo\ImageViewData.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhotoGroupTests.cpp" />
+    <ClCompile Include="..\Hilo\HubPhotoGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhotoTests.cpp" />
+    <ClCompile Include="..\Hilo\HubPhoto.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="TestImageGenerator.cpp" />
+    <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp" />
+    <ClCompile Include="..\Hilo\BrowserPhotoGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailGeneratorTests.cpp" />
+    <ClCompile Include="..\Hilo\WideFiveImageTile.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailConverterTests.cpp" />
+    <ClCompile Include="..\Hilo\ThumbnailConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="CropImageViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\CropImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageBase.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
   </ItemGroup>
@@ -147,6 +165,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Images\UnitTestStoreLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\InvalidImageFile.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

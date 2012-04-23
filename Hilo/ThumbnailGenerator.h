@@ -11,16 +11,15 @@
 
 namespace Hilo
 {
-    class ThumnailGenerator
+    class ThumbnailGenerator
     {
     public:
-        static concurrency::task<Platform::Collections::Vector<Windows::Storage::StorageFile^>^> Generate(Windows::Foundation::Collections::IVector<Windows::Storage::StorageFile^>^ files, Windows::Storage::StorageFolder^ thumbnailsFolder);
+        concurrency::task<Platform::Collections::Vector<Windows::Storage::StorageFile^>^> Generate(Windows::Foundation::Collections::IVector<Windows::Storage::StorageFile^>^ files, Windows::Storage::StorageFolder^ thumbnailsFolder) ;
 
     private:
         static concurrency::task<Windows::Storage::Streams::InMemoryRandomAccessStream^> CreateThumbnailFromPictureFileAsync(Windows::Storage::StorageFile^ sourceFile, unsigned int thumbSize);
         static concurrency::task<Windows::Storage::StorageFile^> CreateLocalThumbnailAsync(Windows::Storage::StorageFolder^ folder, Windows::Storage::StorageFile^ imageFile, Platform::String^ localFileName, unsigned int thumbSize);
         static concurrency::task<Windows::Storage::StorageFile^> InternalSaveToFile(Windows::Storage::StorageFolder^ folder, Windows::Storage::Streams::InMemoryRandomAccessStream^ stream, Platform::String^ filename);
-
     } ; 
 }
 

@@ -27,15 +27,17 @@ namespace HiloTests
 
         TEST_METHOD(RandomPhotoSelectorTestsSelectsFivePhotos)
         {
+            TestImageGenerator imageGenerator;
+
             concurrency::task_status status;
-            auto photos = TestHelper::RunAsync(
-                TestHelper::CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"),
+            auto photos = TestHelper::RunSynced(
+                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"),
                 status);
 
             Assert::AreEqual(concurrency::completed, status);   
 
-            auto selectedPhotos = TestHelper::RunAsync(
-                TestHelper::CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
+            auto selectedPhotos = TestHelper::RunSynced(
+                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
                 .then([](IVectorView<StorageFile^>^ photos)
                 { 
                     // workaround for threading issue
@@ -47,6 +49,36 @@ namespace HiloTests
             Assert::AreEqual(concurrency::completed, status);
 
             Assert::AreEqual(5U, selectedPhotos->Size);
+
+            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+        }
+
+        TEST_METHOD(RandomPhotoSelectorUsesSizeOfProvidedFilesIfLessThanRequestedCount)
+        {
+            TestImageGenerator imageGenerator;
+
+            concurrency::task_status status;
+            auto photos = TestHelper::RunSynced(
+                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"),
+                status);
+
+            Assert::AreEqual(concurrency::completed, status);   
+
+            auto selectedPhotos = TestHelper::RunSynced(
+                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
+                .then([](IVectorView<StorageFile^>^ photos)
+            { 
+                // workaround for threading issue
+
+                auto copied = ref new Vector<StorageFile^>(begin(photos), end(photos));
+                return RandomPhotoSelector::SelectFilesAsync(copied->GetView(), 15);
+            }), status);
+
+            Assert::AreEqual(concurrency::completed, status);
+
+            Assert::AreEqual(10U, selectedPhotos->Size);
+
+            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
     };
 }

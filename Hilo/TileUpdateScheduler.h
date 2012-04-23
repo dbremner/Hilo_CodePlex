@@ -15,10 +15,10 @@ namespace Hilo
     class TileUpdateScheduler
     {
     public:
-        void TileUpdateScheduler::ScheduleUpdatedTiles();
+        void TileUpdateScheduler::ScheduleUpdateAsync();
 
     private:
-        concurrency::task<void> TileUpdateScheduler::InternalUpdateTileFromPictureLibrary(Windows::Storage::StorageFolder^ picturesFolder, Windows::Storage::StorageFolder^ thumbnailsFolder);
+        concurrency::task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(Windows::Storage::StorageFolder^ thumbnailsFolder);
         void TileUpdateScheduler::UpdateTile(Windows::Foundation::Collections::IVector<Windows::Storage::StorageFile^>^ files);
     };
 }

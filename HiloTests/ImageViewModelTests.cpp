@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -37,7 +37,7 @@ namespace HiloTests
                 propertyChangedFired = true;
             });
 
-            TestHelper::RunUIAsync([vm]() {
+            TestHelper::RunUISynced([vm]() {
                 vm->IsAppBarSticky = true;
             });
 
@@ -45,16 +45,15 @@ namespace HiloTests
             Assert::IsTrue(vm->IsAppBarSticky);
         }
 
-        TEST_METHOD(ImageViewModelEditImageCommandIsNotNull)
+        TEST_METHOD(ImageViewModelRotateImageCommandShouldNotBeNull)
         {
             auto vm = ref new ImageViewModel();
 
-            ICommand^ editCommand = vm->EditImageCommand;
+            ICommand^ editCommand = vm->RotateImageCommand;
 
-            Assert::IsNotNull(editCommand, "Edit image command should not be null");        
+            Assert::IsNotNull(editCommand, "Rotate image command should not be null");        
         }
 
-        // TODO Figure out how to create a NavigationEventArgs object for tests.
         /*TEST_METHOD(ImageViewModelShouldSetValuesFromNavigationParameterThatIsImageViewData)
         {
             auto vm = ref new ImageViewModel();

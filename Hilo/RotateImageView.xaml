@@ -1,0 +1,116 @@
+﻿<!--
+===============================================================================
+ Microsoft patterns & practices
+ Hilo Guidance
+===============================================================================
+ Copyright © Microsoft Corporation.  All rights reserved.
+ This code released under the terms of the 
+ Microsoft patterns & practices license (http://hilo.codeplex.com/license)
+===============================================================================
+-->
+<local:HiloPage
+    x:Name="PageRoot"
+    x:Class="Hilo.RotateImageView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Hilo"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=RotateImageVM}">
+
+    <UserControl.Resources>
+        <x:String x:Key="PageTitle">Rotate Image</x:String>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <Grid x:Name="ContentRoot" 
+          Background="{StaticResource HiloPageBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="PageTitleRow" 
+                           Height="140"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Page title -->
+        <Grid>
+            <TextBlock x:Name="PageTitle" 
+                       x:Uid="RotateImagePageTitle"
+                       Margin="120,0,0,0"
+                       Text="{StaticResource PageTitle}" 
+                       Style="{StaticResource PageHeaderTextStyle}"
+                       VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Rotate Image -->
+        <Grid Grid.Row="1"
+              x:Name="RotateImageGrid">
+            <Image x:Name="Photo" 
+                   AutomationProperties.AutomationId="ImageControl" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Source="{Binding Photo}" 
+                   ManipulationMode="Rotate" />
+
+            <!--<ProgressRing x:Name="WorkInProgress" Visibility="{Binding Path=IsRotating, Converter={StaticResource BooleanToVisibilityConverter}}" />-->
+            <ProgressRing x:Name="WorkInProgress" Visibility="Visible" IsActive="{Binding IsRotating}" Foreground="{StaticResource HiloHighlightBrush}" />
+        </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <!--App Orientation States-->
+            <VisualStateGroup x:Name="OrientationStates">
+                <VisualState x:Name="FullScreenLandscape"/>
+                <VisualState x:Name="Filled"/>
+
+                <!-- The entire page respects the narrower 100-pixel margin convention for portrait -->
+                <VisualState x:Name="FullScreenPortrait">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackButton" 
+                                                       Storyboard.TargetProperty="Style">
+                            <DiscreteObjectKeyFrame KeyTime="0" 
+                                                    Value="{StaticResource PortraitBackButtonStyle}"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+                        <!--<ObjectAnimationUsingKeyFrames Storyboard.TargetName="EditImageGrid" 
+                                                       Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" 
+                                                    Value="96,0,10,56"/>
+                        </ObjectAnimationUsingKeyFrames>-->
+                    </Storyboard>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+
+    <local:HiloPage.BottomAppBar>
+        <AppBar x:Name="EditImageBottomAppBar" 
+                AutomationProperties.AutomationId="RotateImageBottomAppBar"
+                IsOpen="True"
+                IsSticky="{Binding IsAppBarSticky}" 
+                Padding="10,0,10,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel HorizontalAlignment="Left" 
+                            Orientation="Horizontal"
+                            Grid.Column="0">
+                    <Button Command="{Binding RotateCommand}" 
+                            Style="{StaticResource RotateAppBarButtonStyle}" 
+                            Tag="Rotate" />
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Right" 
+                            Orientation="Horizontal"
+                            Grid.Column="1">
+                    <Button Command="{Binding CancelCommand}" 
+                            Style="{StaticResource CancelAppBarButtonStyle}" 
+                            Tag="Cancel" />
+                    <Button Command="{Binding SaveCommand}" 
+                            Style="{StaticResource SaveAppBarButtonStyle}"
+                            Tag="Save" />
+                </StackPanel>
+            </Grid>
+        </AppBar>
+    </local:HiloPage.BottomAppBar>
+</local:HiloPage>

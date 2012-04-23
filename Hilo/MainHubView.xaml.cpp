@@ -19,8 +19,17 @@ MainHubView::MainHubView()
     InitializeComponent();
 }
 
-
 void MainHubView::OnItemGridViewTapped(Object^ sender, TappedRoutedEventArgs^ e)
 {
     HiloPage::NavigateToPage(PageType::Browse, nullptr);
+}
+
+void Hilo::MainHubView::OnNavigatedTo( Windows::UI::Xaml::Navigation::NavigationEventArgs^ e )
+{
+    HiloPage::OnNavigatedTo(e);
+}
+
+void Hilo::MainHubView::OnNavigatedFrom( Windows::UI::Xaml::Navigation::NavigationEventArgs^ e )
+{
+    HiloPage::OnNavigatedFrom(e);
 }

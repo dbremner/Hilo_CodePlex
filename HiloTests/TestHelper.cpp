@@ -16,7 +16,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
 using namespace Windows::Foundation;
 
-void TestHelper::RunUIAsync(std::function<void ()>&& action)
+void TestHelper::RunUISynced(std::function<void ()>&& action)
 {
     Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
 

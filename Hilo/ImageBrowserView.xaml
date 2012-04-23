@@ -23,6 +23,11 @@
     <UserControl.Resources>
         <x:String x:Key="PageTitle">Pictures</x:String>
         <converters:ThumbnailConverter x:Key="ThumbConverter" />
+        <!--<CollectionViewSource
+            x:Name="GroupedItemsViewSource"
+            Source="{Binding PhotoGroups}"
+            IsSourceGrouped="true"
+            ItemsPath="Items"/>-->
     </UserControl.Resources>
 
     <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
@@ -50,7 +55,58 @@
         </Grid>
 
         <!-- Photos Grid -->
-        <Grid Margin="50" Grid.Row="1">
+        <Grid Margin="50" 
+              Grid.Row="1">
+            <!-- Grouped Photos Hub Margin="116,0,40,46" -->
+            <!--<GridView x:Name="PhotosGridView"
+                      AutomationProperties.AutomationId="PhotosGridView"
+                      AutomationProperties.Name="Grouped Photos"
+                      ItemsSource="{Binding Source={StaticResource GroupedItemsViewSource}}"
+                      ItemContainerStyle="{StaticResource HiloImageGridViewItem}"
+                      ItemClick="OnPhotoItemClicked" 
+                      IsItemClickEnabled="True" 
+                      SelectionMode="Multiple">
+
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <Image Source="{Binding Thumbnail, Converter={StaticResource ThumbConverter}}"
+                                Stretch="UniformToFill"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch"/>
+                        </Grid>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+                <GridView.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <Grid Margin="1,0,0,6" 
+                                      x:Name="GroupHeaderGrid">
+                                    <Button
+                                        AutomationProperties.AutomationId="GroupTitle"
+                                        Content="{Binding Title}"
+                                        Style="{StaticResource HiloTextButtonStyle}" />
+                                </Grid>
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                        <GroupStyle.Panel>
+                            <ItemsPanelTemplate>
+                                <VariableSizedWrapGrid Orientation="Vertical"
+                                                       Margin="0,0,80,0"
+                                                       ItemHeight="200"
+                                                       ItemWidth="200"
+                                                       MaximumRowsOrColumns="6"/>
+                            </ItemsPanelTemplate>
+                        </GroupStyle.Panel>
+                    </GroupStyle>
+                </GridView.GroupStyle>
+            </GridView>-->
             <GridView x:Name="PhotosGridView"
                       AutomationProperties.AutomationId="PhotosGridView"
                       ItemsSource="{Binding Photos}" 

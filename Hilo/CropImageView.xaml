@@ -9,18 +9,17 @@
 ===============================================================================
 -->
 <local:HiloPage
-    x:Name="PageRoot"
-    x:Class="Hilo.EditImageView"
+    x:Class="Hilo.CropImageView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Hilo"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=EditImageVM}">
+    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=CropImageVM}">
 
     <UserControl.Resources>
-        <x:String x:Key="PageTitle">Edit Image</x:String>
+        <x:String x:Key="PageTitle">Crop Image</x:String>
     </UserControl.Resources>
 
     <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
@@ -29,27 +28,19 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Back button and page title -->
+        <!-- Page title -->
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="BackButton" 
-                    AutomationProperties.AutomationId="BackButton"
-                    Click="GoBack" 
-                    IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}" 
-                    Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="PageTitle" 
-                       x:Uid="EditImagePageTitle"
+                       x:Uid="CropImagePageTitle"
+                       Margin="120,0,0,0"
                        Text="{StaticResource PageTitle}" 
-                       Grid.Column="1" 
-                       Style="{StaticResource PageHeaderTextStyle}"/>
+                       Style="{StaticResource PageHeaderTextStyle}"
+                       VerticalAlignment="Center"/>
         </Grid>
-        
-        <!-- Edit Image -->
+
+        <!-- Crop Image -->
         <Grid Grid.Row="1"
-              x:Name="EditImageGrid">
+              x:Name="CropImageGrid">
             <Grid.Resources>
                 <Storyboard x:Name="CropBorderAnimation">
                     <DoubleAnimation Duration="0:0:1" AutoReverse="True"
@@ -58,21 +49,14 @@
                 </Storyboard>
                 <local:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
             </Grid.Resources>
-            <!-- ManipulationDelta="OnImageManipulationDelta" -->
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center" 
                    Source="{Binding Photo}" 
-                   RenderTransformOrigin="0.5, 0.5"
-                   ManipulationMode="Rotate" 
                    PointerPressed="OnImagePointerPressed" 
                    PointerReleased="OnImagePointerReleased" 
-                   PointerMoved="OnImagePointerMoved">
-                <Image.RenderTransform>
-                    <RotateTransform Angle="{Binding Angle}" />
-                </Image.RenderTransform>
-            </Image>
+                   PointerMoved="OnImagePointerMoved" />
             <Rectangle x:Name="CropRectangle" 
                        AutomationProperties.AutomationId="CropRectangleControl" 
                        HorizontalAlignment="Left" 
@@ -103,7 +87,7 @@
                                                     Value="{StaticResource PortraitBackButtonStyle}"/>
                         </ObjectAnimationUsingKeyFrames>
 
-                        <!--<ObjectAnimationUsingKeyFrames Storyboard.TargetName="EditImageGrid" 
+                        <!--<ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropImageGrid" 
                                                        Storyboard.TargetProperty="Margin">
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="96,0,10,56"/>
@@ -115,27 +99,22 @@
     </Grid>
 
     <local:HiloPage.BottomAppBar>
-        <AppBar x:Name="EditImageBottomAppBar" 
-                AutomationProperties.AutomationId="EditImageBottomAppBar"
+        <AppBar x:Name="CropImageBottomAppBar" 
+                AutomationProperties.AutomationId="CropImageBottomAppBar"
+                IsOpen="True"
                 IsSticky="{Binding IsAppBarSticky}" 
                 Padding="10,0,10,0">
             <Grid>
                 <StackPanel HorizontalAlignment="Right" 
                             Orientation="Horizontal">
-                    <Button Command="{Binding RotateCommand}" 
-                            Style="{StaticResource RotateAppBarButtonStyle}" 
-                            Tag="Rotate" />
-                    <Button Command="{Binding UndoEditCommand}" 
-                            Style="{StaticResource UndoAppBarButtonStyle}" 
-                            Tag="Undo" />
-                    <Button Command="{Binding CancelEditCommand}" 
+                    <Button Command="{Binding CancelCommand}" 
                             Style="{StaticResource CancelAppBarButtonStyle}" 
                             Tag="Cancel" />
-                    <Button Command="{Binding SaveEditCommand}" 
+                    <Button Command="{Binding SaveCommand}" 
                             Style="{StaticResource SaveAppBarButtonStyle}" 
                             Tag="Save" />
                 </StackPanel>
             </Grid>
         </AppBar>
-        </local:HiloPage.BottomAppBar>
+    </local:HiloPage.BottomAppBar>
 </local:HiloPage>

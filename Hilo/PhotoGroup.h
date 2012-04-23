@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Common\BindableBase.h"
-#include <ppltasks.h>
 
 namespace Hilo
 {
@@ -19,12 +18,12 @@ namespace Hilo
     public ref class PhotoGroup sealed : public BindableBase
     {
     public:
-        PhotoGroup(Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^>^ task);
+        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder);
+        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, Platform::String^ title);
 
         property Platform::String^ Title 
         { 
-            Platform::String^ get(); 
-            void set(Platform::String^ value); 
+            Platform::String^ get();
         }
 
         property Platform::Object^ Items
@@ -34,7 +33,7 @@ namespace Hilo
 
     private:
         Platform::String^ m_title;
-        concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> m_task;
+        Windows::Storage::IStorageFolder^ m_storageFolder;
         Platform::Collections::Vector<Platform::Object^>^ m_photos;
     };
 }

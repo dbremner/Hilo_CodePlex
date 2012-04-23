@@ -47,7 +47,7 @@
                       Margin="0,0,0,0"
                       ItemsSource="{Binding Photos}"
                       IsItemClickEnabled="False"
-                      ItemContainerStyle="{StaticResource HiloImageGridViewItem}"
+                      ItemContainerStyle="{StaticResource HiloFilmStripImageGridViewItem}"
                       VerticalAlignment="Center"
                       SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                       SelectionMode="Single">
@@ -109,11 +109,17 @@
                 IsSticky="{Binding IsAppBarSticky}" 
                 Padding="10,0,10,0">
             <Grid>
-                <StackPanel HorizontalAlignment="Right" 
+                <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">
-                    <Button Command="{Binding EditImageCommand}" 
+                    <!--<Button Command="{Binding EditImageCommand}" 
                             Style="{StaticResource EditImageAppBarButtonStyle}" 
-                            Tag="EditImage" />
+                            Tag="EditImage" />-->
+                    <Button Command="{Binding RotateImageCommand}" 
+                            Style="{StaticResource RotateAppBarButtonStyle}" 
+                            Tag="Rotate" />
+                    <Button Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonStyle}"
+                            Tag="Crop" />
                 </StackPanel>
             </Grid>
         </AppBar>

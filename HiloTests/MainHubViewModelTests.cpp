@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\PhotoGroup.h"
+#include "..\Hilo\HubPhotoGroup.h"
 #include "..\Hilo\MainHubViewModel.h"
 
 using namespace Hilo;
@@ -28,11 +28,22 @@ namespace HiloTests
     TEST_CLASS(MainHubViewModelTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_imageGenerator = TestImageGenerator();
+        }
+
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+            concurrency::task_status status;
+            TestHelper::RunSynced(m_imageGenerator.DeleteFilesAsync(), status);
+        }
+
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsForHub)
         {
-            auto photoGroup = ref new PhotoGroup(GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
             photoGroup->Title = "Test";
-            auto vector = ref new Vector<PhotoGroup^>();
+            auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             auto model = ref new MainHubViewModel(vector);
             task<Object^> photoGroupTasks([model]()-> Object^ {
@@ -40,7 +51,7 @@ namespace HiloTests
             });
             task_status status;
 
-            Object^ photoGroups = TestHelper::RunAsync<Object^>(photoGroupTasks, status);
+            Object^ photoGroups = TestHelper::RunSynced<Object^>(photoGroupTasks, status);
 
             Assert::AreEqual(completed, status);
             Assert::IsNotNull(photoGroups);
@@ -48,9 +59,9 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsAsVectorOfPhotoGroups)
         {
-            auto photoGroup = ref new PhotoGroup(GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
             photoGroup->Title = "Test";
-            auto vector = ref new Vector<PhotoGroup^>();
+            auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             TypeName pageType;
             auto model = ref new MainHubViewModel(vector);
@@ -59,8 +70,8 @@ namespace HiloTests
             });
             task_status status;
 
-            Object^ photoGroupsAsObject = TestHelper::RunAsync<Object^>(photoGroupTasks, status);
-            Vector<PhotoGroup^>^ photoGroups = dynamic_cast<Vector<PhotoGroup^>^>(photoGroupsAsObject);
+            Object^ photoGroupsAsObject = TestHelper::RunSynced<Object^>(photoGroupTasks, status);
+            Vector<HubPhotoGroup^>^ photoGroups = dynamic_cast<Vector<HubPhotoGroup^>^>(photoGroupsAsObject);
 
             Assert::AreEqual(completed, status);
             Assert::IsNotNull(photoGroups);
@@ -70,7 +81,7 @@ namespace HiloTests
         IAsyncOperation<IVectorView<FileInformation^>^>^ GetPhotosAsync()
         {
             concurrency::task_status status;
-            FileInformation^ file = TestHelper::RunAsync<FileInformation^>(TestHelper::CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
+            FileInformation^ file = TestHelper::RunSynced<FileInformation^>(m_imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
 
             task<IVectorView<FileInformation^>^> task([file]()-> IVectorView<FileInformation^>^ {
                 Vector<FileInformation^>^ files = ref new Vector<FileInformation^>();
@@ -82,5 +93,7 @@ namespace HiloTests
                 return task;
             });
         }
+    private:
+        TestImageGenerator m_imageGenerator;
     };
 }

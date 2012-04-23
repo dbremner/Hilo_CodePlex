@@ -13,8 +13,12 @@
 
 #pragma once
 
-#include "App.xaml.h"
-#include "TaskExtensions.h"
+#include <assert.h>
 #include <ppltasks.h>
 #include <sstream>
 #include <collection.h>
+#include <vccorlib.h>
+#include "TaskExtensions.h"
+#include "App.xaml.h"
+
+

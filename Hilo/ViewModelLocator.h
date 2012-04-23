@@ -11,30 +11,31 @@
 #include "MainHubViewModel.h" // Required by generated header
 #include "ImageBrowserViewModel.h" // Required by generated header
 #include "ImageViewModel.h" // Required by generated header
-#include "EditImageViewModel.h" // Required by generated header
-#include "PhotoGroup.h" // Required by generated header
+#include "CropImageViewModel.h" // Required by generated header
+#include "RotateImageViewModel.h" // Required by generated header
+#include "HubPhoto.h" // Required by generated header
+#include "HubPhotoGroup.h" // Required by generated header
+#include "BrowserPhotoGroup.h" // Required by generated header
+#include "Photo.h"// Required by generated header
+#include "PhotoGroup.h"// Required by generated header
 
 namespace Hilo
 {
-    interface class INavigationService;
-
     [Windows::UI::Xaml::Data::Bindable]
     public ref class ViewModelLocator sealed
     {
     public:
-        ViewModelLocator();
-
         property ImageBrowserViewModel^ ImageBrowserVM { ImageBrowserViewModel^ get(); }
-
         property MainHubViewModel^ MainHubVM { MainHubViewModel^ get(); }
-
         property ImageViewModel^ ImageVM { ImageViewModel^ get(); }
-
-        property EditImageViewModel^ EditImageVM { EditImageViewModel^ get(); }
+        property CropImageViewModel^ CropImageVM { CropImageViewModel^ get(); }
+        property RotateImageViewModel^ RotateImageVM { RotateImageViewModel^ get(); }
 
     private:
         ImageBrowserViewModel^ m_imageBrowswerViewModel;
         MainHubViewModel^ m_mainHubViewModel;
         ImageViewModel^ m_imageViewModel;
+        CropImageViewModel^ m_cropImageViewModel;
+        RotateImageViewModel^ m_rotateImageViewModel;
     };
 }

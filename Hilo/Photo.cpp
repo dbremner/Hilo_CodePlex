@@ -10,6 +10,8 @@
 #include "Photo.h"
 
 using namespace Hilo;
+using namespace Platform;
+using namespace Windows::Foundation;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml::Media::Imaging;
@@ -21,6 +23,11 @@ Photo::Photo(FileInformation^ fileInfo) : m_fileInfo(fileInfo), m_thumbnail(null
 Platform::String^ Photo::Name::get()
 {
     return m_fileInfo->Name;
+}
+
+Photo::operator FileInformation^()
+{
+    return m_fileInfo;
 }
 
 BitmapImage^ Photo::Thumbnail::get()

@@ -10,13 +10,9 @@
 
 #include "App.g.h"
 #include "ViewModelLocator.h" // Required by generated header
-#include "Photo.h" // Required by generated header
 
 namespace Hilo
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     ref class App sealed
     {
     public:

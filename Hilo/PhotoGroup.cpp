@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "PhotoGroup.h"
 #include "Photo.h"
+#include "PhotoReader.h"
 
 using namespace Hilo;
 
@@ -17,11 +18,19 @@ using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage::Search;
 using namespace Windows::UI::Core;
 
-PhotoGroup::PhotoGroup(IAsyncOperation<IVectorView<FileInformation^>^>^ task) : m_task(task)
+PhotoGroup::PhotoGroup(IStorageFolder^ storagefolder) : m_storageFolder(storagefolder) 
 {
+    assert(nullptr != dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder));
+}
+
+PhotoGroup::PhotoGroup(IStorageFolder^ storagefolder, String^ title) : m_storageFolder(storagefolder), m_title(title)
+{
+    assert(nullptr != dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder));
 }
 
 Object^ PhotoGroup::Items::get()
@@ -29,13 +38,18 @@ Object^ PhotoGroup::Items::get()
     if (m_photos == nullptr)
     {
         m_photos = ref new Vector<Object^>();
-        m_task.then([this](IVectorView<FileInformation^>^ files) {
+        IStorageFolderQueryOperations^ query = dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder);
+        PhotoReader reader;
+        task<IVectorView<FileInformation^>^> photosTask = reader.GetPhotosAsync(query, "");
+        photosTask.then([this](IVectorView<FileInformation^>^ files)
+        {
             bool first = true;
-            std::for_each(begin(files), end(files), [this, &first](FileInformation^ item) {
-                auto photo = ref new Photo(item);
+            std::for_each(begin(files), end(files), [this, &first](FileInformation^ item) 
+            {
+                auto photo = ref new HubPhoto(item);
                 if (first)
                 {
-                    photo->ColumnSpan = 3;
+                    photo->ColumnSpan = 2;
                     photo->RowSpan = 2;
                     first = false;
                 }                
@@ -48,10 +62,9 @@ Object^ PhotoGroup::Items::get()
 
 String^ PhotoGroup::Title::get()
 {
-    return m_title;
-}
-
-void PhotoGroup::Title::set(String^ value)
-{
-    m_title = value;
+    if (nullptr != m_title)
+    {
+        return m_title;
+    }
+    return m_storageFolder->Name;
 }

@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -7,19 +7,15 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include <sstream>
-
 #include "TaskExtensions.h"
-
 #include "TileUpdateScheduler.h"
-#include "ThumnailGenerator.h"
+#include "ThumbnailGenerator.h"
 #include "PhotoReader.h"
 #include "RandomPhotoSelector.h"
-#include "WideTile05.h"
+#include "WideFiveImageTile.h"
 
-using namespace Hilo;
-
-using namespace Concurrency;
+using namespace concurrency;
+using namespace std;
 using namespace Platform;
 using namespace Windows::ApplicationModel::Background;
 using namespace Windows::Data::Xml::Dom;
@@ -34,87 +30,111 @@ using namespace Windows::Storage::Search;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Notifications;
 
-//todo: duplicated right now...need to rationalize with ThumbnailGenerator.h
-static Platform::String^ ThumbnailImagePrefix = "thumbImage_";
-static Platform::String^ ThumbnailsFolderName = "thumbnails";
+using namespace Hilo;
 
-static unsigned int BatchSize   = 5;
-static unsigned int SetSize     = 3;
+// Specifies the name of the local app folder that holds the thumbnail images.
+String^ ThumbnailsFolderName = "thumbnails";
 
-void TileUpdateScheduler::ScheduleUpdatedTiles()
+// Specifies the number of photos in a batch. A batch is applied to a single 
+// tile update.
+const unsigned int BatchSize = 5;
+// Specifies the number of batches. The Windows Runtime rotates through 
+// multiple batches.
+const unsigned int SetSize = 3;
+
+void TileUpdateScheduler::ScheduleUpdateAsync()
 {
-    InternalUpdateTileFromPictureLibrary(KnownFolders::PicturesLibrary,  ApplicationData::Current->LocalFolder);
+    // Select random pictures from the Pictures library and copy them 
+    // to a local app folder and then update the tile.
+    InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder);
 }
 
-task<void> TileUpdateScheduler::InternalUpdateTileFromPictureLibrary(StorageFolder^ picturesFolder, StorageFolder^ thumbnailsFolder)
+task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
+    StorageFolder^ thumbnailsFolder)
 {
-    task<StorageFolder^> createFolder(thumbnailsFolder->CreateFolderAsync(ThumbnailsFolderName, Windows::Storage::CreationCollisionOption::ReplaceExisting));
+    // Create a folder to hold the thumbnails.
+    // The ReplaceExisting option specifies to replace the contents of 
+    // any existing folder with a new, empty folder.
+    task<StorageFolder^> createFolder(thumbnailsFolder->CreateFolderAsync(
+        ThumbnailsFolderName, 
+        CreationCollisionOption::ReplaceExisting));
 
-    std::shared_ptr<StorageFolder^> thumbnailStorageFolder = std::make_shared<StorageFolder^>(nullptr);
+    // The storage folder that holds the thumbnails.
+    auto thumbnailStorageFolder = make_shared<StorageFolder^>(nullptr);
 
     return createFolder.then([thumbnailStorageFolder](StorageFolder^ createdFolder) 
     {
         (*thumbnailStorageFolder) = createdFolder;
+
+        // until we get around the threading issue that forces us to copy the 
+        // vector in the next step.
+
+        // Retrieve the most recent photos from the library. We later 
+        // select random photos from this collection.
         PhotoReader reader;
-        // TODO: Right now we're only getting a multiple of the batch and set size until we get around the threading issue that forces us to copy the vector in the
-        //       next step.
-        return reader.GetPhotoStorageFilesAsync("", 2 * BatchSize * SetSize );
+        return reader.GetPhotoStorageFilesAsync("", 2 * BatchSize * SetSize);
     }).then([](IVectorView<StorageFile^>^ files) 
     {
+        // If we received fewer than the number in one batch,
+        // return the empty collection. 
         if (files->Size < BatchSize)
-            return task_from_result(static_cast<IVector<StorageFile^>^>(ref new Vector<StorageFile^>()));
+        {
+            return task_from_result(static_cast<IVector<StorageFile^>^>(
+                ref new Vector<StorageFile^>()));
+        }
 
         auto copiedFileInfos = ref new Vector<StorageFile^>(begin(files),end(files));
         return RandomPhotoSelector::SelectFilesAsync(copiedFileInfos->GetView(), SetSize * BatchSize);
-    }).then([thumbnailsFolder](IVector<StorageFile^>^ selectedFiles)
+    }).then([thumbnailsFolder, thumbnailStorageFolder](IVector<StorageFile^>^ selectedFiles)
     {
+        // Return the empty collection if the previous step did not
+        // produce enough photos.
         if (selectedFiles->Size == 0)
         {
             return task_from_result(ref new Vector<StorageFile^>());
         }
 
-        return ThumnailGenerator::Generate(selectedFiles, thumbnailsFolder);
+        ThumbnailGenerator thumbnailGenerator;
+        return thumbnailGenerator.Generate(selectedFiles, *thumbnailStorageFolder);
     }).then([this](Vector<StorageFile^>^ files)
     {
-        if (files->Size == 0) return;
-
+        // Update the tile.
         UpdateTile(files);
-        return;
     });
 }
 
 void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
 {
-    // Create a tile updater
+    // Create a tile updater.
     TileUpdater^ tileUpdater = TileUpdateManager::CreateTileUpdaterForApplication();
     tileUpdater->Clear();
-    tileUpdater->EnableNotificationQueue(true);
-
+    
     unsigned int imagesCount = files->Size;
     unsigned int imageBatches = imagesCount / BatchSize;
 
+    tileUpdater->EnableNotificationQueue(imagesCount > 0);
+
     for(unsigned int batch = 0; batch < imageBatches; batch++)
     {
-        std::vector<std::wstring> imageList;
+        vector<wstring> imageList;
 
-        // Update Wide tile template with the selected images
+        // Add the selected images to the wide tile template.
         for(unsigned int image = 0; image < BatchSize; image++)
         {
             StorageFile^ file = files->GetAt(image + (batch * BatchSize));
-            std::wstringstream imageSource;
-            imageSource << L"ms-appdata:///local/" << ThumbnailsFolderName->Data() << L"/" << file->Name->Data() ;
+            wstringstream imageSource;
+            imageSource << L"ms-appdata:///local/" 
+                        << ThumbnailsFolderName->Data() 
+                        << L"/" 
+                        << file->Name->Data();
             imageList.push_back(imageSource.str());
         }
 
-        WideTile05 wideTile;
+        WideFiveImageTile wideTile;
         wideTile.SetImageFilePaths(imageList);
 
+        // Create the notification and update the tile.
         auto notification = wideTile.GetTileNotification();
-        auto s = notification->Content->GetXml();
-        // Create the notification and update the tile
         tileUpdater->Update(notification);
     }
 }
-
-
-

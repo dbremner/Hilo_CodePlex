@@ -7,7 +7,7 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "PhotoGroup.h"
+#include "HubPhotoGroup.h"
 #include "DelegateCommand.h"
 #include "PageType.h"
 #include "MainHubViewModel.h"
@@ -18,7 +18,7 @@ using namespace Platform;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Input;
 
-MainHubViewModel::MainHubViewModel(IObservableVector<PhotoGroup^>^ photoGroups) : m_photoGroups(photoGroups)
+MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroups) : m_photoGroups(photoGroups)
 {
     m_navigateToPicturesCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &MainHubViewModel::NavigateToPictures), nullptr);
 }

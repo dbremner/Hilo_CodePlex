@@ -117,13 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EditImagePageTitle.Text" xml:space="preserve">
-    <value>Edit Picture</value>
+  <data name="CropImagePageTitle.Text" xml:space="preserve">
+    <value>Crop Picture</value>
   </data>
   <data name="PicturesTitle" xml:space="preserve">
     <value>Pictures</value>
   </data>
   <data name="PicturesViewTitle.Text" xml:space="preserve">
     <value>Pictures</value>
+  </data>
+  <data name="RotateImagePageTitle.Text" xml:space="preserve">
+    <value>Rotate Picture</value>
   </data>
 </root>

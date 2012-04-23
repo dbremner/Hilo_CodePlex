@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -13,7 +13,6 @@
 #include <ctime>
 #include <ppltasks.h>
 #include <collection.h>
-
 
 using namespace concurrency;
 using namespace Windows::Storage;
@@ -31,7 +30,7 @@ task<IVector<StorageFile^>^> Hilo::RandomPhotoSelector::SelectFilesAsync(IVector
 
         auto selectedFiles = ref new Platform::Collections::Vector<Windows::Storage::StorageFile^>();
 
-        for (unsigned int imageCounter = 0; imageCounter < count; imageCounter++)
+        for (unsigned int imageCounter = 0; imageCounter < selectedImages.size(); imageCounter++)
         {
             auto imageFile = photos->GetAt(selectedImages[imageCounter]);
             selectedFiles->Append(imageFile);
@@ -49,7 +48,6 @@ std::vector<unsigned int> Hilo::RandomPhotoSelector::CreateRandomizedVector(unsi
 
     if (vectorSize >= sampleSize)
     {
-        //TODO: Use std::19973?
 
         srand((unsigned int)time(NULL));
         while (numbers.size() < sampleSize)
@@ -62,6 +60,14 @@ std::vector<unsigned int> Hilo::RandomPhotoSelector::CreateRandomizedVector(unsi
                 numbers.insert(RandomMap::value_type(pickFile, true));
                 result.push_back(pickFile);
             }
+        }
+    }
+    else
+    {
+        // Don't select any randomized images, just use all the images, no randomization
+        for(unsigned int i = 0; i < vectorSize; i++)
+        {
+            result.push_back(i);
         }
     }
 

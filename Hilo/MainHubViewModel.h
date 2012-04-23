@@ -12,17 +12,17 @@
 
 namespace Hilo
 {
-    ref class PhotoGroup;
+    ref class HubPhotoGroup;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MainHubViewModel sealed : public ViewModelBase
     {
     public:
-        MainHubViewModel(Windows::Foundation::Collections::IObservableVector<PhotoGroup^>^ photoGroups);
+        MainHubViewModel(Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ photoGroups);
 
         property Platform::Object^ PhotoGroups
         {
-            Platform::Object^ get();
+            Object^ get();
         }
 
         property Windows::UI::Xaml::Input::ICommand^ NavigateToPicturesCommand
@@ -31,7 +31,7 @@ namespace Hilo
         }
 
     private:
-        Windows::Foundation::Collections::IObservableVector<PhotoGroup^>^ m_photoGroups;
+        Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ m_photoGroups;
         Windows::UI::Xaml::Input::ICommand^ m_navigateToPicturesCommand;
 
         void NavigateToPictures(Platform::Object^ parameter);

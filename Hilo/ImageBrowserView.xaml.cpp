@@ -17,6 +17,7 @@ using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::ViewManagement;
 using namespace Windows::Graphics::Display;
 using namespace Windows::Storage;
@@ -27,7 +28,7 @@ ImageBrowserView::ImageBrowserView()
     InitializeComponent();
 }
 
-void Hilo::ImageBrowserView::OnPhotoItemClicked(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+void Hilo::ImageBrowserView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
 {
     auto file = dynamic_cast<FileInformation^>(e->ClickedItem);
     auto viewModel = static_cast<ImageBrowserViewModel^>(DataContext);

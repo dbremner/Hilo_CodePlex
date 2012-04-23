@@ -8,8 +8,8 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\PhotoGroup.h"
-#include "..\Hilo\Photo.h"
+#include "..\Hilo\HubPhotoGroup.h"
+#include "..\Hilo\HubPhoto.h"
 
 using namespace Hilo;
 
@@ -23,27 +23,38 @@ using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {
-    TEST_CLASS(PhotoGroupTests)
+    TEST_CLASS(HubPhotoGroupTests)
     {
     public:
-        TEST_METHOD(PhotoGroupShouldBeAbleToSetTitleForGroup)
+        TEST_METHOD_INITIALIZE(Initialize)
         {
-            PhotoGroup^ photoGroup = ref new PhotoGroup(GetPhotosAsync());
+            m_generator = TestImageGenerator();
+        }
+
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+            concurrency::task_status status;
+            TestHelper::RunSynced(m_generator.DeleteFilesAsync(), status);
+        }
+
+        TEST_METHOD(HubPhotoGroupShouldBeAbleToSetTitleForGroup)
+        {
+            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
 
             photoGroup->Title = "Test";
 
             Assert::AreEqual("Test", photoGroup->Title);
         }
 
-        TEST_METHOD(PhotoGroupShouldCallFunctionToGetPhotos)
+        TEST_METHOD(HubPhotoGroupShouldCallFunctionToGetPhotos)
         {
-            PhotoGroup^ photoGroup = ref new PhotoGroup(GetPhotosAsync());
+            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
             task<Object^> itemsTask([&photoGroup]()-> Object^ {
                 return photoGroup->Items;
             });
             task_status status;
 
-            Object^ photos = TestHelper::RunAsync<Object^>(itemsTask, status);
+            Object^ photos = TestHelper::RunSynced<Object^>(itemsTask, status);
 
             Assert::AreEqual(completed, status);
             Assert::IsNotNull(photos);
@@ -52,7 +63,7 @@ namespace HiloTests
         IAsyncOperation<IVectorView<FileInformation^>^>^ GetPhotosAsync()
         {
             concurrency::task_status status;
-            FileInformation^ file = TestHelper::RunAsync<FileInformation^>(TestHelper::CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
+            FileInformation^ file = TestHelper::RunSynced<FileInformation^>(m_generator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
 
             task<IVectorView<FileInformation^>^> task([file]()-> IVectorView<FileInformation^>^ {
                 Vector<FileInformation^>^ files = ref new Vector<FileInformation^>();
@@ -64,5 +75,8 @@ namespace HiloTests
                 return task;
             });
         }
+
+    private:
+        TestImageGenerator m_generator;
     };
 }

@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,7 +12,6 @@
 
 namespace Hilo
 {
-    // TODO: Inherit from LayoutAwarePage in RC
     // Suppress class "not consumable from JavaScript because it's not marked 'sealed'" warning
     // currently emitted despite the WebHostHidden attribute
 #pragma warning(push)
@@ -52,6 +51,7 @@ namespace Hilo
         virtual void NavigateHome();
         virtual void NavigateToPage(PageType page, Platform::Object^ parameter);        
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
     private:        
         bool _useFilledStateForNarrowWindow;
@@ -64,10 +64,14 @@ namespace Hilo
 
         // Hilo Page
         std::map<PageType, Windows::UI::Xaml::Interop::TypeName> m_pages;
-        NavigateEventHandler^ m_navigateBackEventHandler;
-        NavigateEventHandler^ m_navigateHomeEventHandler;
-        PageNavigateEventHandler^ m_navigateToPageEventHandler;
+        Windows::Foundation::EventRegistrationToken m_navigateBackEventToken;
+        Windows::Foundation::EventRegistrationToken m_navigateHomeEventToken;
+        Windows::Foundation::EventRegistrationToken m_navigateToPageEventToken;
         static Windows::UI::Xaml::DependencyProperty^ m_hiloDataContextProperty;
+
+        void AttachNavigationHandlers(Hilo::ViewModelBase^ viewModel);
+        void DetachNavigationHandlers(Hilo::ViewModelBase^ viewModel);
+
         static void OnHiloDataContextPropertyChanged(Windows::UI::Xaml::DependencyObject^ element, Windows::UI::Xaml::DependencyPropertyChangedEventArgs^ e);
     };
 #pragma warning(pop)

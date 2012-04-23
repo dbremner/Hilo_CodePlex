@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -13,6 +13,7 @@
 using namespace Hilo;
 
 using namespace Platform;
+using namespace Platform::Details;
 using namespace Platform::Collections;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
@@ -48,12 +49,11 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 {
     if (pArgs->PreviousExecutionState == ApplicationExecutionState::Terminated)
     {
-        //TODO: Load state from previously suspended application
     }
 
-    // Schedule tile updates
+    // Schedule tile updates.
     TileUpdateScheduler scheduler;
-    scheduler.ScheduleUpdatedTiles();
+    scheduler.ScheduleUpdateAsync();
 
     // Create a Frame to act navigation context and navigate to the first page
     auto rootFrame = ref new Frame();
@@ -74,13 +74,9 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 /// <param name="e">Details about the suspend request.</param>
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
-    //TODO: Save application state and stop any background activity
 }
 
 void App::OnUnhandledException(_In_ Object^ sender, UnhandledExceptionEventArgs^ args)
 {
-    //TODO: Do something useful here!
     throw ref new NotImplementedException();
 }
-
-

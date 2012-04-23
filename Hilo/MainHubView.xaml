@@ -45,7 +45,7 @@
             <Button x:Name="BackButton"
                     AutomationProperties.AutomationId="BackButton"
                     Click="GoBack" 
-                    IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}" 
+                    IsEnabled="False" 
                     Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="PageTitle" 
                        Text="{StaticResource AppName}" 
@@ -54,7 +54,7 @@
         </Grid>
 
         <!-- Grouped Photos Hub -->
-        <GridView x:Name="ItemGridView"
+        <local:VariableGridView x:Name="ItemGridView"
                       AutomationProperties.AutomationId="ItemGridView"
                       AutomationProperties.Name="Grouped Photos"
                       Margin="116,0,40,46"
@@ -64,7 +64,7 @@
                       SelectionMode="None"
                       Tapped="OnItemGridViewTapped">
 
-            <GridView.ItemTemplate>
+            <local:VariableGridView.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="2">
                         <Border Background="{StaticResource HiloDefaultImageBrush}" >
@@ -75,13 +75,16 @@
                         </Border>
                     </Grid>
                 </DataTemplate>
-            </GridView.ItemTemplate>
-            <GridView.ItemsPanel>
+            </local:VariableGridView.ItemTemplate>
+            <local:VariableGridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VariableSizedWrapGrid VerticalAlignment="Top" />
+                    <!--<VariableSizedWrapGrid VerticalAlignment="Top" />-->
+                    <VirtualizingStackPanel Orientation="Horizontal" 
+                                            Height="700"
+                                            VerticalAlignment="Top"/>
                 </ItemsPanelTemplate>
-            </GridView.ItemsPanel>
-            <GridView.GroupStyle>
+            </local:VariableGridView.ItemsPanel>
+            <local:VariableGridView.GroupStyle>
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
@@ -103,8 +106,8 @@
                         </ItemsPanelTemplate>
                     </GroupStyle.Panel>
                 </GroupStyle>
-            </GridView.GroupStyle>
-        </GridView>
+            </local:VariableGridView.GroupStyle>
+        </local:VariableGridView>
 
         <VisualStateManager.VisualStateGroups>
 

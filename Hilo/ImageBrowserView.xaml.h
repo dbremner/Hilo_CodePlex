@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -21,7 +21,6 @@ namespace Hilo
 
     private:
 
-        // TODO: Replace event handlers with behaviors once supported in Blend.
         void OnPhotoItemClicked(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
     };
 }

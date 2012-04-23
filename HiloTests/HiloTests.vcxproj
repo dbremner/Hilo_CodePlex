@@ -213,46 +213,53 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Hilo\BrowserPhotoGroup.h" />
     <ClInclude Include="..\Hilo\Common\BindableBase.h" />
+    <ClInclude Include="..\Hilo\CropImageViewModel.h" />
     <ClInclude Include="..\Hilo\DelegateCommand.h" />
-    <ClInclude Include="..\Hilo\EditImageViewModel.h" />
+    <ClInclude Include="..\Hilo\HubPhoto.h" />
+    <ClInclude Include="..\Hilo\HubPhotoGroup.h" />
+    <ClInclude Include="..\Hilo\ImageBase.h" />
     <ClInclude Include="..\Hilo\ImageBrowserViewModel.h" />
     <ClInclude Include="..\Hilo\ImageRotation.h" />
     <ClInclude Include="..\Hilo\ImageViewData.h" />
     <ClInclude Include="..\Hilo\ImageViewModel.h" />
     <ClInclude Include="..\Hilo\MainHubViewModel.h" />
     <ClInclude Include="..\Hilo\PageType.h" />
-    <ClInclude Include="..\Hilo\Photo.h" />
-    <ClInclude Include="..\Hilo\PhotoGroup.h" />
     <ClInclude Include="..\Hilo\PhotoReader.h" />
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h" />
     <ClInclude Include="..\Hilo\TaskExtensions.h" />
-    <ClInclude Include="..\Hilo\ThumnailGenerator.h" />
+    <ClInclude Include="..\Hilo\ThumbnailConverter.h" />
+    <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
     <ClInclude Include="..\Hilo\TileUpdateScheduler.h" />
     <ClInclude Include="..\Hilo\ViewModelBase.h" />
     <ClInclude Include="..\Hilo\ViewModelLocator.h" />
-    <ClInclude Include="..\Hilo\WideTile05.h" />
+    <ClInclude Include="..\Hilo\WideFiveImageTile.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestHelper.h" />
+    <ClInclude Include="TestImageGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Hilo\BrowserPhotoGroup.cpp" />
     <ClCompile Include="..\Hilo\Common\BindableBase.cpp" />
-    <ClCompile Include="..\Hilo\EditImageViewModel.cpp" />
+    <ClCompile Include="..\Hilo\CropImageViewModel.cpp" />
+    <ClCompile Include="..\Hilo\HubPhoto.cpp" />
+    <ClCompile Include="..\Hilo\HubPhotoGroup.cpp" />
+    <ClCompile Include="..\Hilo\ImageBase.cpp" />
     <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp" />
     <ClCompile Include="..\Hilo\ImageRotation.cpp" />
     <ClCompile Include="..\Hilo\ImageViewData.cpp" />
     <ClCompile Include="..\Hilo\ImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\MainHubViewModel.cpp" />
-    <ClCompile Include="..\Hilo\Photo.cpp" />
-    <ClCompile Include="..\Hilo\PhotoGroup.cpp" />
     <ClCompile Include="..\Hilo\PhotoReader.cpp" />
     <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp" />
-    <ClCompile Include="..\Hilo\ThumnailGenerator.cpp" />
+    <ClCompile Include="..\Hilo\ThumbnailConverter.cpp" />
+    <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp" />
     <ClCompile Include="..\Hilo\TileUpdateScheduler.cpp" />
     <ClCompile Include="..\Hilo\ViewModelBase.cpp" />
-    <ClCompile Include="..\Hilo\WideTile05.cpp" />
-    <ClCompile Include="EditViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\WideFiveImageTile.cpp" />
+    <ClCompile Include="CropImageViewModelTests.cpp" />
     <ClCompile Include="ImageRotationTests.cpp" />
     <ClCompile Include="ImageViewModelTests.cpp" />
     <ClCompile Include="MainHubViewModelTests.cpp" />
@@ -264,11 +271,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PhotoGroupTests.cpp" />
+    <ClCompile Include="HubPhotoGroupTests.cpp" />
     <ClCompile Include="PhotoReaderTests.cpp" />
     <ClCompile Include="RandomPhotoSelectorTests.cpp" />
     <ClCompile Include="TestHelper.cpp" />
-    <ClCompile Include="PhotoTests.cpp" />
+    <ClCompile Include="HubPhotoTests.cpp" />
+    <ClCompile Include="TestImageGenerator.cpp" />
+    <ClCompile Include="ThumbnailConverterTests.cpp" />
+    <ClCompile Include="ThumbnailGeneratorTests.cpp" />
     <ClCompile Include="WideTile05Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -281,6 +291,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Images\InvalidImageFile.jpg" />
     <Image Include="Images\UnitTestLogo.png" />
     <Image Include="Images\UnitTestSmallLogo.png" />
     <Image Include="Images\UnitTestSplashScreen.png" />

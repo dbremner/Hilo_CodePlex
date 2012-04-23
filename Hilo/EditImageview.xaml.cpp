@@ -49,7 +49,7 @@ void EditImageView::OnImagePointerMoved(Object^ sender, PointerEventArgs^ e)
 {
     if (m_pointerPressed)
     {
-        m_editImageViewModel->CalculateCropRectangleCoordinates(e->GetCurrentPoint(nullptr)->Position, Photo->Margin);
+        m_editImageViewModel->CalculateCropRectangleCoordinates(e->GetCurrentPoint(nullptr)->Position, e->GetCurrentPoint(Photo)->Position, Photo->Margin);
     }
 }
 

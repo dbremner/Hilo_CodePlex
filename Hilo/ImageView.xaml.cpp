@@ -23,12 +23,12 @@ ImageView::ImageView()
     InitializeComponent();
 }
 
-/// <summary>
-/// Invoked when this page is about to be displayed in a Frame.
-/// </summary>
-/// <param name="e">Event data that describes how this page was reached.  The Parameter
-/// property is typically used to configure the page.</param>
 void ImageView::OnNavigatedTo(NavigationEventArgs^ e)
 {
     HiloPage::OnNavigatedTo(e);
+}
+
+void ImageView::OnNavigatedFrom(NavigationEventArgs^ e)
+{
+    HiloPage::OnNavigatedFrom(e);
 }

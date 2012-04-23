@@ -26,7 +26,7 @@ static TypeName hiloPageTypeName = { Hilo::HiloPage::typeid->FullName, TypeKind:
 static TypeName objectTypeName = { "Object", TypeKind::Primitive };
 
 DependencyProperty^ HiloPage::m_hiloDataContextProperty =
-    DependencyProperty::RegisterAttached(
+    DependencyProperty::Register(
     "HiloDataContext",
     objectTypeName, 
     hiloPageTypeName, 
@@ -36,24 +36,16 @@ DependencyProperty^ HiloPage::m_hiloDataContextProperty =
     &HiloPage::OnHiloDataContextPropertyChanged)
     ));
 
+
+
 void HiloPage::OnHiloDataContextPropertyChanged(Windows::UI::Xaml::DependencyObject^ element, Windows::UI::Xaml::DependencyPropertyChangedEventArgs^ e)
 {
     HiloPage^ page = static_cast<HiloPage^>(element);
     ViewModelBase^ oldViewModel = dynamic_cast<ViewModelBase^>(e->OldValue);
-    if (oldViewModel != nullptr)
-    {
-        oldViewModel->NavigateBack -= page->m_navigateBackEventHandler;
-        oldViewModel->NavigateHome -= page->m_navigateHomeEventHandler;
-        oldViewModel->NavigateToPage -= page->m_navigateToPageEventHandler;
-    }
+    page->DetachNavigationHandlers(oldViewModel);
 
     ViewModelBase^ newViewModel = dynamic_cast<ViewModelBase^>(e->NewValue);
-    if (newViewModel != nullptr)
-    {
-        newViewModel->NavigateBack += page->m_navigateBackEventHandler;
-        newViewModel->NavigateHome += page->m_navigateHomeEventHandler;
-        newViewModel->NavigateToPage += page->m_navigateToPageEventHandler;
-    }
+    page->AttachNavigationHandlers(newViewModel);
 }
 
 DependencyProperty^ HiloPage::HiloDataContextProperty::get()
@@ -65,14 +57,13 @@ HiloPage::HiloPage()
 {
     if (Windows::ApplicationModel::DesignMode::DesignModeEnabled) return;
 
-    // Navigate event handlers
-    m_navigateBackEventHandler = ref new NavigateEventHandler(this, &HiloPage::NavigateBack);
-    m_navigateHomeEventHandler = ref new NavigateEventHandler(this, &HiloPage::NavigateHome);
-    m_navigateToPageEventHandler = ref new PageNavigateEventHandler(this, &HiloPage::NavigateToPage);
-
     // Map of pages to PageType enumeration
     TypeName editImageViewType = { "Hilo.EditImageView", TypeKind::Metadata };
     m_pages.insert(std::make_pair(PageType::Edit, editImageViewType));
+    TypeName cropImageViewType = { "Hilo.CropImageView", TypeKind::Metadata };
+    m_pages.insert(std::make_pair(PageType::Crop, cropImageViewType));
+    TypeName rotateImageViewType = { "Hilo.RotateImageView", TypeKind::Metadata };
+    m_pages.insert(std::make_pair(PageType::Rotate, rotateImageViewType));
     TypeName imageViewType = { "Hilo.ImageView", TypeKind::Metadata };
     m_pages.insert(std::make_pair(PageType::Image, imageViewType));
     TypeName imageBrowserType =  { "Hilo.ImageBrowserView", TypeKind::Metadata };;
@@ -116,6 +107,16 @@ void HiloPage::OnNavigatedTo(NavigationEventArgs^ e)
     if (viewModel != nullptr)
     {
         viewModel->OnNavigatedTo(e);
+    }
+}
+
+void Hilo::HiloPage::OnNavigatedFrom( Windows::UI::Xaml::Navigation::NavigationEventArgs^ e )
+{
+    ViewModelBase^ viewModel = dynamic_cast<ViewModelBase^>(DataContext);
+    if (viewModel != nullptr)
+    {
+        // Since we never receive destructs, this is the only place to unsubscribe.
+        DetachNavigationHandlers(viewModel);
     }
 }
 
@@ -331,4 +332,22 @@ void HiloPage::InvalidateVisualState(ApplicationViewState viewState)
     }
 }
 
+void HiloPage::AttachNavigationHandlers(ViewModelBase^ viewModel) 
+{
+    if (nullptr == viewModel) return ;
+
+    // Only resusbcribe if our tokens are empty.
+    m_navigateBackEventToken = viewModel->NavigateBack += ref new NavigateEventHandler(this, &HiloPage::NavigateBack);
+    m_navigateHomeEventToken = viewModel->NavigateHome += ref new NavigateEventHandler(this, &HiloPage::NavigateHome);
+    m_navigateToPageEventToken = viewModel->NavigateToPage += ref new PageNavigateEventHandler(this, &HiloPage::NavigateToPage);
+}
+
+void HiloPage::DetachNavigationHandlers(ViewModelBase^ viewModel) 
+{
+    if (nullptr == viewModel) return ;
+
+    viewModel->NavigateBack -= m_navigateBackEventToken;
+    viewModel->NavigateHome -= m_navigateHomeEventToken;
+    viewModel->NavigateToPage -= m_navigateToPageEventToken;
+}
 

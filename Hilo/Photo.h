@@ -12,11 +12,13 @@
 namespace Hilo 
 {
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class Photo sealed : public Hilo::BindableBase
+    public ref class Photo sealed : public BindableBase
     {
 
     public:
         Photo(Windows::Storage::BulkAccess::FileInformation^ file);
+
+        operator Windows::Storage::BulkAccess::FileInformation^ ();
 
         property Platform::String^ Name { Platform::String^ get(); }
 

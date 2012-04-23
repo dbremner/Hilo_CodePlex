@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\WideTile05.h"
+#include "..\Hilo\WideFiveImageTile.h"
 #include <array>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -19,21 +19,21 @@ using namespace Windows::UI::Notifications;
 
 namespace HiloTests
 {
-    TEST_CLASS(WideTile05Tests)
+    TEST_CLASS(WideFiveImageTileTests)
     {
     public:
-        TEST_METHOD(WideTile05TestsReturnsNotificationTileWhenRequested)
+        TEST_METHOD(WideFiveImageTileTestsReturnsNotificationTileWhenRequested)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
 
             auto notification = tile.GetTileNotification();
 
             Assert::IsNotNull(notification);
         }
 
-        TEST_METHOD(WideTile05TestsReturnsDefaultContentIfNoFilesProvided)
+        TEST_METHOD(WideFiveImageTileTestsReturnsDefaultContentIfNoFilesProvided)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
             auto defaultContent = TileUpdateManager::GetTemplateContent(TileTemplateType::TileWideImageCollection);
 
             auto notification = tile.GetTileNotification();
@@ -41,9 +41,9 @@ namespace HiloTests
             Assert::AreEqual(defaultContent->GetXml(), notification->Content->GetXml());
         }
 
-        TEST_METHOD(WideTile05TestsWhenProvideFileNamesThenReplacesImageSourceInContent)
+        TEST_METHOD(WideFiveImageTileTestsWhenProvideFileNamesThenReplacesImageSourceInContent)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
 
             const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
@@ -65,21 +65,21 @@ namespace HiloTests
             }
         }
 
-        TEST_METHOD(WideTile05TestsWhenProvideMoreThanFiveFileNamesThrows)
+        TEST_METHOD(WideFiveImageTileTestsWhenProvideMoreThanFiveFileNamesThrows)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
 
             const std::array<std::wstring,6> names = { L"path1", L"path2", L"path3", L"path4", L"path5", L"pathTooMany" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
 
-            TestHelper::ExceptionAssert<std::exception>([&tile, fileNames] () {
+            Assert::ExpectException<std::exception>([&tile, fileNames] () {
                 tile.SetImageFilePaths(fileNames);
             });
         }
 
-        TEST_METHOD(WideTile05TestsIncludesTileSquareImageNode)
+        TEST_METHOD(WideFiveImageTileTestsIncludesTileSquareImageNode)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
 
             const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
@@ -91,9 +91,9 @@ namespace HiloTests
             Assert::IsNotNull(squareImageBinding);
         }
 
-        TEST_METHOD(WideTile05TestsSetsTileSquareImageSourceToFirstFile)
+        TEST_METHOD(WideFiveImageTileTestsSetsTileSquareImageSourceToFirstFile)
         {
-            WideTile05 tile;
+            WideFiveImageTile tile;
 
             const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
