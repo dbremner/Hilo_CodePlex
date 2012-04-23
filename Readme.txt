@@ -11,7 +11,7 @@ Known Issues
 
  * Loading the initial set of photos may be slow as we turned off 
    usage of the indexer when executing the photo query.  This is
-   due to inconstistent caching of photo indexes on some machines
+   due to inconsistent caching of photo indexes on some machines
    particularly when photos were deleted.
 
 
