@@ -1,6 +1,6 @@
 Known Issues
 ==================================================================
-04/23/2012  
+05/02/2012 
  * When you select an item to view from the browse page, it will not 
    be selected in the image view page. Once you select a picture
    from the film strip at the top, it will be selected and start 
@@ -9,10 +9,8 @@ Known Issues
  * When navigating back after saving a crop or rotate image action, 
    it does not orient to the cropped or rotated image.
 
- * Loading the initial set of photos may be slow as we turned off 
-   usage of the indexer when executing the photo query.  This is
-   due to inconsistent caching of photo indexes on some machines
-   particularly when photos were deleted.
+ * Rotating an image using gesture manipulation many times in a row 
+   may lead to a heap exception with a Xaml stack trace. 
 
 
    

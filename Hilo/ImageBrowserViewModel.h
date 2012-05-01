@@ -18,16 +18,26 @@ namespace Hilo
     public:
         ImageBrowserViewModel();
 
-        // Properties
-        property Platform::Object^ Photos { Platform::Object^ get(); }
-
         property Platform::Object^ PhotoGroups
         {
             Platform::Object^ get();
         }
 
+        property bool InProgress
+        {
+            bool get();
+        }
+
+        property Windows::UI::Xaml::Input::ICommand^ GroupCommand
+        {
+            Windows::UI::Xaml::Input::ICommand^ get();
+        }
+
     private:
-        Platform::Object^ m_photos;
-        Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ m_photoGroups;
+        Platform::Collections::Vector<Platform::Object^>^ m_photoGroups;
+        bool m_inProgress;
+        Windows::UI::Xaml::Input::ICommand^ m_groupCommand;
+
+        void NavigateToGroup(Platform::Object^ parameter);
     };
 }

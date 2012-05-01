@@ -24,53 +24,53 @@
         <converters:ThumbnailConverter x:Key="ThumbConverter" />
     </UserControl.Resources>
 
-    <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="140"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <local:HiloPage.TopAppBar>
+        <AppBar x:Name="ImageViewTopAppBar"
+                AutomationProperties.AutomationId="ImageViewTopAppBar"
+                IsSticky="{Binding IsAppBarSticky}"
+                Padding="10,0,10,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BackButton" 
+                        AutomationProperties.AutomationId="BackButton" 
+                        Click="GoBack" 
+                        IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}"
+                        Style="{StaticResource BackButtonStyle}" />
+                <GridView x:Name="PhotosGridView"
+                          AutomationProperties.AutomationId="PhotosGridView"
+                          Grid.Column="1"
+                          ItemsSource="{Binding Photos}"
+                          IsItemClickEnabled="False"
+                          ItemContainerStyle="{StaticResource HiloFilmStripImageGridViewItem}"
+                          VerticalAlignment="Center"
+                          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                          SelectionMode="Single">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapGrid MaximumRowsOrColumns="1" />
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate>
+                            <Border>
+                                <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbConverter}}" 
+                                       Height="138" 
+                                       Width="200" 
+                                       Stretch="UniformToFill" />
+                            </Border>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </Grid>
+        </AppBar>
+    </local:HiloPage.TopAppBar>
 
-        <!-- Back button and photo grid -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="BackButton" 
-                    AutomationProperties.AutomationId="BackButton" 
-                    Click="GoBack" 
-                    IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}" 
-                    Style="{StaticResource BackButtonStyle}"/>
-            <GridView x:Name="PhotosGridView"
-                      AutomationProperties.AutomationId="PhotosGridView"
-                      Grid.Column="1"
-                      Margin="0,0,0,0"
-                      ItemsSource="{Binding Photos}"
-                      IsItemClickEnabled="False"
-                      ItemContainerStyle="{StaticResource HiloFilmStripImageGridViewItem}"
-                      VerticalAlignment="Center"
-                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                      SelectionMode="Single">
-                <GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapGrid MaximumRowsOrColumns="1" />
-                    </ItemsPanelTemplate>
-                </GridView.ItemsPanel>
-                <GridView.ItemTemplate>
-                    <DataTemplate>
-                        <Border>
-                            <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbConverter}}" 
-                                   Height="138" 
-                                   Width="200" 
-                                   Stretch="UniformToFill" />
-                        </Border>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
-            </GridView>
-        </Grid>
-        <Grid Grid.Row="1" 
-              Margin="50"
-              x:Name="PhotoGrid">
+    <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
+        <Grid x:Name="PhotoGrid" 
+              Margin="50,50,50,110">
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
                    HorizontalAlignment="Center" 
@@ -103,6 +103,7 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
+
     <local:HiloPage.BottomAppBar>
         <AppBar x:Name="ImageViewBottomAppBar"
                 AutomationProperties.AutomationId="ImageViewBottomAppBar"
@@ -111,9 +112,6 @@
             <Grid>
                 <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">
-                    <!--<Button Command="{Binding EditImageCommand}" 
-                            Style="{StaticResource EditImageAppBarButtonStyle}" 
-                            Tag="EditImage" />-->
                     <Button Command="{Binding RotateImageCommand}" 
                             Style="{StaticResource RotateAppBarButtonStyle}" 
                             Tag="Rotate" />

@@ -17,12 +17,6 @@ namespace Hilo
     {
     public:
         CropImageViewModel();
-        ~CropImageViewModel();
-
-        property int CropRectangleWidth { int get(); }
-        property int CropRectangleHeight { int get(); }
-        property Platform::Object^ CropRectangleMargin { Platform::Object^ get(); }
-        property bool IsCropRectangleVisible { bool get(); }
 
         property Windows::UI::Xaml::Media::ImageSource^ Photo
         {
@@ -39,39 +33,38 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+        property bool InProgress { bool get(); }
+        property double CropOverlayLeft { double get(); }
+        property double CropOverlayTop { double get(); }
+        property double CropOverlayHeight { double get(); }
+        property double CropOverlayWidth { double get(); }
+        property bool IsCropOverlayVisible { bool get(); }
 
-        void GetCropStartCoordinates(Windows::Foundation::Point onScreen, Windows::Foundation::Point relative, int pageTitleRowHeight);
-        void CalculateCropRectangleCoordinates(Windows::Foundation::Point onScreen, Windows::Foundation::Point relative, Windows::UI::Xaml::Thickness imageMargin);
+        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+        void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
+        void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
         void CropImage(double actualWidth);
     
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_file;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
-        Windows::Storage::Streams::IRandomAccessStream^ m_randomAccessStream;
+        Windows::Storage::Streams::IRandomAccessStream^ m_imageStream;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
-        bool m_isCropRectangleVisible;
-        int m_cropRectangleWidth;
-        int m_cropRectangleHeight;
-        int m_pageTitleRowHeight;
-        Windows::Foundation::Point m_actualCropAnchorPoint;
-        Windows::Foundation::Point m_actualCropEndPoint;
-        Windows::Foundation::Point m_relativeCropAnchorPoint;
-        Windows::Foundation::Point m_relativeCropEndPoint;
-        Platform::Object^ m_cropRectangleMargin;
+        bool m_inProgress;
+        bool m_isCropOverlayVisible;
 
-        // Image data
-        Windows::Graphics::Imaging::BitmapDecoder^ m_decoder;
-        Platform::Array<unsigned char, 1>^ m_sourcePixels;
-        Platform::Array<unsigned char, 1>^ m_destinationPixels;
-        int m_imageWidth;
-        int m_imageHeight;
-        int m_newImageWidth;
-        int m_newImageHeight;
+        double m_left;
+        double m_top;
+        double m_right;
+        double m_bottom;
 
-        // Member functions
-        void PopulatePixelArray();
+        double m_cropOverlayLeft;
+        double m_cropOverlayTop;
+        double m_cropOverlayHeight;
+        double m_cropOverlayWidth;
+        double m_actualHeight;
+        double m_actualWidth;       
 
         // Member functions that implement Commands
         void SaveImage(Platform::Object^ parameter);

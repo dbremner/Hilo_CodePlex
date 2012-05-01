@@ -38,12 +38,17 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        property bool IsRotating
+        ///<summary>Returns the rotation angle for image display.</summary>
+        property double RotationAngle 
         {
-            bool get();
+            double get();
+            void set(double value);
         }
-
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
+        void Initialize(Windows::Storage::BulkAccess::FileInformation^ image);
+
+        void EndRotation();
 
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_file;
@@ -53,7 +58,10 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
         concurrency::task<void> m_head;
-        bool m_isRotating;
+        bool m_isSaving;
+        double m_rotationAngle;
+
+        concurrency::task<void> RotateImageViewModel::DoRotate(double angle);
 
         void Rotate90(Platform::Object^ parameter);
         void SaveImage(Platform::Object^ parameter);

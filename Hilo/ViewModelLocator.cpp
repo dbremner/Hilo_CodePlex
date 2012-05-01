@@ -57,18 +57,10 @@ ImageViewModel^ ViewModelLocator::ImageVM::get()
 
 CropImageViewModel^ ViewModelLocator::CropImageVM::get()
 {
-    if (nullptr == m_cropImageViewModel)
-    {
-        m_cropImageViewModel = ref new CropImageViewModel();
-    }
-    return m_cropImageViewModel;
+    return ref new CropImageViewModel();
 }
 
 RotateImageViewModel^ ViewModelLocator::RotateImageVM::get()
 {
-    if (nullptr == m_rotateImageViewModel)
-    {
-        m_rotateImageViewModel = ref new RotateImageViewModel();
-    }
-    return m_rotateImageViewModel;
+    return ref new RotateImageViewModel();
 }

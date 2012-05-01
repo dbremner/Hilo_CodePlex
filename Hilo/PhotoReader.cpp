@@ -37,6 +37,13 @@ task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(IStorageFolderQ
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
+task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query)
+{
+    auto fileQuery = CreateFileQuery(folder, query);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
+}
+
 task<IVectorView<StorageFile^>^> PhotoReader::GetPhotoStorageFilesAsync(String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
@@ -68,7 +75,7 @@ StorageFolderQueryResult^ PhotoReader::CreateVirtualFolderQueryByMonth(IStorageF
 {
     auto queryOptions = ref new QueryOptions(CommonFolderQuery::GroupByMonth);
     queryOptions->FolderDepth = FolderDepth::Deep;
-    queryOptions->IndexerOption = IndexerOption::DoNotUseIndexer;
+    queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     return folder->CreateFolderQueryWithOptions(queryOptions);
 }
 
@@ -79,7 +86,7 @@ StorageFileQueryResult^ PhotoReader::CreateFileQuery(IStorageFolderQueryOperatio
     //auto picturesFolder = KnownFolders::PicturesLibrary;
     auto queryOptions = ref new QueryOptions(CommonFileQuery::OrderByDate, fileTypeFilter);
     queryOptions->FolderDepth = FolderDepth::Deep;
-    queryOptions->IndexerOption = IndexerOption::DoNotUseIndexer;
+    queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     queryOptions->ApplicationSearchFilter = query;
     return folder->CreateFileQueryWithOptions(queryOptions);
     

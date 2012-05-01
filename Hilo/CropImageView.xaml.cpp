@@ -13,6 +13,9 @@
 using namespace Hilo;
 
 using namespace Platform;
+using namespace Windows::Foundation;
+using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Navigation;
 
@@ -37,28 +40,25 @@ void CropImageView::OnNavigatedFrom(NavigationEventArgs^ e)
     HiloPage::OnNavigatedFrom(e);
 }
 
-void CropImageView::OnImagePointerPressed(Object^ sender, PointerEventArgs^ e)
+void CropImageView::OnPhotoSizeChanged(Platform::Object^ sender, SizeChangedEventArgs^ e)
 {
-    m_pointerPressed = true;
-    m_cropImageViewModel->GetCropStartCoordinates(e->GetCurrentPoint(nullptr)->Position, e->GetCurrentPoint(Photo)->Position, safe_cast<int>(PageTitleRow->ActualHeight));    
-    CropBorderAnimation->Stop();
+    m_cropImageViewModel->CalculateInitialCropOverlayPosition(
+        Photo->TransformToVisual(CropImageGrid), 
+        Photo->RenderSize.Width, Photo->RenderSize.Height);
 }
 
-void CropImageView::OnImagePointerReleased(Object^ sender, PointerEventArgs^ e)
+void CropImageView::OnThumbDragDelta(Platform::Object^ sender, DragDeltaEventArgs^ e)
 {
-    m_pointerPressed = false;
-    CropBorderAnimation->Begin();
-}
-
-void CropImageView::OnImagePointerMoved(Object^ sender, PointerEventArgs^ e)
-{
-    if (m_pointerPressed)
-    {
-        m_cropImageViewModel->CalculateCropRectangleCoordinates(e->GetCurrentPoint(nullptr)->Position, e->GetCurrentPoint(Photo)->Position, Photo->Margin);
-    }
+    m_cropImageViewModel->UpdateCropOverlayPostion(safe_cast<Thumb^>(sender), 
+        e->VerticalChange, 
+        e->HorizontalChange, 
+        CropOverlay->MinWidth, CropOverlay->MinHeight);
 }
 
 void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^ e)
 {
-    m_cropImageViewModel->CropImage(Photo->ActualWidth);
+    if (!m_cropImageViewModel->InProgress)
+    {
+        m_cropImageViewModel->CropImage(Photo->ActualWidth);
+    }
 }

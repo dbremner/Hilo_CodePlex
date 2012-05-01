@@ -10,6 +10,7 @@
 #include "ImageViewData.h"
 #include "ImageViewModel.h"
 #include "DelegateCommand.h"
+#include "PhotoReader.h"
 
 using namespace Hilo;
 
@@ -18,6 +19,7 @@ using namespace Platform;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::FileProperties;
+using namespace Windows::Storage::Search;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
@@ -41,8 +43,13 @@ ICommand^ ImageViewModel::RotateImageCommand::get()
     return m_rotateImageCommand;
 }
 
-Object^ ImageViewModel::Photos::get()
+Platform::Object^ ImageViewModel::Photos::get()
 {
+    if (nullptr == m_photos)
+    {
+        PhotoReader reader;
+        m_photos = reader.GetVirtualizedFiles(m_folder, "");
+    }
     return m_photos;
 }
 
@@ -61,7 +68,7 @@ FileInformation^ ImageViewModel::SelectedItem::get()
 }
 void ImageViewModel::SelectedItem::set(FileInformation^ value)
 {
-    if (m_photo != value)
+    if (m_photo != value && value != nullptr)
     {
         m_photo = value;
         m_image = nullptr;
@@ -100,8 +107,13 @@ void ImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
         return;
     }
 
-    // we came from an edit
-    auto newFile = dynamic_cast<FileInformation^>(e->Parameter);
+	Initialize(e->Parameter);
+}
+
+void ImageViewModel::Initialize(Object^ parameter)
+{
+	// we came from an edit
+    auto newFile = dynamic_cast<FileInformation^>(parameter);
     if (nullptr != newFile)
     {
         m_photo = newFile;
@@ -110,12 +122,15 @@ void ImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
     // we came from the image browser
     else
     {
-        auto imageViewData = dynamic_cast<ImageViewData^>(e->Parameter);
+        auto imageViewData = dynamic_cast<ImageViewData^>(parameter);
         if (nullptr != imageViewData)
         {
-            m_photo = imageViewData->Photo; 
-            m_photos = imageViewData->Photos;
+            m_photo = dynamic_cast<FileInformation^>(imageViewData->Photo); 
+            assert(nullptr != m_photo);
+            m_folder = dynamic_cast<IStorageFolderQueryOperations^>(imageViewData->Folder);
+            assert(nullptr != m_folder);
             m_image = nullptr;
+            m_photos = nullptr;
         }
     }
 }

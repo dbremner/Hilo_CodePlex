@@ -26,31 +26,22 @@
 
     <Grid x:Name="ContentRoot" 
           Background="{StaticResource HiloPageBackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition x:Name="PageTitleRow" 
-                           Height="140"/>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!-- Page title -->
-        <Grid>
-            <TextBlock x:Name="PageTitle" 
-                       x:Uid="RotateImagePageTitle"
-                       Margin="120,0,0,0"
-                       Text="{StaticResource PageTitle}" 
-                       Style="{StaticResource PageHeaderTextStyle}"
-                       VerticalAlignment="Center" />
-        </Grid>
-
+        
         <!-- Rotate Image -->
-        <Grid Grid.Row="1"
-              x:Name="RotateImageGrid">
+        <Grid x:Name="RotateImageGrid"
+              Margin="50,50,50,110">
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center" 
                    Source="{Binding Photo}" 
-                   ManipulationMode="Rotate" />
+                   ManipulationMode="Rotate">
+                <Image.RenderTransform>
+                    <RotateTransform 
+                        x:Name="ImageRotateTransform"  
+                        Angle="{Binding RotationAngle}" />
+                </Image.RenderTransform>
+            </Image>
 
             <!--<ProgressRing x:Name="WorkInProgress" Visibility="{Binding Path=IsRotating, Converter={StaticResource BooleanToVisibilityConverter}}" />-->
             <ProgressRing x:Name="WorkInProgress" Visibility="Visible" IsActive="{Binding IsRotating}" Foreground="{StaticResource HiloHighlightBrush}" />

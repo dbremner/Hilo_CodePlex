@@ -15,7 +15,6 @@
 #include "RotateImageViewModel.h" // Required by generated header
 #include "HubPhoto.h" // Required by generated header
 #include "HubPhotoGroup.h" // Required by generated header
-#include "BrowserPhotoGroup.h" // Required by generated header
 #include "Photo.h"// Required by generated header
 #include "PhotoGroup.h"// Required by generated header
 
@@ -35,7 +34,5 @@ namespace Hilo
         ImageBrowserViewModel^ m_imageBrowswerViewModel;
         MainHubViewModel^ m_mainHubViewModel;
         ImageViewModel^ m_imageViewModel;
-        CropImageViewModel^ m_cropImageViewModel;
-        RotateImageViewModel^ m_rotateImageViewModel;
     };
 }

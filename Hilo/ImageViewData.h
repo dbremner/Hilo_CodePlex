@@ -13,20 +13,20 @@ namespace Hilo
     ref class ImageViewData sealed
     {
     public:
-        ImageViewData(Windows::Storage::BulkAccess::FileInformation^ photo, Platform::Object^ photos);
+        ImageViewData(Windows::Storage::IStorageFile^ photo, Windows::Storage::IStorageFolder^ folder);
 
-        property Windows::Storage::BulkAccess::FileInformation^ Photo
+        property Windows::Storage::IStorageFile^ Photo
         {
-            Windows::Storage::BulkAccess::FileInformation^ get();
+            Windows::Storage::IStorageFile^ get();
         }
 
-        property Platform::Object^ Photos
+        property Windows::Storage::IStorageFolder^ Folder
         {
-            Platform::Object^ get();
+            Windows::Storage::IStorageFolder^ get();
         }
 
     private:
-        Windows::Storage::BulkAccess::FileInformation^ m_photo;
-        Platform::Object^ m_photos;
+        Windows::Storage::IStorageFile^ m_photo;
+        Windows::Storage::IStorageFolder^ m_folder;
     };
 }

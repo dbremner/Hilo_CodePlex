@@ -20,56 +20,97 @@
 
     <UserControl.Resources>
         <x:String x:Key="PageTitle">Crop Image</x:String>
+        <local:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <ControlTemplate x:Key="HiloCroppingOverlayTemplate" TargetType="ContentControl">
+            <Grid>
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta"
+                       HorizontalAlignment="Stretch" 
+                       Style="{StaticResource HiloCroppingOverlaySidesStyle}"
+                       VerticalAlignment="Top" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta" 
+                       HorizontalAlignment="Left"
+                       Style="{StaticResource HiloCroppingOverlaySidesStyle}"
+                       VerticalAlignment="Stretch" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource HiloCroppingOverlaySidesStyle}"
+                       VerticalAlignment="Stretch" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta"
+                       HorizontalAlignment="Stretch"
+                       Style="{StaticResource HiloCroppingOverlaySidesStyle}"
+                       VerticalAlignment="Bottom" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta"  
+                       HorizontalAlignment="Left"
+                       Style="{StaticResource HiloCroppingOverlayCornerStyle}"
+                       VerticalAlignment="Top" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta" 
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource HiloCroppingOverlayCornerStyle}"
+                       VerticalAlignment="Top" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta" 
+                       HorizontalAlignment="Left"
+                       Style="{StaticResource HiloCroppingOverlayCornerStyle}"
+                       VerticalAlignment="Bottom" />
+                <Thumb Canvas.ZIndex="1"
+                       DragDelta="OnThumbDragDelta" 
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource HiloCroppingOverlayCornerStyle}"
+                       VerticalAlignment="Bottom" />
+                <ContentPresenter Content="{TemplateBinding ContentControl.Content}" />
+            </Grid>
+        </ControlTemplate>
     </UserControl.Resources>
 
     <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition x:Name="PageTitleRow" Height="140"/>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="140"/>
             <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        </Grid.RowDefinitions>-->
 
         <!-- Page title -->
-        <Grid>
+        <!--<Grid>
             <TextBlock x:Name="PageTitle" 
                        x:Uid="CropImagePageTitle"
                        Margin="120,0,0,0"
                        Text="{StaticResource PageTitle}" 
                        Style="{StaticResource PageHeaderTextStyle}"
                        VerticalAlignment="Center"/>
-        </Grid>
+        </Grid>-->
 
-        <!-- Crop Image -->
-        <Grid Grid.Row="1"
-              x:Name="CropImageGrid">
-            <Grid.Resources>
-                <Storyboard x:Name="CropBorderAnimation">
-                    <DoubleAnimation Duration="0:0:1" AutoReverse="True"
-                             Storyboard.TargetProperty="Opacity"
-                             Storyboard.TargetName="CropRectangle" From="1.0" To="0.4" RepeatBehavior="Forever"/>
-                </Storyboard>
-                <local:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
-            </Grid.Resources>
+        <!-- Crop Image Grid.Row="1" -->
+        <Grid x:Name="CropImageGrid"
+              Margin="50,50,50,110">
             <Image x:Name="Photo" 
-                   AutomationProperties.AutomationId="ImageControl" 
+                   AutomationProperties.AutomationId="ImageControl"
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center" 
-                   Source="{Binding Photo}" 
-                   PointerPressed="OnImagePointerPressed" 
-                   PointerReleased="OnImagePointerReleased" 
-                   PointerMoved="OnImagePointerMoved" />
-            <Rectangle x:Name="CropRectangle" 
-                       AutomationProperties.AutomationId="CropRectangleControl" 
-                       HorizontalAlignment="Left" 
-                       VerticalAlignment="Top" 
-                       Stroke="DarkBlue" StrokeThickness="1" 
-                       Fill="#660000ff"
-                       PointerMoved="OnImagePointerMoved" 
-                       PointerReleased="OnImagePointerReleased" 
-                       Tapped="OnCropRectangleTapped"
-                       Height="{Binding CropRectangleHeight}" 
-                       Width="{Binding CropRectangleWidth}" 
-                       Margin="{Binding CropRectangleMargin}"
-                       Visibility="{Binding IsCropRectangleVisible, Converter={StaticResource BoolToVisConverter}}" />
+                   SizeChanged="OnPhotoSizeChanged"
+                   Source="{Binding Photo}" />
+            <ProgressRing IsActive="{Binding InProgress}" 
+                          Foreground="{StaticResource HiloHighlightBrush}"/>
+            <Canvas>
+                <ContentControl x:Name="CropOverlay" 
+                                Canvas.Left="{Binding CropOverlayLeft}"
+                                Canvas.Top="{Binding CropOverlayTop}"
+                                Height="{Binding CropOverlayHeight}"
+                                MinHeight="100"
+                                MinWidth="100"
+                                Template="{StaticResource HiloCroppingOverlayTemplate}"
+                                Visibility="{Binding Path=IsCropOverlayVisible, Converter={StaticResource BoolToVisConverter}}"
+                                Width="{Binding CropOverlayWidth}">
+                    <Grid Background="Transparent" 
+                          HorizontalAlignment="Stretch"
+                          Tapped="OnCropRectangleTapped"
+                          VerticalAlignment="Stretch" />
+                </ContentControl>
+            </Canvas>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>

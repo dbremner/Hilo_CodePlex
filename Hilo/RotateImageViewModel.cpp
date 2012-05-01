@@ -55,9 +55,15 @@ ICommand^ RotateImageViewModel::CancelCommand::get()
     return m_cancelCommand;
 }
 
-bool RotateImageViewModel::IsRotating::get()
+double RotateImageViewModel::RotationAngle::get()
 {
-    return m_isRotating;
+    return m_rotationAngle;
+}
+
+void RotateImageViewModel::RotationAngle::set( double value )
+{
+    m_rotationAngle = value;
+    OnPropertyChanged("RotationAngle");
 }
 
 ImageSource^ RotateImageViewModel::Photo::get()
@@ -80,19 +86,30 @@ ImageSource^ RotateImageViewModel::Photo::get()
 
 void RotateImageViewModel::Rotate90(Object^ parameter)
 {   
-    auto ras = ref new InMemoryRandomAccessStream();
-    auto tail = m_head.then([this]()
+    RotationAngle += 90;
+    EndRotation();
+}
+concurrency::task<void> RotateImageViewModel::DoRotate(double angle)
+{
+    assert(angle < 360);
+
+    while(angle < 0)
     {
-        m_isRotating = true;
-        OnPropertyChanged("IsRotating");
-    }, concurrency::task_continuation_context::use_current()).then([this] {
-        return BitmapDecoder::CreateAsync(m_randomAccessStream);
-    }).then([this, ras](BitmapDecoder^ decoder) 
+        angle += 360;
+    }
+
+    auto ras = ref new InMemoryRandomAccessStream();
+    BitmapRotation rotation;
+
+    rotation = static_cast<BitmapRotation>((int)floor(angle / 90));
+
+    return task<BitmapDecoder^>(BitmapDecoder::CreateAsync(m_randomAccessStream))
+        .then([this, ras](BitmapDecoder^ decoder) 
     {
         return BitmapEncoder::CreateForTranscodingAsync(ras, decoder);
-    }).then([](BitmapEncoder^ encoder) 
+    }).then([rotation](BitmapEncoder^ encoder) 
     {
-        encoder->BitmapTransform->Rotation = BitmapRotation::Clockwise90Degrees;
+        encoder->BitmapTransform->Rotation = rotation;
         return encoder->FlushAsync();
     }).then([this, ras]() 
     {
@@ -100,16 +117,32 @@ void RotateImageViewModel::Rotate90(Object^ parameter)
         m_image->SetSource(m_randomAccessStream);
     }).then([this]()
     {
-        m_isRotating = false;
+        RotationAngle = 0;
         OnPropertyChanged("Photo");
-        OnPropertyChanged("IsRotating");
     });
-    m_head = tail;
 }
 
 void RotateImageViewModel::SaveImage(Object^ parameter)
 {
-    ImageBase::SaveImage(m_file, m_randomAccessStream);
+    if (m_isSaving) return;
+
+    m_isSaving = true;
+    DoRotate(RotationAngle).then([this]()
+    {
+        ImageBase::SaveImage(m_file, m_randomAccessStream);
+    }).then([this](task<void> savedTask)
+    {
+        try 
+        {
+            savedTask.get();
+        }
+        catch(...)
+        {
+            m_isSaving = false;
+            throw;
+        }
+        m_isSaving = false;
+    });
 }
 
 void RotateImageViewModel::CancelRotate(Object^ parameter)
@@ -119,6 +152,21 @@ void RotateImageViewModel::CancelRotate(Object^ parameter)
 
 void RotateImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 {
-    m_file = dynamic_cast<FileInformation^>(e->Parameter);
+    Initialize(dynamic_cast<FileInformation^>(e->Parameter));
+}
+
+void RotateImageViewModel::Initialize( Windows::Storage::BulkAccess::FileInformation^ image )
+{
+    m_file = image;
+    assert(m_file!= nullptr);    
     m_image = nullptr;
 }
+
+void RotateImageViewModel::EndRotation()
+{
+    auto quarterTurns = (RotationAngle / 90);
+    auto nearestQuarter = (int)floor(quarterTurns + 0.5) % 4;
+    RotationAngle = (double)nearestQuarter * 90;
+}
+
+

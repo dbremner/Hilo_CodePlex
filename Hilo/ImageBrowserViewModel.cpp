@@ -9,7 +9,10 @@
 #include "pch.h"
 #include "ImageBrowserViewModel.h"
 #include "PhotoReader.h"
-#include "BrowserPhotoGroup.h"
+#include "PhotoGroup.h"
+#include "Photo.h"
+#include "DelegateCommand.h"
+#include "ImageViewData.h"
 
 using namespace Hilo;
 
@@ -18,41 +21,58 @@ using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage::BulkAccess;
+using namespace Windows::UI::Xaml::Input;
 
-ImageBrowserViewModel::ImageBrowserViewModel()
+ImageBrowserViewModel::ImageBrowserViewModel() : m_inProgress(true)
 {
+    m_groupCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::NavigateToGroup), nullptr);
 }
 
-// Properties
-Object^ ImageBrowserViewModel::Photos::get()
+ICommand^ ImageBrowserViewModel::GroupCommand::get()
 {
-    if (m_photos == nullptr)
-    {
-        PhotoReader reader;
-        m_photos = reader.GetVirtualizedFiles("");
-    }
-    return m_photos;
+    return m_groupCommand;
+}
+
+bool ImageBrowserViewModel::InProgress::get()
+{
+    return m_inProgress;
 }
 
 Object^ ImageBrowserViewModel::PhotoGroups::get()
 {
     if (nullptr == m_photoGroups)
     {
+        m_photoGroups = ref new Vector<Object^>();
         PhotoReader reader;
-        auto photosTask = task<IVectorView<FolderInformation^>^>(reader.GetVirtualPhotoFoldersByMonth());
-        photosTask.then([this](IVectorView<FolderInformation^>^ photos) 
+        auto foldersTask = task<IVectorView<FolderInformation^>^>(reader.GetVirtualPhotoFoldersByMonth());
+        
+        foldersTask.then([this](IVectorView<FolderInformation^>^ folders) 
         {
-            auto tempPhotos = ref new Vector<Object^>();
-            std::for_each(begin(photos), end(photos), [this, tempPhotos](FolderInformation^ folder) 
+            auto temp = ref new Vector<Object^>();
+            std::for_each(begin(folders), end(folders), [temp](FolderInformation^ folder) 
             {
-                auto photoGroup = ref new BrowserPhotoGroup(folder);
-                tempPhotos->Append(photoGroup);
+                auto photoGroup = ref new PhotoGroup(folder, false);
+                temp->Append(photoGroup);
             });
-            m_photos = tempPhotos;
-        }).then([this] 
+            return temp;
+        }).then([this](Vector<Object^>^ folders)
         {
-            OnPropertyChanged("PhotoGroups");
-        },task_continuation_context::use_current());
+            m_inProgress = false;
+            Array<Object^>^ many = ref new Array<Object^>(folders->Size);
+            folders->GetMany(0, many);
+            m_photoGroups->ReplaceAll(many);
+            OnPropertyChanged("InProgress");
+        }, task_continuation_context::use_current());
     }
-    return m_photos;
+    return m_photoGroups;
+}
+
+void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
+{
+    auto group = dynamic_cast<PhotoGroup^>(parameter);
+    assert(group != nullptr);
+    auto photo = dynamic_cast<Photo^>(group->Items->GetAt(0));
+    assert(photo != nullptr);
+    auto imageData = ref new ImageViewData(photo, group);
+    ViewModelBase::GoToPage(PageType::Image, imageData);
 }

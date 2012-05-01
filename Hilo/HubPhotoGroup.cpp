@@ -43,6 +43,7 @@ Object^ HubPhotoGroup::Items::get()
                 }                
                 m_photos->Append(photo);
             });
+            OnPropertyChanged("Items");
         }, concurrency::task_continuation_context::use_current());
     }
     return m_photos;

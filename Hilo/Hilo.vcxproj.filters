@@ -120,9 +120,6 @@
     <ClCompile Include="RotateImageViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="BrowserPhotoGroup.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="ThumbnailGenerator.cpp">
       <Filter>Models</Filter>
     </ClCompile>
@@ -220,9 +217,6 @@
     </ClInclude>
     <ClInclude Include="ThumbnailGenerator.h">
       <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="BrowserPhotoGroup.h">
-      <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="WideFiveImageTile.h">
       <Filter>Models</Filter>

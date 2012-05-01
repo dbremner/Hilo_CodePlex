@@ -9,24 +9,21 @@
 #include "pch.h"
 #include "DelegateCommand.h"
 #include "CropImageViewModel.h"
-#include "PhotoReader.h"
 
 using namespace Hilo;
 
 using namespace concurrency;
+using namespace std;
 using namespace Platform;
-using namespace Platform::Collections;
 using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::UI::Xaml::Navigation;
-using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::Pickers;
 using namespace Windows::Storage::Streams;
 
 CropImageViewModel::CropImageViewModel(void)
@@ -35,40 +32,6 @@ CropImageViewModel::CropImageViewModel(void)
     m_cancelCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::CancelCrop), nullptr);
     
     ViewModelBase::m_isAppBarSticky = true;
-}
-
-CropImageViewModel::~CropImageViewModel(void)
-{
-    // Deallocate pixel arrays
-    if (m_sourcePixels != nullptr)
-    {
-        m_sourcePixels = nullptr;
-    }
-
-    if (m_destinationPixels != nullptr)
-    {
-        m_destinationPixels = nullptr;
-    }
-}
-
-int CropImageViewModel::CropRectangleWidth::get()
-{
-    return m_cropRectangleWidth;
-}
-
-int CropImageViewModel::CropRectangleHeight::get()
-{
-    return m_cropRectangleHeight;
-}
-
-Object^ CropImageViewModel::CropRectangleMargin::get()
-{
-    return m_cropRectangleMargin;
-}
-
-bool CropImageViewModel::IsCropRectangleVisible::get()
-{
-    return m_isCropRectangleVisible;
 }
 
 ICommand^ CropImageViewModel::SaveCommand::get()
@@ -81,6 +44,36 @@ ICommand^ CropImageViewModel::CancelCommand::get()
     return m_cancelCommand;
 }
 
+bool CropImageViewModel::InProgress::get()
+{
+    return m_inProgress;
+}
+
+double CropImageViewModel::CropOverlayLeft::get()
+{
+    return m_cropOverlayLeft;
+}
+
+double CropImageViewModel::CropOverlayTop::get()
+{
+    return m_cropOverlayTop;
+}
+
+double CropImageViewModel::CropOverlayHeight::get()
+{
+    return m_cropOverlayHeight;
+}
+
+double CropImageViewModel::CropOverlayWidth::get()
+{
+    return m_cropOverlayWidth;
+}
+
+bool CropImageViewModel::IsCropOverlayVisible::get()
+{
+    return m_isCropOverlayVisible;
+}
+
 ImageSource^ CropImageViewModel::Photo::get()
 {
     if (m_image == nullptr && m_file != nullptr)
@@ -88,13 +81,10 @@ ImageSource^ CropImageViewModel::Photo::get()
         auto fileOpenTask = task<IRandomAccessStreamWithContentType^>(m_file->OpenReadAsync());
         fileOpenTask.then([this](IRandomAccessStreamWithContentType^ imageData)
         {
-            m_randomAccessStream = imageData;
+            m_imageStream = imageData;
             m_image = ref new BitmapImage();
-            m_image->SetSource(m_randomAccessStream);
-        }).then([this]
-        {
+            m_image->SetSource(m_imageStream);
             OnPropertyChanged("Photo");
-            PopulatePixelArray();
         }, task_continuation_context::use_current());
     }
     return m_image;
@@ -106,31 +96,9 @@ void CropImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
     m_image = nullptr;
 }
 
-void CropImageViewModel::PopulatePixelArray()
-{
-    task<BitmapDecoder^> decodeTask(BitmapDecoder::CreateAsync(m_randomAccessStream));
-    decodeTask.then([this](task<BitmapDecoder^> bmpDecodertask) {
-        BitmapDecoder^ bmpDecoder;
-        try {
-            bmpDecoder = bmpDecodertask.get();
-            m_decoder = bmpDecoder;
-            m_imageWidth = bmpDecoder->PixelWidth;
-            m_imageHeight = bmpDecoder->PixelHeight;
-        }
-        catch (Platform::Exception^ ex)
-        {
-            String^ s = ex->Message;
-        }
-        return bmpDecoder->GetPixelDataAsync(BitmapPixelFormat::Rgba8, BitmapAlphaMode::Straight, ref new BitmapTransform(), 
-            ExifOrientationMode::RespectExifOrientation, ColorManagementMode::ColorManageToSRgb);
-    }).then([this](PixelDataProvider^ provider) {
-        m_sourcePixels = provider->DetachPixelData();
-    });
-}
-
 void CropImageViewModel::SaveImage(Object^ parameter)
 {
-    ImageBase::SaveImage(m_file, m_randomAccessStream);
+    ImageBase::SaveImage(m_file, m_imageStream);
 }
 
 void CropImageViewModel::CancelCrop(Object^ parameter)
@@ -138,97 +106,179 @@ void CropImageViewModel::CancelCrop(Object^ parameter)
     ViewModelBase::GoBack();
 }
 
-void CropImageViewModel::GetCropStartCoordinates(Point onScreen, Point relative, int pageTitleRowHeight)
+void CropImageViewModel::CalculateInitialCropOverlayPosition(GeneralTransform^ transform, float width, float height)
 {
-    m_pageTitleRowHeight = pageTitleRowHeight;
+    // Find the onscreen coordinates of the top left corner of the photo.
+    Point topLeft;
+    topLeft.X = 0;
+    topLeft.Y = 0;
+    if (transform != nullptr)
+    {
+        topLeft = transform->TransformPoint(topLeft);
+    }
 
-    // On-screen coordinates
-    m_actualCropAnchorPoint.X = onScreen.X;
-    m_actualCropAnchorPoint.Y = onScreen.Y - m_pageTitleRowHeight;
+    m_left = topLeft.X;
+    m_top = topLeft.Y;
+    m_bottom = m_top + height;
+    m_right = m_left + width;
+    m_cropOverlayTop = m_top;
+    m_cropOverlayLeft = m_left;
+    m_cropOverlayHeight = height;
+    m_cropOverlayWidth = width;
+    m_actualHeight = height;
+    m_actualWidth = width;
+    m_isCropOverlayVisible = true;
 
-    // Image coordinates
-    m_relativeCropAnchorPoint.X = relative.X;
-    m_relativeCropAnchorPoint.Y = relative.Y;
-
-    m_cropRectangleHeight = 0;
-    m_cropRectangleWidth = 0;
+    OnPropertyChanged("CropOverlayLeft");
+    OnPropertyChanged("CropOverlayTop");
+    OnPropertyChanged("CropOverlayHeight");
+    OnPropertyChanged("CropOverlayWidth");
+    OnPropertyChanged("IsCropOverlayVisible");
 }
 
-void CropImageViewModel::CalculateCropRectangleCoordinates(Point onScreen, Point relative, Thickness imageMargin)
+void CropImageViewModel::UpdateCropOverlayPostion(Thumb ^thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight)
 {
-    // On-screen coordinates
-	m_actualCropEndPoint = onScreen;
-	m_relativeCropEndPoint = relative;
-    float x1 = onScreen.X;
-    float y1 = onScreen.Y - m_pageTitleRowHeight;
-    float x2 = m_actualCropAnchorPoint.X;
-    float y2 = m_actualCropAnchorPoint.Y;
+    if (thumb != nullptr)
+    {
+        double deltaH, deltaV, left, top;
 
-    auto margin = imageMargin;
-    margin.Left += x1 < x2 ? x1 : x2;
-    margin.Top  += y1 < y2 ? y1 : y2;
-    m_cropRectangleMargin = margin;
-    m_cropRectangleWidth = safe_cast<int>(abs(x1 - x2));
-    m_cropRectangleHeight = safe_cast<int>(abs(y1 - y2));
-    m_isCropRectangleVisible = true;
+        switch (thumb->VerticalAlignment)
+        {
+        case VerticalAlignment::Bottom:
+            deltaV = min(-verticalChange, m_cropOverlayHeight - minHeight);
+            m_cropOverlayHeight -= deltaV;
+            if (m_cropOverlayHeight + m_cropOverlayTop > m_bottom)
+            {
+                m_cropOverlayHeight = m_bottom - m_cropOverlayTop;
+            }
+            OnPropertyChanged("CropOverlayHeight");
+            break;
+        case VerticalAlignment::Top:
+            deltaV = min(verticalChange, m_cropOverlayHeight - minHeight);
+            top = m_cropOverlayTop + deltaV;
+            if (m_top < top)
+            {
+                m_cropOverlayTop = top;
+                m_cropOverlayHeight -= deltaV;
+                if (m_cropOverlayHeight > m_actualHeight)
+                {
+                    m_cropOverlayHeight = m_actualHeight;
+                }
+                OnPropertyChanged("CropOverlayTop");
+                OnPropertyChanged("CropOverlayHeight");
+            }
+            break;
+        default:
+            break;
+        }
 
-    OnPropertyChanged("CropRectangleMargin");
-    OnPropertyChanged("CropRectangleWidth");
-    OnPropertyChanged("CropRectangleHeight");
-    OnPropertyChanged("IsCropRectangleVisible");
+        switch (thumb->HorizontalAlignment)
+        {
+        case HorizontalAlignment::Left:
+            deltaH = min(horizontalChange, m_cropOverlayWidth - minWidth);
+            left = m_cropOverlayLeft + deltaH;
+            if (m_left < left)
+            {
+                m_cropOverlayLeft = left;
+                m_cropOverlayWidth -= deltaH;
+                if (m_cropOverlayWidth > m_actualWidth)
+                {
+                    m_cropOverlayWidth = m_actualWidth;
+                }
+                OnPropertyChanged("CropOverlayLeft");
+                OnPropertyChanged("CropOverlayWidth");
+            }
+            break;
+        case HorizontalAlignment::Right:
+            deltaH = min(-horizontalChange, m_cropOverlayWidth - minWidth);
+            m_cropOverlayWidth -= deltaH;
+            if (m_cropOverlayWidth + m_cropOverlayLeft > m_right)
+            {
+                m_cropOverlayWidth = m_right - m_cropOverlayLeft;
+            }
+            OnPropertyChanged("CropOverlayWidth");
+            break;
+
+        default:
+            break;
+        }
+    }
 }
 
 void CropImageViewModel::CropImage(double actualWidth)
 {
-    m_isCropRectangleVisible = false;
-    OnPropertyChanged("IsCropRectangleVisible");
+    m_inProgress = true;
+    OnPropertyChanged("InProgress");
 
-    double scaleFactor = m_decoder->PixelWidth / actualWidth;
-
-	unsigned int smallestX = safe_cast<int>(min(m_relativeCropAnchorPoint.X,m_relativeCropEndPoint.X));
-	unsigned int smallestY = safe_cast<int>(min(m_relativeCropAnchorPoint.Y,m_relativeCropEndPoint.Y));
-
-    unsigned int scaledWidth = safe_cast<int>(m_cropRectangleWidth * scaleFactor);
-    unsigned int scaledHeight = safe_cast<int>(m_cropRectangleHeight * scaleFactor);
-    unsigned int scaledXStart = safe_cast<int>(smallestX * scaleFactor);
-    unsigned int scaledYStart = safe_cast<int>(smallestY * scaleFactor);
-    unsigned int j = scaledYStart;
-    unsigned int i = scaledXStart;
-
-    m_destinationPixels = ref new Array<unsigned char>((scaledWidth * scaledHeight) * 4);
-
-    for (unsigned int y = 0; y < scaledHeight; y++)
-    {
-        for (unsigned int x = 0; x < scaledWidth; x++)
-        {
-            m_destinationPixels[(x + y * scaledWidth) * 4]     = m_sourcePixels[(i + j * m_imageWidth) * 4];
-            m_destinationPixels[(x + y * scaledWidth) * 4 + 1] = m_sourcePixels[(i + j * m_imageWidth) * 4 + 1];
-            m_destinationPixels[(x + y * scaledWidth) * 4 + 2] = m_sourcePixels[(i + j * m_imageWidth) * 4 + 2];
-            m_destinationPixels[(x + y * scaledWidth) * 4 + 3] = m_sourcePixels[(i + j * m_imageWidth) * 4 + 3];
-            i++;
-            if (i >= (scaledWidth + scaledXStart))
-            {
-                i = scaledXStart;
-            }
-        }
-        j++;
-    }
-
-    m_newImageWidth = scaledWidth;
-    m_newImageHeight = scaledHeight;
-
+    auto decoder = make_shared<BitmapDecoder^>(nullptr);
+    auto pixelProvider = make_shared<PixelDataProvider^>(nullptr);
+    auto newWidth = make_shared<unsigned int>(0);
+    auto newHeight = make_shared<unsigned int>(0);
     auto bitmapStream = ref new InMemoryRandomAccessStream();
-    auto encodeTask = task<BitmapEncoder^>(BitmapEncoder::CreateAsync(BitmapEncoder::JpegEncoderId, bitmapStream));
-    //auto encodeTask = task<BitmapEncoder^>(BitmapEncoder::CreateForTranscodingAsync(bitmapStream, m_decoder));
-    encodeTask.then([this](BitmapEncoder^ encoder) 
+
+    auto cropImageTask = task<BitmapDecoder^>(BitmapDecoder::CreateAsync(m_imageStream));
+    cropImageTask.then([decoder](BitmapDecoder^ createdDecoder)
     {
-        encoder->SetPixelData(BitmapPixelFormat::Rgba8, BitmapAlphaMode::Straight, m_newImageWidth, m_newImageHeight, m_decoder->DpiX, m_decoder->DpiY, m_destinationPixels);
+        (*decoder) = createdDecoder;
+        return (*decoder)->GetPixelDataAsync(BitmapPixelFormat::Rgba8,
+            BitmapAlphaMode::Straight,
+            ref new BitmapTransform(),
+            ExifOrientationMode::RespectExifOrientation,
+            ColorManagementMode::ColorManageToSRgb);
+    }).then([this, decoder, bitmapStream, pixelProvider](PixelDataProvider^ provider)
+    {
+        (*pixelProvider) = provider;
+        return BitmapEncoder::CreateAsync(BitmapEncoder::JpegEncoderId, bitmapStream);
+        //return BitmapEncoder::CreateForTranscodingAsync(bitmapStream, (*decoder));
+    }).then([this, pixelProvider, decoder, actualWidth, newWidth, newHeight](BitmapEncoder ^encoder)
+    {
+        Array<unsigned char, 1>^ sourcePixels = (*pixelProvider)->DetachPixelData();
+        double scaleFactor = (*decoder)->PixelWidth / actualWidth;
+        unsigned int scaledXStart = safe_cast<int>((m_cropOverlayLeft - m_left) * scaleFactor);
+        unsigned int scaledYStart = safe_cast<int>((m_cropOverlayTop - m_top) * scaleFactor);
+        unsigned int j = scaledYStart;
+        unsigned int i = scaledXStart;
+
+        *newWidth = safe_cast<int>(m_cropOverlayWidth * scaleFactor);
+        *newHeight = safe_cast<int>(m_cropOverlayHeight * scaleFactor);
+        auto destinationPixels = ref new Array<unsigned char>((*newWidth * *newHeight) * 4);
+
+        for (unsigned int y = 0; y < *newHeight; y++)
+        {
+            for (unsigned int x = 0; x < *newWidth; x++)
+            {
+                destinationPixels[(x + y * *newWidth) * 4]     = 
+                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4];
+                destinationPixels[(x + y * *newWidth) * 4 + 1] = 
+                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 1];
+                destinationPixels[(x + y * *newWidth) * 4 + 2] = 
+                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 2];
+                destinationPixels[(x + y * *newWidth) * 4 + 3] = 
+                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 3];
+                i++;
+                if (i >= (*newWidth + scaledXStart))
+                {
+                    i = scaledXStart;
+                }
+            }
+            j++;
+        }
+
+        encoder->SetPixelData(BitmapPixelFormat::Rgba8,
+            BitmapAlphaMode::Straight,
+            *newWidth,
+            *newHeight,
+            (*decoder)->DpiX,
+            (*decoder)->DpiY,
+            destinationPixels);
+        sourcePixels = nullptr;
         return encoder->FlushAsync();
-    }).then([this, bitmapStream]() {
-        m_randomAccessStream = bitmapStream;
-        m_image->SetSource(m_randomAccessStream);
-    }).then([this]() {
+    }).then([this, bitmapStream]()
+    {
+        m_imageStream = bitmapStream;
+        m_image->SetSource(m_imageStream);
+        m_inProgress = false;
+        OnPropertyChanged("InProgress");
         OnPropertyChanged("Photo");
-        PopulatePixelArray();
-    });
+    }, task_continuation_context::use_current());
 }

@@ -11,20 +11,27 @@
 
 namespace Hilo 
 {
+    ref class PhotoGroup;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class Photo sealed : public BindableBase
     {
 
     public:
-        Photo(Windows::Storage::BulkAccess::FileInformation^ file);
+        Photo(Windows::Storage::BulkAccess::FileInformation^ file, PhotoGroup^ photoGroup);
 
-        operator Windows::Storage::BulkAccess::FileInformation^ ();
+        operator Windows::Storage::IStorageFile^ ();
 
         property Platform::String^ Name { Platform::String^ get(); }
 
         property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Thumbnail 
         { 
             Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
+        }
+
+        property PhotoGroup^ Group
+        {
+            PhotoGroup^ get();
         }
 
         property int ColumnSpan 
@@ -41,10 +48,10 @@ namespace Hilo
 
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
-        Windows::Storage::StorageFile^ m_storageFile;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
+        Platform::WeakReference m_weakPhotoGroup;
         int m_columnSpan;
         int m_rowSpan;
+        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
     };
 
 }

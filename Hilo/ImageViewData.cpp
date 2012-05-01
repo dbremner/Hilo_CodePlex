@@ -10,19 +10,18 @@
 #include "ImageViewData.h"
 
 using namespace Hilo;
-using namespace Platform;
-using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage;
 
-ImageViewData::ImageViewData(FileInformation^ photo, Object^ photos) : m_photo(photo), m_photos(photos)
+ImageViewData::ImageViewData(IStorageFile^ photo, IStorageFolder^ folder) : m_photo(photo), m_folder(folder)
 {
 }
 
-FileInformation^ ImageViewData::Photo::get()
+IStorageFile^ ImageViewData::Photo::get()
 {
     return m_photo;
 }
 
-Object^ ImageViewData::Photos::get()
+IStorageFolder^ ImageViewData::Folder::get()
 {
-    return m_photos;
+    return m_folder;
 }

@@ -18,7 +18,6 @@ namespace Hilo
     public:
         ImageViewModel();
 
-        // Properties
         property Platform::Object^ Photos 
         { 
             Platform::Object^ get(); 
@@ -47,7 +46,10 @@ namespace Hilo
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
+		void Initialize(Platform::Object^ parameter);
+
     private:
+        Windows::Storage::Search::IStorageFolderQueryOperations^ m_folder;
         Windows::Storage::BulkAccess::FileInformation^ m_photo;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         Platform::Object^ m_photos;
@@ -55,7 +57,7 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
         concurrency::task<void> m_head;
 
-        concurrency::cancellation_token_source m_cts;        
+        concurrency::cancellation_token_source m_cts;
         concurrency::critical_section m_cs;
 
         void CropImage(Platform::Object^ parameter);

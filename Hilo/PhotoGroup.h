@@ -18,22 +18,25 @@ namespace Hilo
     public ref class PhotoGroup sealed : public BindableBase
     {
     public:
-        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder);
-        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, Platform::String^ title);
+        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, bool supportSpan);
+        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, bool supportSpan, Platform::String^ title);
+
+        operator Windows::Storage::IStorageFolder^ ();
 
         property Platform::String^ Title 
         { 
             Platform::String^ get();
         }
 
-        property Platform::Object^ Items
+        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
         {
-            Platform::Object^ get();
+            Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
         }
 
     private:
-        Platform::String^ m_title;
         Windows::Storage::IStorageFolder^ m_storageFolder;
+        bool m_supportSpan;
+        Platform::String^ m_title;
         Platform::Collections::Vector<Platform::Object^>^ m_photos;
     };
 }

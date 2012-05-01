@@ -23,11 +23,12 @@
     <UserControl.Resources>
         <x:String x:Key="PageTitle">Pictures</x:String>
         <converters:ThumbnailConverter x:Key="ThumbConverter" />
-        <!--<CollectionViewSource
+        <!-- Source="{Binding PhotoGroups}" -->
+        <CollectionViewSource
             x:Name="GroupedItemsViewSource"
             Source="{Binding PhotoGroups}"
             IsSourceGrouped="true"
-            ItemsPath="Items"/>-->
+            ItemsPath="Items"/>
     </UserControl.Resources>
 
     <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
@@ -46,19 +47,23 @@
                     AutomationProperties.AutomationId="BackButton"
                     Click="GoBack"
                     IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}"
+                    Margin="46,26,40,0"
                     Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="PageTitle"
                        x:Uid="PicturesViewTitle"
                        Text="{StaticResource PageTitle}" 
-                       Grid.Column="1" 
+                       Grid.Column="1"
                        Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
 
         <!-- Photos Grid -->
         <Grid Margin="50" 
               Grid.Row="1">
-            <!-- Grouped Photos Hub Margin="116,0,40,46" -->
-            <!--<GridView x:Name="PhotosGridView"
+            <!-- Grouped Photos Hub -->
+            <ProgressRing x:Name="ProgressRing" 
+                          IsActive="{Binding InProgress}" 
+                          Foreground="{StaticResource HiloHighlightBrush}"/>
+            <GridView x:Name="PhotosGridView"
                       AutomationProperties.AutomationId="PhotosGridView"
                       AutomationProperties.Name="Grouped Photos"
                       ItemsSource="{Binding Source={StaticResource GroupedItemsViewSource}}"
@@ -70,7 +75,7 @@
                 <GridView.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="2">
-                            <Image Source="{Binding Thumbnail, Converter={StaticResource ThumbConverter}}"
+                            <Image Source="{Binding Thumbnail}"
                                 Stretch="UniformToFill"
                                 VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch"/>
@@ -89,9 +94,12 @@
                                 <Grid Margin="1,0,0,6" 
                                       x:Name="GroupHeaderGrid">
                                     <Button
+                                        x:Name="GroupName"
                                         AutomationProperties.AutomationId="GroupTitle"
                                         Content="{Binding Title}"
-                                        Style="{StaticResource HiloTextButtonStyle}" />
+                                        Style="{StaticResource HiloTextButtonStyle}"
+                                        Command="{Binding ElementName=PhotosGridView, Path=DataContext.GroupCommand}"
+                                        CommandParameter="{Binding}"/>
                                 </Grid>
                             </DataTemplate>
                         </GroupStyle.HeaderTemplate>
@@ -106,28 +114,6 @@
                         </GroupStyle.Panel>
                     </GroupStyle>
                 </GridView.GroupStyle>
-            </GridView>-->
-            <GridView x:Name="PhotosGridView"
-                      AutomationProperties.AutomationId="PhotosGridView"
-                      ItemsSource="{Binding Photos}" 
-                      ItemClick="OnPhotoItemClicked" 
-                      IsItemClickEnabled="True" 
-                      ItemContainerStyle="{StaticResource HiloImageGridViewItem}">
-                <GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapGrid />
-                    </ItemsPanelTemplate>
-                </GridView.ItemsPanel>
-                <GridView.ItemTemplate>
-                    <DataTemplate>
-                        <Border>
-                            <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbConverter}}" 
-                                   Height="138" 
-                                   Width="200" 
-                                   Stretch="UniformToFill" />
-                        </Border>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
             </GridView>
         </Grid>
 

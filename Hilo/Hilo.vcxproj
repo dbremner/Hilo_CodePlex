@@ -105,7 +105,6 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BrowserPhotoGroup.h" />
     <ClInclude Include="CropImageView.xaml.h">
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClInclude>
@@ -193,7 +192,6 @@
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="BrowserPhotoGroup.cpp" />
     <ClCompile Include="Common\BindableBase.cpp" />
     <ClCompile Include="Common\BooleanToVisibilityConverter.cpp" />
     <ClCompile Include="Common\BooleanNegationConverter.cpp" />

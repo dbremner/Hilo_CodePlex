@@ -14,10 +14,11 @@ using namespace Hilo;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
-using namespace Windows::Foundation;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
+using namespace Windows::UI::Xaml::Media;
 
 namespace HiloTests
 {
@@ -45,98 +46,139 @@ namespace HiloTests
             Assert::IsNotNull(cancelCommand, "Cancel command should not be null");
         }
         
-        TEST_METHOD(CropImageViewModelGetCropStartCoordinatesSetsCropRectangleDimensionsToZero)
+        TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsIsCropOverlayVisibleToTrue)
         {
             auto vm = ref new CropImageViewModel();
+            bool propertyChangedFired = false;
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
+                propertyChangedFired = true;
+            });
+            GeneralTransform^ gt;
 
-            Point p1, p2;
-            p1.X = 50;
-            p1.Y = 50;
-            p2.X = 100;
-            p2.Y = 100;
-            vm->GetCropStartCoordinates(p1, p2, 140);
+            TestHelper::RunUISynced([vm, gt]() {
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+            });
 
-            Assert::AreEqual(vm->CropRectangleWidth, 0);
-            Assert::AreEqual(vm->CropRectangleHeight, 0);
+            Assert::IsTrue(propertyChangedFired);
+            Assert::AreEqual(vm->IsCropOverlayVisible, true);
+        }
+
+        TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayWidthAndHeight)
+        {
+            auto vm = ref new CropImageViewModel();
+            bool propertyChangedFired = false;
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
+                propertyChangedFired = true;
+            });
+            GeneralTransform^ gt;
+
+            TestHelper::RunUISynced([vm, gt]() {
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+            Assert::AreEqual(vm->CropOverlayWidth, 800.0);
+            Assert::AreEqual(vm->CropOverlayHeight, 600.0);
+        }
+
+        TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayLeftAndTop)
+        {
+            auto vm = ref new CropImageViewModel();
+            bool propertyChangedFired = false;
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
+                propertyChangedFired = true;
+            });
+            GeneralTransform^ gt;
+
+            TestHelper::RunUISynced([vm, gt]() {
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+            Assert::AreEqual(vm->CropOverlayLeft, 0.0);
+            Assert::AreEqual(vm->CropOverlayTop, 0.0);
+        }
+
+        TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeight)
+        {
+            auto vm = ref new CropImageViewModel();
+            bool propertyChangedFired = false;
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
+                propertyChangedFired = true;
+            });
+            GeneralTransform^ gt;
+
+            TestHelper::RunUISynced([vm, gt]() {
+                Thumb^ thumb = ref new Thumb();
+                thumb->VerticalAlignment = VerticalAlignment::Bottom;
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+                vm->UpdateCropOverlayPostion(thumb, -2.5, 0.0, 100, 100);
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+            Assert::AreEqual(vm->CropOverlayHeight, 597.5);
+        }
+
+        TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeightAndTop)
+        {
+            auto vm = ref new CropImageViewModel();
+            bool propertyChangedFired = false;
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
+                propertyChangedFired = true;
+            });
+            GeneralTransform^ gt;
+
+            TestHelper::RunUISynced([vm, gt]() {
+                Thumb^ thumb = ref new Thumb();
+                thumb->VerticalAlignment = VerticalAlignment::Top;
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+                vm->UpdateCropOverlayPostion(thumb, 2.5, 0.0, 100, 100);
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+            Assert::AreEqual(vm->CropOverlayTop, 2.5);
+            Assert::AreEqual(vm->CropOverlayHeight, 597.5);
         }
         
-        TEST_METHOD(CropImageViewModelCalculateCropRectangleCoordinatesSetsIsCropRectangleVisibleToTrue)
+        TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayWidth)
         {
             auto vm = ref new CropImageViewModel();
             bool propertyChangedFired = false;
-            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) {
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
             });
+            GeneralTransform^ gt;
 
-            Point p1,p2;
-            p1.X = 50;
-            p1.Y = 50;
-            p2.X = 100;
-            p2.Y = 100;
-
-            Thickness margin;
-            margin.Left = 100;
-            margin.Top = 100;
-
-            TestHelper::RunUISynced([vm, p1, p2, margin]() {
-                vm->CalculateCropRectangleCoordinates(p1, p2,margin);
+            TestHelper::RunUISynced([vm, gt]() {
+                Thumb^ thumb = ref new Thumb();
+                thumb->HorizontalAlignment = HorizontalAlignment::Right;
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+                vm->UpdateCropOverlayPostion(thumb, 0.0, -2.5, 100, 100);
             });
 
             Assert::IsTrue(propertyChangedFired);
-            Assert::IsTrue(vm->IsCropRectangleVisible);
+            Assert::AreEqual(vm->CropOverlayWidth, 797.5);
         }
 
-        TEST_METHOD(CropImageViewModelCalculateCropRectangleCoordinatesSetsCropRectangleHeightCorrectly)
+        TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayLeftAndWidth)
         {
             auto vm = ref new CropImageViewModel();
             bool propertyChangedFired = false;
-            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) {
+            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
             });
+            GeneralTransform^ gt;
 
-            Point p1,p2;
-            p1.X = 50;
-            p1.Y = 50;
-            p2.X = 100;
-            p2.Y = 100;
-
-            Thickness margin;
-            margin.Left = 100;
-            margin.Top = 100;
-
-            TestHelper::RunUISynced([vm, p1, p2, margin]() {
-                vm->CalculateCropRectangleCoordinates(p1, p2, margin);
+            TestHelper::RunUISynced([vm, gt]() {
+                Thumb^ thumb = ref new Thumb();
+                thumb->HorizontalAlignment = HorizontalAlignment::Left;
+                vm->CalculateInitialCropOverlayPosition(gt, 800.0, 600.0);
+                vm->UpdateCropOverlayPostion(thumb, 0.0, 2.5, 100, 100);
             });
 
             Assert::IsTrue(propertyChangedFired);
-            Assert::AreEqual(vm->CropRectangleHeight, 50);
+            Assert::AreEqual(vm->CropOverlayLeft, 2.5);
+            Assert::AreEqual(vm->CropOverlayWidth, 797.5);
         }
-
-        TEST_METHOD(CropImageViewModelCalculateCropRectangleCoordinatesSetsCropRectangleWidthCorrectly)
-        {
-            auto vm = ref new CropImageViewModel();
-            bool propertyChangedFired = false;
-            vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) {
-                propertyChangedFired = true;
-            });
-
-            Point p1,p2;
-            p1.X = 50;
-            p1.Y = 50;
-            p2.X = 100;
-            p2.Y = 100;
-
-            Thickness margin;
-            margin.Left = 100;
-            margin.Top = 100;
-
-            TestHelper::RunUISynced([vm, p1, p2, margin]() {
-                vm->CalculateCropRectangleCoordinates(p1, p2, margin);
-            });
-
-            Assert::IsTrue(propertyChangedFired);
-            Assert::AreEqual(vm->CropRectangleWidth, 50);
-        }
-
 	};
 }

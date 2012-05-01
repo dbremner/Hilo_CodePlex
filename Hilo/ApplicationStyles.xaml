@@ -811,4 +811,135 @@
         </Setter>
     </Style>
 
+    <!-- Hilo cropping overlay corner handles style -->
+    <Style x:Key="HiloCroppingOverlayCornerStyle" TargetType="Thumb">
+        <Setter Property="Background" Value="#FF1F3B53"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="BorderBrush">
+            <Setter.Value>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFA3AEB9" Offset="0"/>
+                    <GradientStop Color="#FF8399A9" Offset="0.375"/>
+                    <GradientStop Color="#FF718597" Offset="0.375"/>
+                    <GradientStop Color="#FF617584" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="BackgroundAnimation"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource ThumbPressedBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="BackgroundAnimation"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" To=".55" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="DisabledVisualElement"/>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="FocusStates">
+                                <VisualState x:Name="Focused">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualElement"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Unfocused"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Background" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="White">
+                            <Grid Background="{TemplateBinding Background}" Margin="1">
+                                <Border x:Name="BackgroundAnimation" Background="#FF448DCA" Opacity="0"/>
+                                <Ellipse Fill="GhostWhite"
+                                         Height="40"
+                                         Margin="-20,-20,-20,-20"
+                                         Width="40" />
+                            </Grid>
+                        </Border>
+                        <Rectangle x:Name="DisabledVisualElement" Fill="#FFFFFFFF" IsHitTestVisible="false" Opacity="0"/>
+                        <Rectangle x:Name="FocusVisualElement" IsHitTestVisible="false" Margin="1" Opacity="0" Stroke="{StaticResource ThumbPressedBrush}" StrokeThickness="1"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Hilo cropping overlay sides style -->
+    <Style x:Key="HiloCroppingOverlaySidesStyle" TargetType="Thumb">
+        <Setter Property="Background" Value="#FF1F3B53"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="BorderBrush">
+            <Setter.Value>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FFA3AEB9" Offset="0"/>
+                    <GradientStop Color="#FF8399A9" Offset="0.375"/>
+                    <GradientStop Color="#FF718597" Offset="0.375"/>
+                    <GradientStop Color="#FF617584" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="PointerOver" />
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Background">
+                                            <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource ThumbPressedBrush}"/>
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" To=".55" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="DisabledVisualElement"/>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="FocusStates">
+                                <VisualState x:Name="Focused">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualElement"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Unfocused"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Background" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="White">
+                            <Ellipse Fill="GhostWhite"
+                                     Height="40"
+                                     Margin="-20,-20,-20,-20"
+                                     Width="40" />
+                        </Border>
+                        <Rectangle x:Name="DisabledVisualElement" Fill="#FFFFFFFF" IsHitTestVisible="false" Opacity="0"/>
+                        <Rectangle x:Name="FocusVisualElement" IsHitTestVisible="false" Margin="1" Opacity="0" Stroke="{StaticResource ThumbPressedBrush}" StrokeThickness="1"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
 </ResourceDictionary>
+
+
+

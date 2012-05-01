@@ -48,16 +48,16 @@ namespace HiloTests
 
         TEST_METHOD(HubPhotoGroupShouldCallFunctionToGetPhotos)
         {
+            bool photosNull = false;
+
             HubPhotoGroup^ photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
-            task<Object^> itemsTask([&photoGroup]()-> Object^ {
-                return photoGroup->Items;
+            Object^ items;
+
+            TestHelper::RunUISynced([this, photoGroup, &items]() {
+                items = photoGroup->Items;
             });
-            task_status status;
 
-            Object^ photos = TestHelper::RunSynced<Object^>(itemsTask, status);
-
-            Assert::AreEqual(completed, status);
-            Assert::IsNotNull(photos);
+            Assert::IsNotNull(items);
         }
 
         IAsyncOperation<IVectorView<FileInformation^>^>^ GetPhotosAsync()

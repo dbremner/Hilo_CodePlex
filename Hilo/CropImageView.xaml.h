@@ -29,11 +29,10 @@ namespace Hilo
         CropImageViewModel^ m_cropImageViewModel;
         bool m_pointerPressed;
 
-        void OnImagePointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
-        void OnImagePointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
-        void OnImagePointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerEventArgs^ e);
         void OnCropRectangleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
-	};
+        void OnThumbDragDelta(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::DragDeltaEventArgs^ e);
+        void OnPhotoSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+    };
 }
 
 

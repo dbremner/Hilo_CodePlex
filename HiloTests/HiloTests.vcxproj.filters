@@ -70,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="TestImageGenerator.h" />
     <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
-    <ClInclude Include="..\Hilo\BrowserPhotoGroup.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Hilo\WideFiveImageTile.h">
       <Filter>Testable</Filter>
     </ClInclude>
@@ -83,6 +80,15 @@
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\ImageBase.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\Photo.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\PhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\RotateImageViewModel.h">
       <Filter>Testable</Filter>
     </ClInclude>
   </ItemGroup>
@@ -135,9 +141,6 @@
     </ClCompile>
     <ClCompile Include="TestImageGenerator.cpp" />
     <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp" />
-    <ClCompile Include="..\Hilo\BrowserPhotoGroup.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
     <ClCompile Include="ThumbnailGeneratorTests.cpp" />
     <ClCompile Include="..\Hilo\WideFiveImageTile.cpp">
       <Filter>Testable</Filter>
@@ -153,6 +156,16 @@
     <ClCompile Include="..\Hilo\ImageBase.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
+    <ClCompile Include="..\Hilo\Photo.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\PhotoGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\RotateImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="RotateImageViewModelTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UnitTestLogo.png">
