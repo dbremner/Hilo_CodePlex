@@ -397,37 +397,7 @@
     </Style>
 
     <!-- Standard App Bar buttons -->
-
-    <Style x:Key="CancelAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="CancelAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Cancel"/>
-        <Setter Property="Content" Value="&#xE10A;"/>
-    </Style>
-
-    <Style x:Key="CropAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="CropAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Crop"/>
-        <Setter Property="Content" Value="&#xE123;"/>
-    </Style>
-
-    <Style x:Key="EditImageAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="EditAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Edit"/>
-        <Setter Property="Content" Value="&#xE104;"/>
-    </Style>
-
-    <Style x:Key="SlideShowAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="SlideShowAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="View Slideshow"/>
-        <Setter Property="Content" Value="&#xE173;"/>
-    </Style>
-
-    <Style x:Key="PinAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="PinAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Pin to Start"/>
-        <Setter Property="Content" Value="&#xE141;"/>
-    </Style>
-
+  
     <Style x:Key="SkipBackAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="SkipBackAppBarButton"/>
         <Setter Property="AutomationProperties.Name" Value="Skip Back"/>
@@ -450,23 +420,18 @@
     </Style>
     <Style x:Key="EditAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="EditAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Edit Categories"/>
+        <Setter Property="AutomationProperties.Name" Value="Edit"/>
         <Setter Property="Content" Value="&#xE104;"/>
     </Style>
     <Style x:Key="SaveAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="SaveAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Accept"/>
+        <Setter Property="AutomationProperties.Name" Value="Save"/>
         <Setter Property="Content" Value="&#xE105;"/>
-    </Style>
-    <Style x:Key="ClearSelectionAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="DeleteAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Clear Selection"/>
-        <Setter Property="Content" Value="&#xE106;"/>
     </Style>
     <Style x:Key="DeleteAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="DeleteAppBarButton"/>
         <Setter Property="AutomationProperties.Name" Value="Delete"/>
-        <Setter Property="Content" Value="&#xE0E0;"/>
+        <Setter Property="Content" Value="&#xE106;"/>
     </Style>
     <Style x:Key="DiscardAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="DiscardAppBarButton"/>
@@ -530,7 +495,7 @@
     </Style>
     <Style x:Key="FavoriteAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="FavoriteAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Add to Favorites"/>
+        <Setter Property="AutomationProperties.Name" Value="Favorite"/>
         <Setter Property="Content" Value="&#xE113;"/>
     </Style>
     <Style x:Key="PhotoAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
@@ -551,11 +516,6 @@
     <Style x:Key="RefreshAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
         <Setter Property="AutomationProperties.AutomationId" Value="RefreshAppBarButton"/>
         <Setter Property="AutomationProperties.Name" Value="Refresh"/>
-        <Setter Property="Content" Value="&#xE117;"/>
-    </Style>
-    <Style x:Key="RotateAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
-        <Setter Property="AutomationProperties.AutomationId" Value="RefreshAppBarButton"/>
-        <Setter Property="AutomationProperties.Name" Value="Rotate"/>
         <Setter Property="Content" Value="&#xE117;"/>
     </Style>
     <Style x:Key="DownloadAppBarButtonStyle" TargetType="Button" BasedOn="{StaticResource AppBarButtonStyle}">
@@ -610,8 +570,8 @@
         <Setter Property="MinWidth" Value="0"/>
         <Setter Property="Width" Value="48"/>
         <Setter Property="Height" Value="48"/>
-        <Setter Property="Margin" Value="36,36,36,36"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="36,0,36,36"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
         <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="FontSize" Value="56"/>
@@ -926,11 +886,11 @@
         </Grid>
     </DataTemplate>
 
-    <!--
+  <!--
       190x130 pixel item template for displaying file previews as seen in the FileOpenPickerPage
       Includes an elaborate tooltip to display title and description text
   -->
-    <DataTemplate x:Key="StandardFileWithTooltip190x130ItemTemplate">
+  <DataTemplate x:Key="StandardFileWithTooltip190x130ItemTemplate">
         <Grid>
             <Grid Background="{StaticResource ListViewItemPlaceholderRectBrush}">
                 <Image
@@ -962,7 +922,7 @@
                         <TextBlock Text="{Binding Title}" TextWrapping="NoWrap" Style="{StaticResource BodyTextStyle}"/>
                         <TextBlock Text="{Binding Description}" MaxHeight="140" Foreground="{StaticResource ApplicationSecondaryTextBrush}" Style="{StaticResource BodyTextStyle}"/>
                     </StackPanel>
-                </Grid>
+                </Grid>                    
             </ToolTipService.ToolTip>
         </Grid>
     </DataTemplate>

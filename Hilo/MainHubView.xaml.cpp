@@ -7,29 +7,38 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
+#include "ImageViewData.h"
 #include "MainHubView.xaml.h"
+
 
 using namespace Hilo;
 
 using namespace Platform;
+using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Input;
+using namespace Windows::UI::Xaml::Navigation;
 
 MainHubView::MainHubView()
 {
     InitializeComponent();
 }
 
-void MainHubView::OnItemGridViewTapped(Object^ sender, TappedRoutedEventArgs^ e)
+void MainHubView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
 {
-    HiloPage::NavigateToPage(PageType::Browse, nullptr);
+    auto photo = dynamic_cast<Photo^>(e->ClickedItem);
+    if (nullptr !=  photo)
+    {
+        auto imageData = ref new ImageViewData(photo);
+        HiloPage::NavigateToPage(PageType::Image, imageData);
+    }
 }
 
-void Hilo::MainHubView::OnNavigatedTo( Windows::UI::Xaml::Navigation::NavigationEventArgs^ e )
+void MainHubView::OnNavigatedTo(NavigationEventArgs^ e )
 {
     HiloPage::OnNavigatedTo(e);
 }
 
-void Hilo::MainHubView::OnNavigatedFrom( Windows::UI::Xaml::Navigation::NavigationEventArgs^ e )
+void MainHubView::OnNavigatedFrom(NavigationEventArgs^ e )
 {
     HiloPage::OnNavigatedFrom(e);
 }

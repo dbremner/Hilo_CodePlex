@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,7 +9,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\HubPhotoGroup.h"
-#include "..\Hilo\HubPhoto.h"
 
 using namespace Hilo;
 
@@ -37,20 +36,11 @@ namespace HiloTests
             TestHelper::RunSynced(m_generator.DeleteFilesAsync(), status);
         }
 
-        TEST_METHOD(HubPhotoGroupShouldBeAbleToSetTitleForGroup)
-        {
-            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
-
-            photoGroup->Title = "Test";
-
-            Assert::AreEqual("Test", photoGroup->Title);
-        }
-
         TEST_METHOD(HubPhotoGroupShouldCallFunctionToGetPhotos)
         {
             bool photosNull = false;
 
-            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup(GetPhotosAsync());
+            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
             Object^ items;
 
             TestHelper::RunUISynced([this, photoGroup, &items]() {
@@ -59,6 +49,23 @@ namespace HiloTests
 
             Assert::IsNotNull(items);
         }
+
+        /*TEST_METHOD(HubPhotoGroupShouldReturnEmptyTitleWhenNoPicturesArePresent)
+        {
+            auto task = create_async([]() {
+                auto empty = ref new Vector<FileInformation^>();
+                return empty->GetView();
+            });
+
+            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", task);
+            Object^ items;
+
+            TestHelper::RunUISynced([this, photoGroup, &items]() {
+                items = photoGroup->Items;
+            });
+
+            Assert::AreEqual("No Test", photoGroup->Title);
+        }*/
 
         IAsyncOperation<IVectorView<FileInformation^>^>^ GetPhotosAsync()
         {

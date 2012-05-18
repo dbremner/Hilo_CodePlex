@@ -32,9 +32,6 @@
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="TestHelper.h" />
-    <ClInclude Include="..\Hilo\ImageRotation.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
     <ClInclude Include="..\Hilo\MainHubViewModel.h">
       <Filter>Testable</Filter>
     </ClInclude>
@@ -65,11 +62,7 @@
     <ClInclude Include="..\Hilo\HubPhotoGroup.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\HubPhoto.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
     <ClInclude Include="TestImageGenerator.h" />
-    <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
     <ClInclude Include="..\Hilo\WideFiveImageTile.h">
       <Filter>Testable</Filter>
     </ClInclude>
@@ -85,10 +78,58 @@
     <ClInclude Include="..\Hilo\Photo.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\PhotoGroup.h">
+    <ClInclude Include="..\Hilo\RotateImageViewModel.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\RotateImageViewModel.h">
+    <ClInclude Include="..\Hilo\MonthBlock.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\YearGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\FileInformationToBitmapImageConverter.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\DateTimeToStringConverter.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\PhotoCache.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ThumbnailGenerator.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\FileInformationToToolTipConverter.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\MonthGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IPhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IResizable.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="StubPhotoGroup.h">
+      <Filter>Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\StorageExtensions.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IExceptionPolicy.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\DebugLoggingExceptionPolicy.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="StubExceptionPolicy.h">
+      <Filter>Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\TaskExceptionsExtensions.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\AsyncException.h">
       <Filter>Testable</Filter>
     </ClInclude>
   </ItemGroup>
@@ -108,11 +149,7 @@
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="TestHelper.cpp" />
-    <ClCompile Include="ImageRotationTests.cpp" />
     <ClCompile Include="PhotoReaderTests.cpp" />
-    <ClCompile Include="..\Hilo\ImageRotation.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
     <ClCompile Include="MainHubViewModelTests.cpp" />
     <ClCompile Include="..\Hilo\MainHubViewModel.cpp">
       <Filter>Testable</Filter>
@@ -136,9 +173,6 @@
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="HubPhotoTests.cpp" />
-    <ClCompile Include="..\Hilo\HubPhoto.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
     <ClCompile Include="TestImageGenerator.cpp" />
     <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp" />
     <ClCompile Include="ThumbnailGeneratorTests.cpp" />
@@ -159,13 +193,57 @@
     <ClCompile Include="..\Hilo\Photo.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoGroup.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
     <ClCompile Include="..\Hilo\RotateImageViewModel.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
     <ClCompile Include="RotateImageViewModelTests.cpp" />
+    <ClCompile Include="FileInformationToBitmapImageConverterTests.cpp" />
+    <ClCompile Include="..\Hilo\FileInformationToBitmapImageConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeToStringConverterTests.cpp" />
+    <ClCompile Include="..\Hilo\DateTimeToStringConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\MonthBlock.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\YearGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInformationToToolTipConverterTests.cpp" />
+    <ClCompile Include="..\Hilo\FileInformationToToolTipConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\PhotoCache.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoCacheTests.cpp" />
+    <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\MonthGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="StubPhotoGroup.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\DebugLoggingExceptionPolicy.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="StubExceptionPolicy.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\AsyncException.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncExceptionTests.cpp" />
+    <ClCompile Include="TaskExceptionTests.cpp" />
+    <ClCompile Include="ImageViewDataTests.cpp" />
+    <ClCompile Include="ImageBrowserViewModelTests.cpp" />
+    <ClCompile Include="..\Hilo\DelegateCommand.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UnitTestLogo.png">

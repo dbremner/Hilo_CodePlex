@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,23 +8,21 @@
 //===============================================================================
 #include "pch.h"
 #include "Photo.h"
-#include "PhotoGroup.h"
+#include "IPhotoGroup.h"
 
+using namespace concurrency;
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Globalization;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-Photo::Photo(FileInformation^ fileInfo, PhotoGroup^ photoGroup) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), m_columnSpan(1), m_rowSpan(1), m_thumbnail(nullptr)
+Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), m_thumbnail(nullptr), m_columnSpan(1), m_rowSpan(1)
 {
-}
-
-Platform::String^ Photo::Name::get()
-{
-    return m_fileInfo->Name;
 }
 
 Photo::operator IStorageFile^()
@@ -32,9 +30,19 @@ Photo::operator IStorageFile^()
     return m_fileInfo;
 }
 
-PhotoGroup^ Photo::Group::get()
+Photo::operator FileInformation^()
 {
-    return m_weakPhotoGroup.Resolve<PhotoGroup>();
+    return m_fileInfo;
+}
+
+Platform::String^ Photo::Name::get()
+{
+    return m_fileInfo->Name;
+}
+
+IPhotoGroup^ Photo::Group::get()
+{
+    return m_weakPhotoGroup.Resolve<IPhotoGroup>();
 }
 
 BitmapImage^ Photo::Thumbnail::get()
@@ -69,4 +77,19 @@ int Photo::ColumnSpan::get()
 void Photo::ColumnSpan::set(int value)
 {
     m_columnSpan = value;
+}
+
+Object^ Photo::FileName::get()
+{
+    return m_fileInfo->Name;
+}
+
+Object^ Photo::FileDateCreated::get()
+{
+    return ref new Box<DateTime>(m_fileInfo->DateCreated);
+}
+
+Object^ Photo::FileDateModified::get()
+{
+    return ref new Box<DateTime>(m_fileInfo->BasicProperties->DateModified);
 }

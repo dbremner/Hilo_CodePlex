@@ -9,6 +9,8 @@
 #include "pch.h"
 #include "DelegateCommand.h"
 #include "CropImageViewModel.h"
+#include "TaskExceptionsExtensions.h"
+#include "AsyncException.h"
 
 using namespace Hilo;
 
@@ -26,7 +28,7 @@ using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Streams;
 
-CropImageViewModel::CropImageViewModel(void)
+CropImageViewModel::CropImageViewModel(IExceptionPolicy^ exceptionPolicy) : ImageBase(exceptionPolicy)
 {
     m_saveCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::SaveImage), nullptr);
     m_cancelCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::CancelCrop), nullptr);
@@ -42,6 +44,21 @@ ICommand^ CropImageViewModel::SaveCommand::get()
 ICommand^ CropImageViewModel::CancelCommand::get()
 {
     return m_cancelCommand;
+}
+
+Object^ CropImageViewModel::FileName::get()
+{
+    return m_file->Name;
+}
+
+Object^ CropImageViewModel::FileDateCreated::get()
+{
+    return ref new Box<DateTime>(m_file->DateCreated);
+}
+
+Object^ CropImageViewModel::FileDateModified::get()
+{
+    return ref new Box<DateTime>(m_file->BasicProperties->DateModified);
 }
 
 bool CropImageViewModel::InProgress::get()
@@ -98,7 +115,7 @@ void CropImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 
 void CropImageViewModel::SaveImage(Object^ parameter)
 {
-    ImageBase::SaveImage(m_file, m_imageStream);
+    AsyncException::ObserveWithPolicy(m_exceptionPolicy, ImageBase::SaveImageAsync(m_file, m_imageStream));
 }
 
 void CropImageViewModel::CancelCrop(Object^ parameter)
@@ -205,10 +222,19 @@ void CropImageViewModel::UpdateCropOverlayPostion(Thumb ^thumb, double verticalC
     }
 }
 
-void CropImageViewModel::CropImage(double actualWidth)
+IAsyncAction^ CropImageViewModel::CropImageAsync(double actualWidth)
+{
+    return concurrency::create_async([this, actualWidth]
+    { 
+        return CropImageAsyncImpl(actualWidth).then(ObserveException<void>(m_exceptionPolicy)); 
+    });
+}
+
+task<void> CropImageViewModel::CropImageAsyncImpl(double actualWidth)
 {
     m_inProgress = true;
     OnPropertyChanged("InProgress");
+    auto continuationContext = concurrency::task_continuation_context::use_current();
 
     auto decoder = make_shared<BitmapDecoder^>(nullptr);
     auto pixelProvider = make_shared<PixelDataProvider^>(nullptr);
@@ -217,7 +243,7 @@ void CropImageViewModel::CropImage(double actualWidth)
     auto bitmapStream = ref new InMemoryRandomAccessStream();
 
     auto cropImageTask = task<BitmapDecoder^>(BitmapDecoder::CreateAsync(m_imageStream));
-    cropImageTask.then([decoder](BitmapDecoder^ createdDecoder)
+    return cropImageTask.then([decoder](BitmapDecoder^ createdDecoder)
     {
         (*decoder) = createdDecoder;
         return (*decoder)->GetPixelDataAsync(BitmapPixelFormat::Rgba8,
@@ -248,13 +274,13 @@ void CropImageViewModel::CropImage(double actualWidth)
             for (unsigned int x = 0; x < *newWidth; x++)
             {
                 destinationPixels[(x + y * *newWidth) * 4]     = 
-                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4];
+                    sourcePixels[(i + j * (*decoder)->OrientedPixelWidth) * 4];
                 destinationPixels[(x + y * *newWidth) * 4 + 1] = 
-                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 1];
+                    sourcePixels[(i + j * (*decoder)->OrientedPixelWidth) * 4 + 1];
                 destinationPixels[(x + y * *newWidth) * 4 + 2] = 
-                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 2];
+                    sourcePixels[(i + j * (*decoder)->OrientedPixelWidth) * 4 + 2];
                 destinationPixels[(x + y * *newWidth) * 4 + 3] = 
-                    sourcePixels[(i + j * (*decoder)->PixelWidth) * 4 + 3];
+                    sourcePixels[(i + j * (*decoder)->OrientedPixelWidth) * 4 + 3];
                 i++;
                 if (i >= (*newWidth + scaledXStart))
                 {
@@ -280,5 +306,5 @@ void CropImageViewModel::CropImage(double actualWidth)
         m_inProgress = false;
         OnPropertyChanged("InProgress");
         OnPropertyChanged("Photo");
-    }, task_continuation_context::use_current());
+    }, continuationContext);
 }

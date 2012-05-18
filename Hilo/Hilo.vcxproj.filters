@@ -55,9 +55,6 @@
     <Filter Include="XamlExtensions">
       <UniqueIdentifier>{f9e8a720-3d1b-46f5-991b-0b23f486a944}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Helpers">
-      <UniqueIdentifier>{814d64eb-4820-4171-97e6-a299e1e2a005}</UniqueIdentifier>
-    </Filter>
     <Filter Include="en-US">
       <UniqueIdentifier>{3d2f588c-0a85-4784-a6d8-1bace183d19c}</UniqueIdentifier>
     </Filter>
@@ -83,9 +80,6 @@
     <ClCompile Include="MainHubView.xaml.cpp">
       <Filter>Views</Filter>
     </ClCompile>
-    <ClCompile Include="ImageRotation.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
     <ClCompile Include="MainHubViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
@@ -106,9 +100,6 @@
       <Filter>Views</Filter>
     </ClCompile>
     <ClCompile Include="ImageViewData.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="HubPhoto.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
     <ClCompile Include="HubPhotoGroup.cpp">
@@ -132,9 +123,6 @@
     <ClCompile Include="CropImageViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="PhotoGroup.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="Photo.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
@@ -142,6 +130,38 @@
     <ClCompile Include="CropImageView.xaml.cpp" />
     <ClCompile Include="ImageBase.cpp">
       <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInformationToBitmapImageConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="DateTimeToStringConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="YearGroup.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthBlock.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="BooleanToBrushConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInformationToToolTipConverter.cpp">
+      <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoCache.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthGroup.cpp">
+      <Filter>ViewModels</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
+    <ClCompile Include="AsyncException.cpp" />
+    <ClCompile Include="VariableListView.cpp">
+      <Filter>Views</Filter>
+    </ClCompile>
+    <ClCompile Include="DelegateCommand.cpp">
+      <Filter>XamlExtensions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,9 +192,6 @@
     <ClInclude Include="MainHubView.xaml.h">
       <Filter>Views</Filter>
     </ClInclude>
-    <ClInclude Include="ImageRotation.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
     <ClInclude Include="MainHubViewModel.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
@@ -203,9 +220,6 @@
     <ClInclude Include="HubPhotoGroup.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="HubPhoto.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="RotateImageView.xaml.h">
       <Filter>Views</Filter>
     </ClInclude>
@@ -222,9 +236,6 @@
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="CropImageView.xaml.h" />
-    <ClInclude Include="PhotoGroup.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="Photo.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
@@ -235,6 +246,47 @@
     <ClInclude Include="ImageBase.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
+    <ClInclude Include="HubGroupType.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInformationToBitmapImageConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="DateTimeToStringConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="YearGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthBlock.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="BooleanToBrushConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInformationToToolTipConverter.h">
+      <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoCache.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="IPhotoGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthGroup.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="IResizable.h">
+      <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="IExceptionPolicy.h" />
+    <ClInclude Include="TaskExceptionsExtensions.h" />
+    <ClInclude Include="DebugLoggingExceptionPolicy.h" />
+    <ClInclude Include="StorageExtensions.h" />
+    <ClInclude Include="VariableListView.h">
+      <Filter>Views</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncException.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />

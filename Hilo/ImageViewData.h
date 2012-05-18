@@ -10,23 +10,31 @@
 
 namespace Hilo
 {
+    ref class Photo;
+
     ref class ImageViewData sealed
     {
     public:
-        ImageViewData(Windows::Storage::IStorageFile^ photo, Windows::Storage::IStorageFolder^ folder);
+        ImageViewData(Photo^ photo);
 
-        property Windows::Storage::IStorageFile^ Photo
+        property Platform::String^ FilePath
         {
-            Windows::Storage::IStorageFile^ get();
+            Platform::String^ get();
         }
 
-        property Windows::Storage::IStorageFolder^ Folder
+        property Windows::Foundation::DateTime FileDate
         {
-            Windows::Storage::IStorageFolder^ get();
+            Windows::Foundation::DateTime get();
+        }
+
+        property Platform::String^ DateQuery
+        {
+            Platform::String^ get();
         }
 
     private:
-        Windows::Storage::IStorageFile^ m_photo;
-        Windows::Storage::IStorageFolder^ m_folder;
+        Windows::Foundation::DateTime m_fileDate;
+        Platform::String^ m_dateQuery;
+        Platform::String^ m_filePath;
     };
 }

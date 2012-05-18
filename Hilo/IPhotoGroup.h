@@ -8,19 +8,10 @@
 //===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
-
 namespace Hilo
 {
-    ref class Photo;
-
-    [Windows::UI::Xaml::Data::Bindable]
-    public ref class PhotoGroup sealed : public BindableBase
+    public interface class IPhotoGroup
     {
-    public:
-        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, bool supportSpan);
-        PhotoGroup(Windows::Storage::IStorageFolder^ storagefolder, bool supportSpan, Platform::String^ title);
-
         operator Windows::Storage::IStorageFolder^ ();
 
         property Platform::String^ Title 
@@ -32,11 +23,5 @@ namespace Hilo
         {
             Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
         }
-
-    private:
-        Windows::Storage::IStorageFolder^ m_storageFolder;
-        bool m_supportSpan;
-        Platform::String^ m_title;
-        Platform::Collections::Vector<Platform::Object^>^ m_photos;
     };
 }

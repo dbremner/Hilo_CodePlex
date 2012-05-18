@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -37,6 +37,13 @@ task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(IStorageFolderQ
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
+task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(String^ query)
+{
+    auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
+}
+
 task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query)
 {
     auto fileQuery = CreateFileQuery(folder, query);
@@ -65,10 +72,31 @@ Object^ PhotoReader::GetVirtualizedFiles(IStorageFolderQueryOperations^ folder, 
 
 task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByMonth()
 {
-    auto fileQuery = CreateVirtualFolderQueryByMonth(KnownFolders::PicturesLibrary);
+    return GetVirtualPhotoFoldersByMonth(KnownFolders::PicturesLibrary);
+}
+
+task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByMonth(IStorageFolderQueryOperations^ folder)
+{
+    auto fileQuery = CreateVirtualFolderQueryByMonth(folder);
 
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
     return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
+}
+
+task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByYear()
+{
+    auto fileQuery = CreateVirtualFolderQueryByYear(KnownFolders::PicturesLibrary);
+
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
+}
+
+StorageFolderQueryResult^ PhotoReader::CreateVirtualFolderQueryByYear(IStorageFolderQueryOperations^ folder)
+{
+    auto queryOptions = ref new QueryOptions(CommonFolderQuery::GroupByYear);
+    queryOptions->FolderDepth = FolderDepth::Deep;
+    queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
+    return folder->CreateFolderQueryWithOptions(queryOptions);
 }
 
 StorageFolderQueryResult^ PhotoReader::CreateVirtualFolderQueryByMonth(IStorageFolderQueryOperations^ folder)
@@ -89,5 +117,4 @@ StorageFileQueryResult^ PhotoReader::CreateFileQuery(IStorageFolderQueryOperatio
     queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     queryOptions->ApplicationSearchFilter = query;
     return folder->CreateFileQueryWithOptions(queryOptions);
-    
 }

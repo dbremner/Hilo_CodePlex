@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\CropImageViewModel.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Hilo;
 
@@ -22,33 +23,33 @@ using namespace Windows::UI::Xaml::Media;
 
 namespace HiloTests
 {
-	TEST_CLASS(CropImageViewModelTests)
-	{
-	public:
-		
-		TEST_METHOD(CropImageViewModelIsNotNull)
-		{
-            auto vm = ref new CropImageViewModel();
+    TEST_CLASS(CropImageViewModelTests)
+    {
+    public:
+
+        TEST_METHOD(CropImageViewModelIsNotNull)
+        {
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             Assert::IsNotNull(vm, "CropImageViewModel should not be null");
-		}
+        }
 
         TEST_METHOD(CropImageViewModelSaveCommandIsNotNull)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             ICommand^ saveCommand = vm->SaveCommand;
             Assert::IsNotNull(saveCommand, "Save command should not be null");
         }
 
         TEST_METHOD(CropImageViewModelCancelCommandIsNotNull)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             ICommand^ cancelCommand = vm->CancelCommand;
             Assert::IsNotNull(cancelCommand, "Cancel command should not be null");
         }
-        
+
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsIsCropOverlayVisibleToTrue)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -65,7 +66,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayWidthAndHeight)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -83,7 +84,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayLeftAndTop)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -101,7 +102,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeight)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -121,7 +122,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeightAndTop)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -139,10 +140,10 @@ namespace HiloTests
             Assert::AreEqual(vm->CropOverlayTop, 2.5);
             Assert::AreEqual(vm->CropOverlayHeight, 597.5);
         }
-        
+
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayWidth)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -162,7 +163,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayLeftAndWidth)
         {
-            auto vm = ref new CropImageViewModel();
+            auto vm = ref new CropImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -180,5 +181,5 @@ namespace HiloTests
             Assert::AreEqual(vm->CropOverlayLeft, 2.5);
             Assert::AreEqual(vm->CropOverlayWidth, 797.5);
         }
-	};
+    };
 }

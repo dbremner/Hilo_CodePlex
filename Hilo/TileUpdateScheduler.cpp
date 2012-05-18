@@ -42,11 +42,20 @@ const unsigned int BatchSize = 5;
 // multiple batches.
 const unsigned int SetSize = 3;
 
-void TileUpdateScheduler::ScheduleUpdateAsync()
+IAsyncAction^ TileUpdateScheduler::ScheduleUpdateAsync()
 {
-    // Select random pictures from the Pictures library and copy them 
-    // to a local app folder and then update the tile.
-    InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder);
+  
+    return create_async([this]
+    {
+        // We create a new task to ensure this has the opportunity to run
+        // on a different thread than the one it's invoked upon.
+        return concurrency::task<void>([this]()
+        {
+            // Select random pictures from the Pictures library and copy them 
+            // to a local app folder and then update the tile.
+            InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder);
+        });
+    });
 }
 
 task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
@@ -108,7 +117,7 @@ void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
     // Create a tile updater.
     TileUpdater^ tileUpdater = TileUpdateManager::CreateTileUpdaterForApplication();
     tileUpdater->Clear();
-    
+
     unsigned int imagesCount = files->Size;
     unsigned int imageBatches = imagesCount / BatchSize;
 
@@ -124,9 +133,9 @@ void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
             StorageFile^ file = files->GetAt(image + (batch * BatchSize));
             wstringstream imageSource;
             imageSource << L"ms-appdata:///local/" 
-                        << ThumbnailsFolderName->Data() 
-                        << L"/" 
-                        << file->Name->Data();
+                << ThumbnailsFolderName->Data() 
+                << L"/" 
+                << file->Name->Data();
             imageList.push_back(imageSource.str());
         }
 

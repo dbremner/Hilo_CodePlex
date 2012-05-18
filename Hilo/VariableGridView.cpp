@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "VariableGridView.h"
-#include "HubPhoto.h"
+#include "IResizable.h"
 
 using namespace Hilo;
 
@@ -18,7 +18,7 @@ using namespace Windows::UI::Xaml::Controls;
 
 void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element, Object^ item)
 {
-    auto model = dynamic_cast<HubPhoto^>(item);
+    auto model = dynamic_cast<IResizable^>(item);
 
     if (model != nullptr)
     {

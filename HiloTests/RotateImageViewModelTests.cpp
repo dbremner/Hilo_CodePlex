@@ -10,6 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\RotateImageViewModel.h"
 #include <tuple>
+#include "StubExceptionPolicy.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
@@ -29,7 +30,7 @@ namespace HiloTests
                 status);
             Assert::AreEqual(concurrency::task_status::completed, status);
 
-            RotateImageViewModel^ vm = ref new RotateImageViewModel();
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(ref new StubExceptionPolicy());
 
             vm->Initialize(imageFile);
 
@@ -69,7 +70,7 @@ namespace HiloTests
                 status);
             Assert::AreEqual(concurrency::task_status::completed, status);
 
-            RotateImageViewModel^ vm = ref new RotateImageViewModel();
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(ref new StubExceptionPolicy());
 
             vm->Initialize(imageFile);
 
@@ -92,7 +93,7 @@ namespace HiloTests
                 status);
             Assert::AreEqual(concurrency::task_status::completed, status);
 
-            RotateImageViewModel^ vm = ref new RotateImageViewModel();
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(ref new StubExceptionPolicy());
 
             vm->Initialize(imageFile);
 

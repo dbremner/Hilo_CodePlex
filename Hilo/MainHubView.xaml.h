@@ -11,6 +11,8 @@
 #include "pch.h"
 #include "HiloPage.h" // Required by generated header
 #include "VariableGridView.h" // Required by generated header
+#include "VariableListView.h" // Required by generated header
+#include "Common\BooleanToVisibilityConverter.h" // Required by generated header
 #include "MainHubView.g.h"
 
 namespace Hilo
@@ -25,6 +27,6 @@ namespace Hilo
         virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
     private:
-        void OnItemGridViewTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
+        void OnPhotoItemClicked(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
     };
 }

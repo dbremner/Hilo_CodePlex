@@ -9,9 +9,13 @@
 #pragma once
 #include <ppltasks.h>
 
-// Creates a task that completes with the provided result.
-template <typename Result>
-concurrency::task<Result> task_from_result(Result result)
+namespace Hilo 
 {
-    return concurrency::task<Result>([result]() -> Result { return result; });
+    // Creates a task that completes with the provided result.
+    template <typename Result>
+    concurrency::task<Result> task_from_result(Result result)
+    {
+        return concurrency::task<Result>([result]() -> Result { return result; });
+    }
+
 }

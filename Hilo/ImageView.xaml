@@ -21,13 +21,17 @@
     DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=ImageVM}">
 
     <UserControl.Resources>
-        <converters:ThumbnailConverter x:Key="ThumbConverter" />
+        <converters:ThumbnailConverter x:Key="ThumbnailConverter" />
+        <converters:FileInformationToBitmapImageConverter x:Key="FileInformationConverter" />
+        <converters:FileInformationToToolTipConverter x:Key="FileInformationToolTipConverter" />
     </UserControl.Resources>
 
     <local:HiloPage.TopAppBar>
         <AppBar x:Name="ImageViewTopAppBar"
                 AutomationProperties.AutomationId="ImageViewTopAppBar"
+                Closed="OnImageViewTopAppBarClosed"
                 IsSticky="{Binding IsAppBarSticky}"
+                Opened="OnImageViewTopAppBarOpened"
                 Padding="10,0,10,0">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -39,15 +43,16 @@
                         Click="GoBack" 
                         IsEnabled="{Binding Frame.CanGoBack, ElementName=PageRoot}"
                         Style="{StaticResource BackButtonStyle}" />
-                <GridView x:Name="PhotosGridView"
-                          AutomationProperties.AutomationId="PhotosGridView"
+                <GridView x:Name="PhotosFilmStripGridView"
+                          AutomationProperties.AutomationId="PhotosFilmStripGridView"
                           Grid.Column="1"
                           ItemsSource="{Binding Photos}"
                           IsItemClickEnabled="False"
                           ItemContainerStyle="{StaticResource HiloFilmStripImageGridViewItem}"
-                          VerticalAlignment="Center"
-                          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                          SelectionMode="Single">
+                          SelectionChanged="OnPhotosSelectionChanged"
+                          SelectedItem="{Binding Path=SelectedItem, Mode=TwoWay}"
+                          SelectionMode="Single"
+                          VerticalAlignment="Center">
                     <GridView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapGrid MaximumRowsOrColumns="1" />
@@ -56,7 +61,7 @@
                     <GridView.ItemTemplate>
                         <DataTemplate>
                             <Border>
-                                <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbConverter}}" 
+                                <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbnailConverter}}" 
                                        Height="138" 
                                        Width="200" 
                                        Stretch="UniformToFill" />
@@ -69,13 +74,77 @@
     </local:HiloPage.TopAppBar>
 
     <Grid x:Name="ContentRoot" Background="{StaticResource HiloPageBackgroundBrush}">
-        <Grid x:Name="PhotoGrid" 
+        <Grid x:Name="PhotoGrid"
               Margin="50,50,50,110">
-            <Image x:Name="Photo" 
-                   AutomationProperties.AutomationId="ImageControl" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center" 
-                   Source="{Binding Photo}" />
+            <Popup x:Name="ImageViewFileInformationPopup"
+                   AutomationProperties.AutomationId="ImageViewFileInformationPopup"
+                   HorizontalOffset="82"
+                   VerticalOffset="150">
+                <Popup.Child>
+                    <Border Background="{StaticResource GreySplashScreenColor}"
+                            CornerRadius="2"
+                            Opacity="0.7">
+                        <StackPanel Margin="10">
+                            <TextBlock Foreground="{StaticResource ApplicationTextBrush}" 
+                                       Text="{Binding Path=SelectedItem, Converter={StaticResource FileInformationToolTipConverter}, ConverterParameter='FileName'}" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Foreground="{StaticResource ApplicationTextBrush}" 
+                                           Text="Taken" />
+                                <TextBlock Foreground="{StaticResource ApplicationTextBrush}" 
+                                           Margin="3,0,0,0" 
+                                           Text="{Binding Path=SelectedItem, Converter={StaticResource FileInformationToolTipConverter}, ConverterParameter='DateTaken'}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Popup.Child>
+            </Popup>
+            <FlipView x:Name="PhotosFlipView"
+                      ItemsSource="{Binding Photos}"
+                      SelectionChanged="OnPhotosSelectionChanged">
+                <FlipView.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Image AutomationProperties.AutomationId="ImageControl"
+                                   HorizontalAlignment="Center"
+                                   Source="{Binding Converter={StaticResource FileInformationConverter}}"
+                                   VerticalAlignment="Center">
+                                <!--<ToolTipService.ToolTip>
+                                    <ToolTip ContentTemplate="{StaticResource HiloFlipViewImageToolTipDataTemplate}"
+                                             Style="{StaticResource HiloImageToolTipStyle}" />
+                                </ToolTipService.ToolTip>-->
+                            </Image>
+                        </Border>
+                    </DataTemplate>
+                </FlipView.ItemTemplate>
+            </FlipView>
+
+            <ListView x:Name="SnappedPhotosFilmStripListView"
+                      AutomationProperties.AutomationId="SnappedPhotosFilmStripListView"
+                      HorizontalAlignment="Center"
+                      ItemsSource="{Binding Photos}"
+                      IsItemClickEnabled="False"
+                      ItemContainerStyle="{StaticResource HiloFilmStripImageListViewItem}"
+                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                      SelectionChanged="OnPhotosSelectionChanged"
+                      SelectionMode="Single"
+                      VerticalAlignment="Center"
+                      Visibility="Collapsed">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Image Source="{Binding Path=Thumbnail, Converter={StaticResource ThumbnailConverter}}" 
+                                   Height="138" 
+                                   Width="200" 
+                                   Stretch="UniformToFill" />
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>
@@ -98,6 +167,26 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="96,0,10,56"/>
                         </ObjectAnimationUsingKeyFrames>-->
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Snapped">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SnappedPhotosFilmStripListView" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PhotosFlipView" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PhotoGrid" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="50"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ImageViewTopAppBar" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ImageViewBottomAppBar" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
             </VisualStateGroup>

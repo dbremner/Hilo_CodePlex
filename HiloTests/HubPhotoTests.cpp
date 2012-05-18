@@ -8,12 +8,12 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "..\Hilo\Photo.h"
 #include <ppltasks.h>
-#include "..\Hilo\HubPhoto.h"
-
-using namespace Hilo;
+#include "StubPhotoGroup.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
@@ -29,7 +29,7 @@ namespace HiloTests
     TEST_CLASS(HubPhotoTests)
     {
     public:
-        TEST_METHOD(HubPhotoTestsCanRetrievePhotoPath)
+        TEST_METHOD(PhotoTestsCanRetrievePhotoPath)
         {
             TestImageGenerator imageGenerator;
 
@@ -37,10 +37,10 @@ namespace HiloTests
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
                 .then([](FileInformation^ file) 
             {
-                return ref new HubPhoto(file);
+                return ref new Photo(file, ref new StubPhotoGroup("Test"));
             });
 
-            auto f = TestHelper::RunSynced<HubPhoto^>(t2, status);
+            auto f = TestHelper::RunSynced<Photo^>(t2, status);
 
             Assert::AreEqual(concurrency::completed, status);
             Assert::AreEqual("TestFile.png", f->Name);
@@ -48,7 +48,7 @@ namespace HiloTests
             TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
-        TEST_METHOD(HubPhotoTestsCanBeAssignedToAFileInformation)
+        TEST_METHOD(PhotoTestsCanBeAssignedToAFileInformation)
         {
             TestImageGenerator imageGenerator;
 
@@ -56,10 +56,10 @@ namespace HiloTests
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
                 .then([](FileInformation^ file) 
             {
-                return ref new HubPhoto(file);
+                return ref new Photo(file, ref new StubPhotoGroup("Test"));
             });
 
-            auto f = TestHelper::RunSynced<HubPhoto^>(t2, status);
+            auto f = TestHelper::RunSynced<Photo^>(t2, status);
             FileInformation^ fileInfo = f;
             
             Assert::AreEqual(concurrency::completed, status);
@@ -70,7 +70,7 @@ namespace HiloTests
             TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
-        TEST_METHOD(HubPhotoTestsCanRetrieveThumbnailAsBitmapImage)
+        TEST_METHOD(PhotoTestsCanRetrieveThumbnailAsBitmapImage)
         {
             TestImageGenerator imageGenerator;
 
@@ -92,10 +92,10 @@ namespace HiloTests
                     return (*finalFile);
                 }).then([](FileInformation^ file) 
                 {
-                    return ref new HubPhoto(file);
+                    return ref new Photo(file, ref new StubPhotoGroup("Test"));
                 });
 
-                auto f = TestHelper::RunSynced<HubPhoto^>(t2, status);
+                auto f = TestHelper::RunSynced<Photo^>(t2, status);
 
                 bitmap = f->Thumbnail;
             });

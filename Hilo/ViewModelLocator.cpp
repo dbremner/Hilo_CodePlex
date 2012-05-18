@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,12 +9,18 @@
 #include "pch.h"
 #include "PhotoReader.h"
 #include "ViewModelLocator.h"
+#include "DebugLoggingExceptionPolicy.h"
 
 using namespace Hilo;
 
 using namespace concurrency;
 using namespace Platform::Collections;
 using namespace Windows::ApplicationModel::Resources;
+
+ViewModelLocator::ViewModelLocator()
+{
+    m_exceptionPolicy = ref new DebugLoggingExceptionPolicy();
+}
 
 MainHubViewModel^ ViewModelLocator::MainHubVM::get()
 {
@@ -26,13 +32,14 @@ MainHubViewModel^ ViewModelLocator::MainHubVM::get()
         { 
             PhotoReader reader;
             return reader.GetPhotosAsync("", 6);
-        });        
-        auto picturesGroup = ref new HubPhotoGroup(picturesTask);
+        });
         auto loader = ref new ResourceLoader();
         auto title = loader->GetString("PicturesTitle");
-        picturesGroup->Title = title;
+        auto emptyTitle = loader->GetString("EmptyPicturesTitle");
+        auto picturesGroup = ref new HubPhotoGroup(title, emptyTitle, picturesTask);
+        //picturesGroup->Title = title;
         vector->Append(picturesGroup);
-        m_mainHubViewModel = ref new MainHubViewModel(vector);
+        m_mainHubViewModel = ref new MainHubViewModel(vector, m_exceptionPolicy);
     }
     return m_mainHubViewModel;
 }
@@ -41,7 +48,7 @@ ImageBrowserViewModel^ ViewModelLocator::ImageBrowserVM::get()
 {
     if (nullptr == m_imageBrowswerViewModel)
     {
-        m_imageBrowswerViewModel = ref new ImageBrowserViewModel();
+        m_imageBrowswerViewModel = ref new ImageBrowserViewModel(m_exceptionPolicy);
     }
     return m_imageBrowswerViewModel;
 }
@@ -50,17 +57,17 @@ ImageViewModel^ ViewModelLocator::ImageVM::get()
 {
     if (nullptr == m_imageViewModel)
     {
-        m_imageViewModel = ref new ImageViewModel();
+        m_imageViewModel = ref new ImageViewModel(m_exceptionPolicy);
     }
     return m_imageViewModel;
 }
 
 CropImageViewModel^ ViewModelLocator::CropImageVM::get()
 {
-    return ref new CropImageViewModel();
+    return ref new CropImageViewModel(m_exceptionPolicy);
 }
 
 RotateImageViewModel^ ViewModelLocator::RotateImageVM::get()
 {
-    return ref new RotateImageViewModel();
+    return ref new RotateImageViewModel(m_exceptionPolicy);
 }

@@ -12,13 +12,21 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
 #pragma warning(push)
 #pragma warning(disable: 4449)
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ImageBase : public ViewModelBase
     {
+    public:
+        ImageBase(IExceptionPolicy^ exceptionPolicy);
+        
     protected:
-        void SaveImage(Windows::Storage::BulkAccess::FileInformation^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
+        Windows::Foundation::IAsyncAction^ SaveImageAsync(Windows::Storage::BulkAccess::FileInformation^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
+
+    private:
+        concurrency::task<void> SaveImageAsyncImpl(Windows::Storage::BulkAccess::FileInformation^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
     };
 #pragma warning(pop)
 }

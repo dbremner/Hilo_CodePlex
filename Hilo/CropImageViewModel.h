@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,11 +12,13 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class CropImageViewModel sealed : public ImageBase
     {
     public:
-        CropImageViewModel();
+        CropImageViewModel(IExceptionPolicy^ exceptionPolicy);
 
         property Windows::UI::Xaml::Media::ImageSource^ Photo
         {
@@ -33,6 +35,21 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
+        property Platform::Object^ FileName
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateCreated
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateModified
+        {
+            Platform::Object^ get();
+        }
+
         property bool InProgress { bool get(); }
         property double CropOverlayLeft { double get(); }
         property double CropOverlayTop { double get(); }
@@ -43,7 +60,7 @@ namespace Hilo
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
         void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
         void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
-        void CropImage(double actualWidth);
+        Windows::Foundation::IAsyncAction^ CropImageAsync(double actualWidth);
     
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_file;
@@ -69,6 +86,7 @@ namespace Hilo
         // Member functions that implement Commands
         void SaveImage(Platform::Object^ parameter);
         void CancelCrop(Platform::Object^ parameter);
+        concurrency::task<void> CropImageAsyncImpl(double actualWidth);
     };
 }
 

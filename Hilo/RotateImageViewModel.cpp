@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -10,28 +10,30 @@
 #include "DelegateCommand.h"
 #include "RotateImageViewModel.h"
 #include "PhotoReader.h"
-
-using namespace Hilo;
+#include "TaskExceptionsExtensions.h"
 
 using namespace concurrency;
+using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::Streams;
+using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Pickers;
+using namespace Windows::Storage::Search;
+using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::UI::Xaml::Navigation;
 
-using namespace Windows::Storage::Search;
-using namespace Windows::Storage::FileProperties;
 
-RotateImageViewModel::RotateImageViewModel() : m_head([](){})
+
+RotateImageViewModel::RotateImageViewModel(IExceptionPolicy^ exceptionPolicy) : ImageBase(exceptionPolicy)
 {
     m_rotateCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::Rotate90), nullptr);
     m_saveCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::SaveImage), nullptr);
@@ -66,6 +68,21 @@ void RotateImageViewModel::RotationAngle::set( double value )
     OnPropertyChanged("RotationAngle");
 }
 
+Object^ RotateImageViewModel::FileName::get()
+{
+    return m_file->Name;
+}
+
+Object^ RotateImageViewModel::FileDateCreated::get()
+{
+    return ref new Box<DateTime>(m_file->DateCreated);
+}
+
+Object^ RotateImageViewModel::FileDateModified::get()
+{
+    return ref new Box<DateTime>(m_file->BasicProperties->DateModified);
+}
+
 ImageSource^ RotateImageViewModel::Photo::get()
 {
     if (m_image == nullptr && m_file != nullptr)
@@ -79,7 +96,7 @@ ImageSource^ RotateImageViewModel::Photo::get()
         }).then([this] 
         {
             OnPropertyChanged("Photo");
-        },task_continuation_context::use_current());
+        },task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
     }
     return m_image;
 }
@@ -89,6 +106,7 @@ void RotateImageViewModel::Rotate90(Object^ parameter)
     RotationAngle += 90;
     EndRotation();
 }
+
 concurrency::task<void> RotateImageViewModel::DoRotate(double angle)
 {
     assert(angle < 360);
@@ -129,7 +147,7 @@ void RotateImageViewModel::SaveImage(Object^ parameter)
     m_isSaving = true;
     DoRotate(RotationAngle).then([this]()
     {
-        ImageBase::SaveImage(m_file, m_randomAccessStream);
+        return ImageBase::SaveImageAsync(m_file, m_randomAccessStream);
     }).then([this](task<void> savedTask)
     {
         try 
@@ -142,7 +160,7 @@ void RotateImageViewModel::SaveImage(Object^ parameter)
             throw;
         }
         m_isSaving = false;
-    });
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 void RotateImageViewModel::CancelRotate(Object^ parameter)
@@ -155,7 +173,7 @@ void RotateImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
     Initialize(dynamic_cast<FileInformation^>(e->Parameter));
 }
 
-void RotateImageViewModel::Initialize( Windows::Storage::BulkAccess::FileInformation^ image )
+void RotateImageViewModel::Initialize(FileInformation^ image )
 {
     m_file = image;
     assert(m_file!= nullptr);    

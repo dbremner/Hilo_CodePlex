@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ===============================================================================
  Microsoft patterns & practices
  Hilo Guidance
@@ -33,7 +33,7 @@
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
                    HorizontalAlignment="Center" 
-                   VerticalAlignment="Center" 
+                   VerticalAlignment="Center"
                    Source="{Binding Photo}" 
                    ManipulationMode="Rotate">
                 <Image.RenderTransform>
@@ -41,6 +41,10 @@
                         x:Name="ImageRotateTransform"  
                         Angle="{Binding RotationAngle}" />
                 </Image.RenderTransform>
+                <!--<ToolTipService.ToolTip>
+                    <ToolTip ContentTemplate="{StaticResource HiloImageToolTipDataTemplate}" 
+                             Style="{StaticResource HiloImageToolTipStyle}" />
+                </ToolTipService.ToolTip>-->
             </Image>
 
             <!--<ProgressRing x:Name="WorkInProgress" Visibility="{Binding Path=IsRotating, Converter={StaticResource BooleanToVisibilityConverter}}" />-->
@@ -98,7 +102,7 @@
                             Style="{StaticResource CancelAppBarButtonStyle}" 
                             Tag="Cancel" />
                     <Button Command="{Binding SaveCommand}" 
-                            Style="{StaticResource SaveAppBarButtonStyle}"
+                            Style="{StaticResource AcceptAppBarButtonStyle}"
                             Tag="Save" />
                 </StackPanel>
             </Grid>

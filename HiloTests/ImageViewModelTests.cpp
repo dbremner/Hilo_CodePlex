@@ -10,6 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\ImageViewData.h"
 #include "..\Hilo\ImageViewModel.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Hilo;
 
@@ -31,7 +32,7 @@ namespace HiloTests
     public:
         TEST_METHOD(ImageViewModelShouldFireOnPropertyChangedWhenSettingAppBarIsSticky)
         {
-            auto vm = ref new ImageViewModel();
+            auto vm = ref new ImageViewModel(ref new StubExceptionPolicy());
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -47,7 +48,7 @@ namespace HiloTests
 
         TEST_METHOD(ImageViewModelRotateImageCommandShouldNotBeNull)
         {
-            auto vm = ref new ImageViewModel();
+            auto vm = ref new ImageViewModel(ref new StubExceptionPolicy());
 
             ICommand^ editCommand = vm->RotateImageCommand;
 

@@ -1,0 +1,27 @@
+﻿//===============================================================================
+// Microsoft patterns & practices
+// Hilo Guidance
+//===============================================================================
+// Copyright © Microsoft Corporation.  All rights reserved.
+// This code released under the terms of the 
+// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
+//===============================================================================
+#pragma once
+
+namespace Hilo
+{
+    public interface class IResizable
+    {
+        property int ColumnSpan 
+        {
+            int get();
+            void set(int value);
+        }
+
+        property int RowSpan
+        {
+            int get();
+            void set(int value);
+        }
+    };
+}

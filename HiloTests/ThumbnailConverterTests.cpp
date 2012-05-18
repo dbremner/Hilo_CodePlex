@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\\ThumbnailConverter.h"
+#include "..\Hilo\ThumbnailConverter.h"
 
 using namespace Hilo::Converters;
 
@@ -36,7 +36,7 @@ namespace HiloTests
             {
                 auto finalFile = std::make_shared<FileInformation^>(nullptr);
 
-                concurrency::task_status status;
+                task_status status;
                 auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
                 .then([finalFile](FileInformation^ file)
                 {

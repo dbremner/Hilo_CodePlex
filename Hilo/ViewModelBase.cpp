@@ -14,6 +14,10 @@ using namespace Hilo;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Navigation;
 
+ViewModelBase::ViewModelBase(IExceptionPolicy^ exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
+{
+}
+
 bool ViewModelBase::IsAppBarSticky::get()
 {
     return m_isAppBarSticky;
@@ -29,6 +33,10 @@ void ViewModelBase::IsAppBarSticky::set(bool value)
 }
 
 void ViewModelBase::OnNavigatedTo(NavigationEventArgs^ e)
+{
+}
+
+void ViewModelBase::OnNavigatedFrom(NavigationEventArgs^ e)
 {
 }
 

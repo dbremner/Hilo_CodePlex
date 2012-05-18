@@ -117,8 +117,47 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="1" xml:space="preserve">
+    <value>Jan</value>
+  </data>
+  <data name="10" xml:space="preserve">
+    <value>Oct</value>
+  </data>
+  <data name="11" xml:space="preserve">
+    <value>Nov</value>
+  </data>
+  <data name="12" xml:space="preserve">
+    <value>Dec</value>
+  </data>
+  <data name="2" xml:space="preserve">
+    <value>Feb</value>
+  </data>
+  <data name="3" xml:space="preserve">
+    <value>Mar</value>
+  </data>
+  <data name="4" xml:space="preserve">
+    <value>Apr</value>
+  </data>
+  <data name="5" xml:space="preserve">
+    <value>May</value>
+  </data>
+  <data name="6" xml:space="preserve">
+    <value>Jun</value>
+  </data>
+  <data name="7" xml:space="preserve">
+    <value>Jul</value>
+  </data>
+  <data name="8" xml:space="preserve">
+    <value>Aug</value>
+  </data>
+  <data name="9" xml:space="preserve">
+    <value>Sep</value>
+  </data>
   <data name="CropImagePageTitle.Text" xml:space="preserve">
     <value>Crop Picture</value>
+  </data>
+  <data name="EmptyPicturesTitle" xml:space="preserve">
+    <value>It is lonely here without pictures</value>
   </data>
   <data name="PicturesTitle" xml:space="preserve">
     <value>Pictures</value>

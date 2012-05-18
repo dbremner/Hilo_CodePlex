@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "HubPhotoGroup.h"
-#include "HubPhoto.h"
+#include "Photo.h"
 
 using namespace Hilo;
 
@@ -17,33 +17,48 @@ using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Core;
 
-HubPhotoGroup::HubPhotoGroup(IAsyncOperation<IVectorView<FileInformation^>^>^ task) : m_task(task)
+HubPhotoGroup::HubPhotoGroup(String^ title, String^ emptyTitle, IAsyncOperation<IVectorView<FileInformation^>^>^ task) : m_title(title), m_emptyTitle(emptyTitle),  m_task(task), m_retrievedPhotos(false)
 {
 }
 
-Object^ HubPhotoGroup::Items::get()
+HubPhotoGroup::operator IStorageFolder^()
+{
+    return nullptr;
+}
+
+IObservableVector<Object^>^ HubPhotoGroup::Items::get()
 {
     if (m_photos == nullptr)
     {
         m_photos = ref new Vector<Object^>();
         m_task.then([this](IVectorView<FileInformation^>^ files) 
         {
+            auto temp = ref new Vector<Object^>();
             bool first = true;
-            std::for_each(begin(files), end(files), [this, &first](FileInformation^ item) 
+            std::for_each(begin(files), end(files), [this, temp, &first](FileInformation^ item) 
             {
-                auto photo = ref new HubPhoto(item);
+                auto photo = ref new Photo(item, this);
                 if (first)
                 {
                     photo->ColumnSpan = 2;
                     photo->RowSpan = 2;
                     first = false;
                 }                
-                m_photos->Append(photo);
+                temp->Append(photo);
             });
+            return temp;
+        }).then([this](Vector<Object^>^ photos)
+        {
+            m_retrievedPhotos = true;
+            Array<Object^>^ many = ref new Array<Object^>(photos->Size);
+            photos->GetMany(0, many);
+            m_photos->ReplaceAll(many);
             OnPropertyChanged("Items");
+            OnPropertyChanged("Title");
         }, concurrency::task_continuation_context::use_current());
     }
     return m_photos;
@@ -51,10 +66,14 @@ Object^ HubPhotoGroup::Items::get()
 
 String^ HubPhotoGroup::Title::get()
 {
-    return m_title;
-}
+    if (!m_retrievedPhotos)
+    {
+        return "";
+    }
 
-void HubPhotoGroup::Title::set(String^ value)
-{
-    m_title = value;
+    if (m_photos->Size == 0)
+    {
+        return m_emptyTitle;
+    }
+    return m_title;
 }

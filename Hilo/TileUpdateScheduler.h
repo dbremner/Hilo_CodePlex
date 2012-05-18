@@ -15,7 +15,7 @@ namespace Hilo
     class TileUpdateScheduler
     {
     public:
-        void TileUpdateScheduler::ScheduleUpdateAsync();
+        Windows::Foundation::IAsyncAction^ TileUpdateScheduler::ScheduleUpdateAsync();
 
     private:
         concurrency::task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(Windows::Storage::StorageFolder^ thumbnailsFolder);

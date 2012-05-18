@@ -8,6 +8,8 @@
 //===============================================================================
 #pragma once
 
+#define DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
+
 #include "App.g.h"
 #include "ViewModelLocator.h" // Required by generated header
 
@@ -21,6 +23,6 @@ namespace Hilo
 
     private:
         void OnSuspending(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
-        void OnUnhandledException(_In_ Platform::Object^ sender, _In_ Windows::UI::Xaml::UnhandledExceptionEventArgs^ args);
+        void OnUnhandledException(Platform::Object^ sender, Windows::UI::Xaml::UnhandledExceptionEventArgs^ args);
     };
 }

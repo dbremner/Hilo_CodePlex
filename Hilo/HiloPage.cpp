@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -117,6 +117,7 @@ void Hilo::HiloPage::OnNavigatedFrom( Windows::UI::Xaml::Navigation::NavigationE
     {
         // Since we never receive destructs, this is the only place to unsubscribe.
         DetachNavigationHandlers(viewModel);
+        viewModel->OnNavigatedFrom(e);
     }
 }
 
@@ -285,6 +286,7 @@ Platform::String^ HiloPage::DetermineVisualState(ApplicationViewState viewState)
         auto windowWidth = Window::Current->Bounds.Width;
         actualViewState = windowWidth >= 1366 ? ApplicationViewState::FullScreenLandscape : ApplicationViewState::Filled;
     }
+
     switch (actualViewState)
     {
     case ApplicationViewState::Filled: return "Filled";
@@ -329,7 +331,10 @@ void HiloPage::InvalidateVisualState(ApplicationViewState viewState)
             VisualStateManager::GoToState(control, visualState, false);
             controlIterator->MoveNext();
         }
-    }
+       /* auto context = DataContext;
+        DataContext = nullptr;
+        DataContext = context;*/
+    }    
 }
 
 void HiloPage::AttachNavigationHandlers(ViewModelBase^ viewModel) 

@@ -21,7 +21,15 @@ using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Pickers;
 using namespace Windows::Storage::Streams;
 
-void ImageBase::SaveImage(FileInformation^ file, IRandomAccessStream^ ras)
+ImageBase::ImageBase(IExceptionPolicy^ exceptionPolicy) : ViewModelBase(exceptionPolicy)
+{
+}
+
+Windows::Foundation::IAsyncAction^ ImageBase::SaveImageAsync(FileInformation^ file, IRandomAccessStream^ ras)
+{
+    return create_async([this, file, ras]{ return SaveImageAsyncImpl(file, ras); });
+}
+task<void> ImageBase::SaveImageAsyncImpl(FileInformation^ file, IRandomAccessStream^ ras)
 {
     auto fileExtension = ref new Vector<String^>();
     fileExtension->Append(file->FileType);
@@ -39,7 +47,7 @@ void ImageBase::SaveImage(FileInformation^ file, IRandomAccessStream^ ras)
     auto streamReader = ref new DataReader(inputStream);
         
     task<unsigned int> loadStreamTask(streamReader->LoadAsync(size));
-    loadStreamTask.then([streamReader, savePicker, buffer, size](unsigned int loadedBytes)
+    return loadStreamTask.then([streamReader, savePicker, buffer, size](unsigned int loadedBytes)
     {
         *buffer = streamReader->ReadBuffer(size);
         return savePicker->PickSaveFileAsync();

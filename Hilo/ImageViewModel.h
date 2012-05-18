@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,20 +12,17 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class ImageViewModel sealed : public ViewModelBase
     {
     public:
-        ImageViewModel();
+        ImageViewModel(IExceptionPolicy^ exceptionPolicy);
 
-        property Platform::Object^ Photos 
+        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Photos
         { 
-            Platform::Object^ get(); 
-        }
-
-        property Windows::UI::Xaml::Media::ImageSource^ Photo
-        {
-            Windows::UI::Xaml::Media::ImageSource^ get();
+            Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
         }
 
         property Windows::Storage::BulkAccess::FileInformation^ SelectedItem
@@ -46,22 +43,20 @@ namespace Hilo
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
-		void Initialize(Platform::Object^ parameter);
+        void Initialize(Platform::Object^ parameter);
 
     private:
-        Windows::Storage::Search::IStorageFolderQueryOperations^ m_folder;
+        Platform::String^ m_filePath;
+        Platform::String^ m_query;
         Windows::Storage::BulkAccess::FileInformation^ m_photo;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
-        Platform::Object^ m_photos;
+        Platform::Collections::Vector<Platform::Object^>^ m_photos;
         Windows::UI::Xaml::Input::ICommand^ m_cropImageCommand;
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
-        concurrency::task<void> m_head;
-
         concurrency::cancellation_token_source m_cts;
-        concurrency::critical_section m_cs;
 
         void CropImage(Platform::Object^ parameter);
         void RotateImage(Platform::Object^ parameter);
-        void GetPhotoAsync();
+
+        //concurrency::task<void> GetPhotoAsync();
     };
 }

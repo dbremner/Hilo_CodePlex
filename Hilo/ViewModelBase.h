@@ -12,6 +12,8 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     public delegate void NavigateEventHandler();
     public delegate void PageNavigateEventHandler(PageType page, Platform::Object^ parameter);
 
@@ -21,6 +23,9 @@ namespace Hilo
     public ref class ViewModelBase : public BindableBase
     {
     public:
+        ViewModelBase(IExceptionPolicy^ exceptionPolicy);
+
+    public:
         event NavigateEventHandler^ NavigateBack;
         event NavigateEventHandler^ NavigateHome;
         event PageNavigateEventHandler^ NavigateToPage;
@@ -28,6 +33,7 @@ namespace Hilo
         property bool IsAppBarSticky { bool get(); void set(bool value); }
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
+        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
 
     protected:
         virtual void GoBack();
@@ -35,6 +41,7 @@ namespace Hilo
         virtual void GoToPage(PageType page, Platform::Object^ parameter);
 
         bool m_isAppBarSticky;
+        Hilo::IExceptionPolicy^ m_exceptionPolicy;
     };
 #pragma warning(pop)
 }

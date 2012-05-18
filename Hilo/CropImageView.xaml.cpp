@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -49,16 +49,19 @@ void CropImageView::OnPhotoSizeChanged(Platform::Object^ sender, SizeChangedEven
 
 void CropImageView::OnThumbDragDelta(Platform::Object^ sender, DragDeltaEventArgs^ e)
 {
-    m_cropImageViewModel->UpdateCropOverlayPostion(safe_cast<Thumb^>(sender), 
-        e->VerticalChange, 
-        e->HorizontalChange, 
-        CropOverlay->MinWidth, CropOverlay->MinHeight);
+    if (!m_cropImageViewModel->InProgress)
+    {
+        m_cropImageViewModel->UpdateCropOverlayPostion(safe_cast<Thumb^>(sender), 
+            e->VerticalChange, 
+            e->HorizontalChange, 
+            CropOverlay->MinWidth, CropOverlay->MinHeight);
+    }
 }
 
 void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^ e)
 {
     if (!m_cropImageViewModel->InProgress)
     {
-        m_cropImageViewModel->CropImage(Photo->ActualWidth);
+        m_cropImageViewModel->CropImageAsync(Photo->ActualWidth);
     }
 }

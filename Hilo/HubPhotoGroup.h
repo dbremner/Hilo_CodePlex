@@ -9,31 +9,33 @@
 #pragma once
 
 #include "Common\BindableBase.h"
+#include "IPhotoGroup.h"
 
 namespace Hilo
 {
-    ref class HubPhoto;
-
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class HubPhotoGroup sealed : public BindableBase
+    public ref class HubPhotoGroup sealed : public BindableBase, public IPhotoGroup
     {
     public:
-        HubPhotoGroup(Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^>^ task);
+        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^>^ task);
+
+        virtual operator Windows::Storage::IStorageFolder^ ();
 
         property Platform::String^ Title 
         { 
-            Platform::String^ get(); 
-            void set(Platform::String^ value); 
+            virtual Platform::String^ get(); 
         }
 
-        property Platform::Object^ Items
+        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
         {
-            Platform::Object^ get();
+            virtual Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
         }
 
     private:
         Platform::String^ m_title;
+        Platform::String^ m_emptyTitle;
         concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> m_task;
         Platform::Collections::Vector<Platform::Object^>^ m_photos;
+        bool m_retrievedPhotos;
     };
 }

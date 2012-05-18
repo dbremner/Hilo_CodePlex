@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ===============================================================================
  Microsoft patterns & practices
  Hilo Guidance
@@ -92,7 +92,12 @@
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center" 
                    SizeChanged="OnPhotoSizeChanged"
-                   Source="{Binding Photo}" />
+                   Source="{Binding Photo}">
+                <!--<ToolTipService.ToolTip>
+                    <ToolTip ContentTemplate="{StaticResource HiloImageToolTipDataTemplate}" 
+                             Style="{StaticResource HiloImageToolTipStyle}" />
+                </ToolTipService.ToolTip>-->
+            </Image>
             <ProgressRing IsActive="{Binding InProgress}" 
                           Foreground="{StaticResource HiloHighlightBrush}"/>
             <Canvas>
@@ -105,10 +110,15 @@
                                 Template="{StaticResource HiloCroppingOverlayTemplate}"
                                 Visibility="{Binding Path=IsCropOverlayVisible, Converter={StaticResource BoolToVisConverter}}"
                                 Width="{Binding CropOverlayWidth}">
-                    <Grid Background="Transparent" 
+                    <Grid Background="Transparent"
                           HorizontalAlignment="Stretch"
-                          Tapped="OnCropRectangleTapped"
-                          VerticalAlignment="Stretch" />
+                          VerticalAlignment="Stretch"
+                          Tapped="OnCropRectangleTapped">
+                        <!--<ToolTipService.ToolTip>
+                            <ToolTip ContentTemplate="{StaticResource HiloImageToolTipDataTemplate}" 
+                                     Style="{StaticResource HiloImageToolTipStyle}" />
+                        </ToolTipService.ToolTip>-->
+                    </Grid>
                 </ContentControl>
             </Canvas>
         </Grid>
@@ -152,7 +162,7 @@
                             Style="{StaticResource CancelAppBarButtonStyle}" 
                             Tag="Cancel" />
                     <Button Command="{Binding SaveCommand}" 
-                            Style="{StaticResource SaveAppBarButtonStyle}" 
+                            Style="{StaticResource AcceptAppBarButtonStyle}" 
                             Tag="Save" />
                 </StackPanel>
             </Grid>

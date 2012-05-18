@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -13,14 +13,13 @@
 using namespace Hilo;
 
 using namespace Platform;
-using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Navigation;
 
 ImageView::ImageView()
 {
     InitializeComponent();
+    m_viewModel = dynamic_cast<ImageViewModel^>(DataContext);
 }
 
 void ImageView::OnNavigatedTo(NavigationEventArgs^ e)
@@ -31,4 +30,27 @@ void ImageView::OnNavigatedTo(NavigationEventArgs^ e)
 void ImageView::OnNavigatedFrom(NavigationEventArgs^ e)
 {
     HiloPage::OnNavigatedFrom(e);
+}
+
+void ImageView::OnPhotosSelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+    auto senderString = sender->ToString();
+    if (senderString->Equals("Windows.UI.Xaml.Controls.FlipView"))
+    {
+        m_viewModel->SelectedItem = dynamic_cast<FileInformation^>(PhotosFlipView->SelectedItem);
+    }
+    else if (senderString->Equals("Windows.UI.Xaml.Controls.GridView"))
+    {
+        PhotosFlipView->SelectedIndex = PhotosFilmStripGridView->SelectedIndex;
+    }
+}
+
+void ImageView::OnImageViewTopAppBarOpened(Platform::Object^ sender, Platform::Object^ e)
+{
+    ImageViewFileInformationPopup->IsOpen = true;
+}
+
+void ImageView::OnImageViewTopAppBarClosed(Platform::Object^ sender, Platform::Object^ e)
+{
+    ImageViewFileInformationPopup->IsOpen = false;
 }

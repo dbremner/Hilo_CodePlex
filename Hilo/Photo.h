@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,19 +8,21 @@
 //===============================================================================
 #pragma once
 #include "Common\BindableBase.h"
+#include "IResizable.h"
 
 namespace Hilo 
 {
-    ref class PhotoGroup;
+    interface class IPhotoGroup;
 
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class Photo sealed : public BindableBase
+    public ref class Photo sealed : public BindableBase, public IResizable
     {
-
     public:
-        Photo(Windows::Storage::BulkAccess::FileInformation^ file, PhotoGroup^ photoGroup);
+        Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup);
 
         operator Windows::Storage::IStorageFile^ ();
+
+        operator Windows::Storage::BulkAccess::FileInformation^ ();
 
         property Platform::String^ Name { Platform::String^ get(); }
 
@@ -29,29 +31,44 @@ namespace Hilo
             Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
 
-        property PhotoGroup^ Group
+        property IPhotoGroup^ Group
         {
-            PhotoGroup^ get();
+            IPhotoGroup^ get();
         }
 
         property int ColumnSpan 
         {
-            int get();
-            void set(int value);
+            virtual int get();
+            virtual void set(int value);
         }
 
         property int RowSpan
         {
-            int get();
-            void set(int value);
+            virtual int get();
+            virtual void set(int value);
+        }
+
+        property Platform::Object^ FileName
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateCreated
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateModified
+        {
+            Platform::Object^ get();
         }
 
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
         Platform::WeakReference m_weakPhotoGroup;
+        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
         int m_columnSpan;
         int m_rowSpan;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
     };
 
 }

@@ -13,17 +13,22 @@
 #include "ImageViewModel.h" // Required by generated header
 #include "CropImageViewModel.h" // Required by generated header
 #include "RotateImageViewModel.h" // Required by generated header
-#include "HubPhoto.h" // Required by generated header
 #include "HubPhotoGroup.h" // Required by generated header
-#include "Photo.h"// Required by generated header
-#include "PhotoGroup.h"// Required by generated header
+#include "Photo.h" // Required by generated header
+#include "MonthGroup.h" // Required by generated header
+#include "YearGroup.h" // Required by generated header
+#include "MonthBlock.h" // Required by generated header
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class ViewModelLocator sealed
     {
     public:
+        ViewModelLocator();
+
         property ImageBrowserViewModel^ ImageBrowserVM { ImageBrowserViewModel^ get(); }
         property MainHubViewModel^ MainHubVM { MainHubViewModel^ get(); }
         property ImageViewModel^ ImageVM { ImageViewModel^ get(); }
@@ -34,5 +39,6 @@ namespace Hilo
         ImageBrowserViewModel^ m_imageBrowswerViewModel;
         MainHubViewModel^ m_mainHubViewModel;
         ImageViewModel^ m_imageViewModel;
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

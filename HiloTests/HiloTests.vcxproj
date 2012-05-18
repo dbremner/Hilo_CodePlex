@@ -213,23 +213,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Hilo\AsyncException.h" />
     <ClInclude Include="..\Hilo\Common\BindableBase.h" />
     <ClInclude Include="..\Hilo\CropImageViewModel.h" />
+    <ClInclude Include="..\Hilo\DateTimeToStringConverter.h" />
+    <ClInclude Include="..\Hilo\DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="..\Hilo\DelegateCommand.h" />
-    <ClInclude Include="..\Hilo\HubPhoto.h" />
+    <ClInclude Include="..\Hilo\FileInformationToBitmapImageConverter.h" />
+    <ClInclude Include="..\Hilo\FileInformationToToolTipConverter.h" />
     <ClInclude Include="..\Hilo\HubPhotoGroup.h" />
+    <ClInclude Include="..\Hilo\IExceptionPolicy.h" />
     <ClInclude Include="..\Hilo\ImageBase.h" />
     <ClInclude Include="..\Hilo\ImageBrowserViewModel.h" />
-    <ClInclude Include="..\Hilo\ImageRotation.h" />
     <ClInclude Include="..\Hilo\ImageViewData.h" />
     <ClInclude Include="..\Hilo\ImageViewModel.h" />
+    <ClInclude Include="..\Hilo\IPhotoGroup.h" />
+    <ClInclude Include="..\Hilo\IResizable.h" />
     <ClInclude Include="..\Hilo\MainHubViewModel.h" />
+    <ClInclude Include="..\Hilo\MonthBlock.h" />
+    <ClInclude Include="..\Hilo\MonthGroup.h" />
     <ClInclude Include="..\Hilo\PageType.h" />
     <ClInclude Include="..\Hilo\Photo.h" />
-    <ClInclude Include="..\Hilo\PhotoGroup.h" />
+    <ClInclude Include="..\Hilo\PhotoCache.h" />
     <ClInclude Include="..\Hilo\PhotoReader.h" />
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h" />
     <ClInclude Include="..\Hilo\RotateImageViewModel.h" />
+    <ClInclude Include="..\Hilo\TaskExceptionsExtensions.h" />
+    <ClInclude Include="..\Hilo\StorageExtensions.h" />
     <ClInclude Include="..\Hilo\TaskExtensions.h" />
     <ClInclude Include="..\Hilo\ThumbnailConverter.h" />
     <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
@@ -237,24 +247,33 @@
     <ClInclude Include="..\Hilo\ViewModelBase.h" />
     <ClInclude Include="..\Hilo\ViewModelLocator.h" />
     <ClInclude Include="..\Hilo\WideFiveImageTile.h" />
+    <ClInclude Include="..\Hilo\YearGroup.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="StubExceptionPolicy.h" />
+    <ClInclude Include="StubPhotoGroup.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestHelper.h" />
     <ClInclude Include="TestImageGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Hilo\AsyncException.cpp" />
     <ClCompile Include="..\Hilo\Common\BindableBase.cpp" />
     <ClCompile Include="..\Hilo\CropImageViewModel.cpp" />
-    <ClCompile Include="..\Hilo\HubPhoto.cpp" />
+    <ClCompile Include="..\Hilo\DateTimeToStringConverter.cpp" />
+    <ClCompile Include="..\Hilo\DebugLoggingExceptionPolicy.cpp" />
+    <ClCompile Include="..\Hilo\DelegateCommand.cpp" />
+    <ClCompile Include="..\Hilo\FileInformationToBitmapImageConverter.cpp" />
+    <ClCompile Include="..\Hilo\FileInformationToToolTipConverter.cpp" />
     <ClCompile Include="..\Hilo\HubPhotoGroup.cpp" />
     <ClCompile Include="..\Hilo\ImageBase.cpp" />
     <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp" />
-    <ClCompile Include="..\Hilo\ImageRotation.cpp" />
     <ClCompile Include="..\Hilo\ImageViewData.cpp" />
     <ClCompile Include="..\Hilo\ImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\MainHubViewModel.cpp" />
+    <ClCompile Include="..\Hilo\MonthBlock.cpp" />
+    <ClCompile Include="..\Hilo\MonthGroup.cpp" />
     <ClCompile Include="..\Hilo\Photo.cpp" />
-    <ClCompile Include="..\Hilo\PhotoGroup.cpp" />
+    <ClCompile Include="..\Hilo\PhotoCache.cpp" />
     <ClCompile Include="..\Hilo\PhotoReader.cpp" />
     <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp" />
     <ClCompile Include="..\Hilo\RotateImageViewModel.cpp" />
@@ -263,8 +282,14 @@
     <ClCompile Include="..\Hilo\TileUpdateScheduler.cpp" />
     <ClCompile Include="..\Hilo\ViewModelBase.cpp" />
     <ClCompile Include="..\Hilo\WideFiveImageTile.cpp" />
+    <ClCompile Include="..\Hilo\YearGroup.cpp" />
+    <ClCompile Include="AsyncExceptionTests.cpp" />
     <ClCompile Include="CropImageViewModelTests.cpp" />
-    <ClCompile Include="ImageRotationTests.cpp" />
+    <ClCompile Include="DateTimeToStringConverterTests.cpp" />
+    <ClCompile Include="FileInformationToBitmapImageConverterTests.cpp" />
+    <ClCompile Include="FileInformationToToolTipConverterTests.cpp" />
+    <ClCompile Include="ImageBrowserViewModelTests.cpp" />
+    <ClCompile Include="ImageViewDataTests.cpp" />
     <ClCompile Include="ImageViewModelTests.cpp" />
     <ClCompile Include="MainHubViewModelTests.cpp" />
     <ClCompile Include="pch.cpp">
@@ -276,9 +301,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="HubPhotoGroupTests.cpp" />
+    <ClCompile Include="PhotoCacheTests.cpp" />
     <ClCompile Include="PhotoReaderTests.cpp" />
     <ClCompile Include="RandomPhotoSelectorTests.cpp" />
     <ClCompile Include="RotateImageViewModelTests.cpp" />
+    <ClCompile Include="StubExceptionPolicy.cpp" />
+    <ClCompile Include="StubPhotoGroup.cpp" />
+    <ClCompile Include="TaskExceptionTests.cpp" />
     <ClCompile Include="TestHelper.cpp" />
     <ClCompile Include="HubPhotoTests.cpp" />
     <ClCompile Include="TestImageGenerator.cpp" />

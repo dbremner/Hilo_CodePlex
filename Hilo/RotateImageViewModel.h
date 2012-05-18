@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,11 +12,13 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class RotateImageViewModel sealed : public ImageBase
     {
     public:
-        RotateImageViewModel();
+        RotateImageViewModel(IExceptionPolicy^ exceptionPolicy);
 
         property Windows::UI::Xaml::Media::ImageSource^ Photo
         {
@@ -44,6 +46,22 @@ namespace Hilo
             double get();
             void set(double value);
         }
+
+        property Platform::Object^ FileName
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateCreated
+        {
+            Platform::Object^ get();
+        }
+
+        property Platform::Object^ FileDateModified
+        {
+            Platform::Object^ get();
+        }
+
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
         void Initialize(Windows::Storage::BulkAccess::FileInformation^ image);
@@ -57,7 +75,6 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_rotateCommand;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
-        concurrency::task<void> m_head;
         bool m_isSaving;
         double m_rotationAngle;
 

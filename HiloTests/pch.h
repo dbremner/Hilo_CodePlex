@@ -20,3 +20,4 @@
 #include <collection.h>
 #include "TestHelper.h"
 #include "TestImageGenerator.h"
+#include "..\Hilo\StorageExtensions.h"

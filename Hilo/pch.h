@@ -19,6 +19,6 @@
 #include <collection.h>
 #include <vccorlib.h>
 #include "TaskExtensions.h"
+#include "TaskExceptionsExtensions.h"
+#include "StorageExtensions.h"
 #include "App.xaml.h"
-
-

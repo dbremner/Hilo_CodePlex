@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -16,30 +16,17 @@ namespace Hilo
         public ref class DelegateCommand sealed : public Windows::UI::Xaml::Input::ICommand
         {
         public:
-            DelegateCommand(ExecuteDelegate^ execute, CanExecuteDelegate^ canExecute)
-            {
-                m_executeDelegate = execute;
-                m_canExecuteDelegate = canExecute;
-            }
+            DelegateCommand(ExecuteDelegate^ execute, CanExecuteDelegate^ canExecute);
 
-            event Windows::Foundation::EventHandler<Platform::Object^>^ CanExecuteChanged;
+            virtual event Windows::Foundation::EventHandler<Platform::Object^>^ CanExecuteChanged;
 
-            void Execute(Platform::Object^ parameter)
-            {
-                m_executeDelegate(parameter);
-            }
+            virtual void Execute(Platform::Object^ parameter);
 
-            bool CanExecute(Platform::Object^ parameter)
-            {
-                if (m_canExecuteDelegate == nullptr)
-                {
-                    return true;
-                }
-                return m_canExecuteDelegate(parameter);
-            }
+            virtual bool CanExecute(Platform::Object^ parameter);
 
         private:
             ExecuteDelegate^ m_executeDelegate;
             CanExecuteDelegate^ m_canExecuteDelegate;
+            bool m_canExecute;
         };
 }

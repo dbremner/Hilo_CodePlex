@@ -20,13 +20,12 @@
     DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=MainHubVM}">
 
     <UserControl.Resources>
-
-        <!-- Collection of grouped items displayed by this page -->
         <CollectionViewSource
             x:Name="GroupedItemsViewSource"
             Source="{Binding PhotoGroups}"
             IsSourceGrouped="true"
             ItemsPath="Items"/>
+        <local:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
     </UserControl.Resources>
 
     <Grid x:Name="ContentRoot" 
@@ -49,20 +48,22 @@
                     Style="{StaticResource BackButtonStyle}"/>
             <TextBlock x:Name="PageTitle" 
                        Text="{StaticResource AppName}" 
-                       Grid.Column="1" 
+                       Grid.Column="1"
                        Style="{StaticResource PageHeaderTextStyle}"/>
         </Grid>
 
         <!-- Grouped Photos Hub -->
-        <local:VariableGridView x:Name="ItemGridView"
-                      AutomationProperties.AutomationId="ItemGridView"
-                      AutomationProperties.Name="Grouped Photos"
-                      Margin="116,0,40,46"
-                      Grid.Row="1"
-                      ItemsSource="{Binding Source={StaticResource GroupedItemsViewSource}}"
-                      ItemContainerStyle="{StaticResource HiloImageGridViewItem}"
-                      SelectionMode="None"
-                      Tapped="OnItemGridViewTapped">
+        <local:VariableGridView x:Name="ItemGridView" 
+                                AutomationProperties.AutomationId="ItemGridView"
+                                AutomationProperties.Name="Grouped Photos"
+                                Margin="116,0,40,46"
+                                Grid.Row="1"
+                                ItemsSource="{Binding Source={StaticResource GroupedItemsViewSource}}"
+                                ItemContainerStyle="{StaticResource HiloImageGridViewItem}"
+                                ItemClick="OnPhotoItemClicked"
+                                IsItemClickEnabled="True"
+                                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                                SelectionMode="Single">
 
             <local:VariableGridView.ItemTemplate>
                 <DataTemplate>
@@ -71,14 +72,18 @@
                             <Image Source="{Binding Thumbnail}"
                                    Stretch="UniformToFill"
                                    VerticalAlignment="Stretch"
-                                   HorizontalAlignment="Stretch"/>
+                                   HorizontalAlignment="Stretch">
+                                <!--<ToolTipService.ToolTip>
+                                    <ToolTip ContentTemplate="{StaticResource HiloImageToolTipDataTemplate}" 
+                                             Style="{StaticResource HiloImageToolTipStyle}" />
+                                </ToolTipService.ToolTip>-->
+                            </Image>
                         </Border>
                     </Grid>
                 </DataTemplate>
             </local:VariableGridView.ItemTemplate>
             <local:VariableGridView.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <!--<VariableSizedWrapGrid VerticalAlignment="Top" />-->
                     <VirtualizingStackPanel Orientation="Horizontal" 
                                             Height="700"
                                             VerticalAlignment="Top"/>
@@ -89,26 +94,62 @@
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
                             <Grid Margin="1,0,0,6">
-                                <Button
-                                        AutomationProperties.AutomationId="GroupTitle"
+                                <Button AutomationProperties.AutomationId="GroupTitle"
                                         Content="{Binding Title}"
-                                        Style="{StaticResource HiloTextButtonStyle}" />
+                                        Style="{StaticResource HiloTextButtonStyle}"
+                                        Command="{Binding ElementName=ItemGridView, Path=DataContext.NavigateToPicturesCommand}"/>
                             </Grid>
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>
                     <GroupStyle.Panel>
                         <ItemsPanelTemplate>
                             <VariableSizedWrapGrid Orientation="Vertical"
-                                                       Margin="0,0,80,0"
-                                                       ItemHeight="200"
-                                                       ItemWidth="200"
-                                                       MaximumRowsOrColumns="5"/>
+                                                   Margin="0,0,80,0"
+                                                   ItemHeight="200"
+                                                   ItemWidth="200"
+                                                   MaximumRowsOrColumns="5"/>
                         </ItemsPanelTemplate>
                     </GroupStyle.Panel>
                 </GroupStyle>
             </local:VariableGridView.GroupStyle>
         </local:VariableGridView>
 
+        <!-- Snapped view -->
+        <ListView x:Name="SnapItemListView"
+                  AutomationProperties.AutomationId="SnapItemListView"
+                  AutomationProperties.Name="Snap Grouped Photos"
+                  Grid.Row="1"
+                  Margin="10,-10,0,60"
+                  ItemsSource="{Binding Source={StaticResource GroupedItemsViewSource}}"
+                  IsItemClickEnabled="True"
+                  ItemClick="OnPhotoItemClicked"
+                  SelectionMode="Single"
+                  Visibility="Collapsed">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="2">
+                        <Border Background="{StaticResource HiloDefaultImageBrush}">
+                            <Image Source="{Binding Thumbnail}" 
+                                   Stretch="UniformToFill"/>
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid Margin="7,7,0,0">
+                                <Button AutomationProperties.AutomationId="SnapGroupTitle"
+                                        Content="{Binding Title}"
+                                        Style="{StaticResource HiloTextButtonStyle}"
+                                        Command="{Binding ElementName=SnapItemListView, Path=DataContext.NavigateToPicturesCommand}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ListView.GroupStyle>
+        </ListView>
         <VisualStateManager.VisualStateGroups>
 
             <!-- Visual states reflect the application's view state -->
@@ -118,7 +159,7 @@
 
                 <!-- The entire page respects the narrower 100-pixel margin convention for portrait -->
                 <VisualState x:Name="FullScreenPortrait">
-                    <Storyboard>
+                    <!--<Storyboard>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackButton" 
                                                        Storyboard.TargetProperty="Style">
                             <DiscreteObjectKeyFrame KeyTime="0" 
@@ -130,14 +171,14 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="96,0,10,56"/>
                         </ObjectAnimationUsingKeyFrames>
-                    </Storyboard>
+                    </Storyboard>-->
                 </VisualState>
 
                 <!--
                     The back button and title have different styles when snapped, and the list representation is substituted
                     for the grid displayed in all other view states
                 -->
-                <!--<VisualState x:Name="Snapped">
+                <VisualState x:Name="Snapped">
                     <Storyboard>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackButton" Storyboard.TargetProperty="Style">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource SnappedBackButtonStyle}"/>
@@ -146,15 +187,34 @@
                             <DiscreteObjectKeyFrame KeyTime="0" Value="{StaticResource SnappedPageHeaderTextStyle}"/>
                         </ObjectAnimationUsingKeyFrames>
 
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ItemListScrollViewer" Storyboard.TargetProperty="Visibility">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="SnapItemListView" Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ItemGridScrollViewer" Storyboard.TargetProperty="Visibility">
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ItemGridView" Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
-                </VisualState>-->
+                </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
+    <local:HiloPage.BottomAppBar>
+        <AppBar x:Name="ImageViewBottomAppBar"
+                AutomationProperties.AutomationId="ImageViewBottomAppBar"
+                IsSticky="{Binding IsAppBarSticky}" 
+                Visibility="{Binding IsAppBarEnabled, Mode=TwoWay, Converter={StaticResource BoolToVisConverter}}"
+                Padding="10,0,10,0">
+            <Grid>
+                <StackPanel HorizontalAlignment="Left" 
+                            Orientation="Horizontal">
+                    <Button Command="{Binding RotateImageCommand}" 
+                            Style="{StaticResource RotateAppBarButtonStyle}" 
+                            Tag="Rotate" />
+                    <Button Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonStyle}"
+                            Tag="Crop" />
+                </StackPanel>
+            </Grid>
+        </AppBar>
+    </local:HiloPage.BottomAppBar>
 </local:HiloPage>

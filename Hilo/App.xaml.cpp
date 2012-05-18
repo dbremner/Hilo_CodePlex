@@ -76,7 +76,9 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
 }
 
-void App::OnUnhandledException(_In_ Object^ sender, UnhandledExceptionEventArgs^ args)
+void App::OnUnhandledException(Object^ sender, UnhandledExceptionEventArgs^ args)
 {
+    auto e = args->Exception;
+    auto m = args->Message;
     throw ref new NotImplementedException();
 }

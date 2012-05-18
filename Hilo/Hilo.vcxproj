@@ -105,33 +105,46 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AsyncException.h" />
+    <ClInclude Include="BooleanToBrushConverter.h" />
     <ClInclude Include="CropImageView.xaml.h">
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="CropImageViewModel.h" />
+    <ClInclude Include="DateTimeToStringConverter.h" />
+    <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="DelegateCommand.h" />
+    <ClInclude Include="FileInformationToBitmapImageConverter.h" />
+    <ClInclude Include="FileInformationToToolTipConverter.h" />
     <ClInclude Include="HiloPage.h" />
+    <ClInclude Include="HubGroupType.h" />
+    <ClInclude Include="IExceptionPolicy.h" />
     <ClInclude Include="ImageBase.h" />
     <ClInclude Include="ImageBrowserView.xaml.h">
       <DependentUpon>ImageBrowserView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="ImageBrowserViewModel.h" />
-    <ClInclude Include="ImageRotation.h" />
     <ClInclude Include="ImageView.xaml.h">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="ImageViewData.h" />
     <ClInclude Include="ImageViewModel.h" />
+    <ClInclude Include="IPhotoGroup.h" />
+    <ClInclude Include="IResizable.h" />
     <ClInclude Include="MainHubView.xaml.h">
       <DependentUpon>MainHubView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="MainHubViewModel.h" />
+    <ClInclude Include="MonthBlock.h" />
     <ClInclude Include="Photo.h" />
-    <ClInclude Include="PhotoGroup.h" />
+    <ClInclude Include="PhotoCache.h" />
+    <ClInclude Include="MonthGroup.h" />
     <ClInclude Include="RotateImageView.xaml.h">
       <DependentUpon>RotateImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="RotateImageViewModel.h" />
+    <ClInclude Include="TaskExceptionsExtensions.h" />
+    <ClInclude Include="StorageExtensions.h" />
     <ClInclude Include="TileUpdateScheduler.h" />
     <ClInclude Include="PageType.h" />
     <ClInclude Include="pch.h" />
@@ -143,7 +156,6 @@
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="HubPhoto.h" />
     <ClInclude Include="HubPhotoGroup.h" />
     <ClInclude Include="PhotoReader.h" />
     <ClInclude Include="RandomPhotoSelector.h" />
@@ -151,9 +163,11 @@
     <ClInclude Include="ThumbnailConverter.h" />
     <ClInclude Include="ThumbnailGenerator.h" />
     <ClInclude Include="VariableGridView.h" />
+    <ClInclude Include="VariableListView.h" />
     <ClInclude Include="ViewModelBase.h" />
     <ClInclude Include="ViewModelLocator.h" />
     <ClInclude Include="WideFiveImageTile.h" />
+    <ClInclude Include="YearGroup.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -192,6 +206,8 @@
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="AsyncException.cpp" />
+    <ClCompile Include="BooleanToBrushConverter.cpp" />
     <ClCompile Include="Common\BindableBase.cpp" />
     <ClCompile Include="Common\BooleanToVisibilityConverter.cpp" />
     <ClCompile Include="Common\BooleanNegationConverter.cpp" />
@@ -201,13 +217,17 @@
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="CropImageViewModel.cpp" />
+    <ClCompile Include="DateTimeToStringConverter.cpp" />
+    <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
+    <ClCompile Include="DelegateCommand.cpp" />
+    <ClCompile Include="FileInformationToBitmapImageConverter.cpp" />
+    <ClCompile Include="FileInformationToToolTipConverter.cpp" />
     <ClCompile Include="HiloPage.cpp" />
     <ClCompile Include="ImageBase.cpp" />
     <ClCompile Include="ImageBrowserView.xaml.cpp">
       <DependentUpon>ImageBrowserView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="ImageBrowserViewModel.cpp" />
-    <ClCompile Include="ImageRotation.cpp" />
     <ClCompile Include="ImageView.xaml.cpp">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClCompile>
@@ -217,8 +237,10 @@
       <DependentUpon>MainHubView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="MainHubViewModel.cpp" />
+    <ClCompile Include="MonthBlock.cpp" />
     <ClCompile Include="Photo.cpp" />
-    <ClCompile Include="PhotoGroup.cpp" />
+    <ClCompile Include="PhotoCache.cpp" />
+    <ClCompile Include="MonthGroup.cpp" />
     <ClCompile Include="RotateImageView.xaml.cpp">
       <DependentUpon>RotateImageView.xaml</DependentUpon>
     </ClCompile>
@@ -234,14 +256,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="HubPhoto.cpp" />
     <ClCompile Include="HubPhotoGroup.cpp" />
     <ClCompile Include="PhotoReader.cpp" />
     <ClCompile Include="RandomPhotoSelector.cpp" />
     <ClCompile Include="VariableGridView.cpp" />
+    <ClCompile Include="VariableListView.cpp" />
     <ClCompile Include="ViewModelBase.cpp" />
     <ClCompile Include="ViewModelLocator.cpp" />
     <ClCompile Include="WideFiveImageTile.cpp" />
+    <ClCompile Include="YearGroup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Hilo150b.png" />

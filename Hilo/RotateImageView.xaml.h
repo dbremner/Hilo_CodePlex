@@ -9,6 +9,7 @@
 #pragma once
 
 #include "HiloPage.h"
+#include "DateTimeToStringConverter.h" // Required by generated header
 #include "RotateImageView.g.h"
 
 namespace Hilo
