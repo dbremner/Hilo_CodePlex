@@ -114,6 +114,7 @@
     <ClInclude Include="DateTimeToStringConverter.h" />
     <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="DelegateCommand.h" />
+    <ClInclude Include="ExceptionPolicyFactory.h" />
     <ClInclude Include="FileInformationToBitmapImageConverter.h" />
     <ClInclude Include="FileInformationToToolTipConverter.h" />
     <ClInclude Include="HiloPage.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="DateTimeToStringConverter.cpp" />
     <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="DelegateCommand.cpp" />
+    <ClCompile Include="ExceptionPolicyFactory.cpp" />
     <ClCompile Include="FileInformationToBitmapImageConverter.cpp" />
     <ClCompile Include="FileInformationToToolTipConverter.cpp" />
     <ClCompile Include="HiloPage.cpp" />

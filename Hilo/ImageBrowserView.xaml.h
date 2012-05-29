@@ -21,9 +21,9 @@ namespace Hilo
         ImageBrowserView();
 
     private:
-
         void OnPhotoItemClicked(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
         void OnViewChangeCompleted(Platform::Object^ sender, Windows::UI::Xaml::Controls::SemanticZoomViewChangedEventArgs^ e);
+        void OnZoomedOutGridItemTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
         virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;

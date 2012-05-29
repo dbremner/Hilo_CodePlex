@@ -12,13 +12,18 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     class TileUpdateScheduler
     {
     public:
-        Windows::Foundation::IAsyncAction^ TileUpdateScheduler::ScheduleUpdateAsync();
+        TileUpdateScheduler(IExceptionPolicy^ policy);
+        concurrency::task<void> TileUpdateScheduler::ScheduleUpdateAsync();
 
     private:
         concurrency::task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(Windows::Storage::StorageFolder^ thumbnailsFolder);
         void TileUpdateScheduler::UpdateTile(Windows::Foundation::Collections::IVector<Windows::Storage::StorageFile^>^ files);
+
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

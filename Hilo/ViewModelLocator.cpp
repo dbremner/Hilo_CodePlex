@@ -36,7 +36,7 @@ MainHubViewModel^ ViewModelLocator::MainHubVM::get()
         auto loader = ref new ResourceLoader();
         auto title = loader->GetString("PicturesTitle");
         auto emptyTitle = loader->GetString("EmptyPicturesTitle");
-        auto picturesGroup = ref new HubPhotoGroup(title, emptyTitle, picturesTask);
+        auto picturesGroup = ref new HubPhotoGroup(title, emptyTitle, picturesTask, m_exceptionPolicy);
         //picturesGroup->Title = title;
         vector->Append(picturesGroup);
         m_mainHubViewModel = ref new MainHubViewModel(vector, m_exceptionPolicy);

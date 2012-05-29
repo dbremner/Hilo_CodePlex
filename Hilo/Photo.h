@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -13,14 +13,13 @@
 namespace Hilo 
 {
     interface class IPhotoGroup;
+    interface class IExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class Photo sealed : public BindableBase, public IResizable
     {
     public:
-        Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup);
-
-        operator Windows::Storage::IStorageFile^ ();
+        Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, IExceptionPolicy^ exceptionPolicy);
 
         operator Windows::Storage::BulkAccess::FileInformation^ ();
 
@@ -48,27 +47,15 @@ namespace Hilo
             virtual void set(int value);
         }
 
-        property Platform::Object^ FileName
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateCreated
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateModified
-        {
-            Platform::Object^ get();
-        }
-
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
         Platform::WeakReference m_weakPhotoGroup;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
+        IExceptionPolicy^ m_exceptionPolicy;
         int m_columnSpan;
         int m_rowSpan;
+
+        void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ e);
     };
 
 }

@@ -36,5 +36,7 @@ namespace Hilo
         Windows::Foundation::DateTime m_fileDate;
         Platform::String^ m_dateQuery;
         Platform::String^ m_filePath;
+
+        void Foo(Windows::Storage::BulkAccess::IStorageItemInformation^ s, Platform::Object^ e);
     };
 }

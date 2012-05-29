@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\HubPhotoGroup.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Hilo;
 
@@ -40,7 +41,7 @@ namespace HiloTests
         {
             bool photosNull = false;
 
-            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), ref new StubExceptionPolicy());
             Object^ items;
 
             TestHelper::RunUISynced([this, photoGroup, &items]() {

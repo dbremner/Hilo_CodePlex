@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -40,26 +40,16 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
+        property Platform::Object^ ImageMargin
+        {
+            Platform::Object^ get();
+        }
+
         ///<summary>Returns the rotation angle for image display.</summary>
         property double RotationAngle 
         {
             double get();
             void set(double value);
-        }
-
-        property Platform::Object^ FileName
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateCreated
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateModified
-        {
-            Platform::Object^ get();
         }
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
@@ -75,10 +65,15 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_rotateCommand;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
+        Platform::Object^ m_imageMargin;
         bool m_isSaving;
         double m_rotationAngle;
-
+        bool m_isExifOrientation;
+        unsigned int m_exifOrientation;
+        
         concurrency::task<void> RotateImageViewModel::DoRotate(double angle);
+        unsigned int ConvertExifOrientationToDegreesRotation(unsigned int exifOrientationFlag);
+        unsigned int ConvertDegreesRotationToExifOrientation(unsigned int angle);
 
         void Rotate90(Platform::Object^ parameter);
         void SaveImage(Platform::Object^ parameter);

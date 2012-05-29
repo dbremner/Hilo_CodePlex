@@ -24,5 +24,7 @@ namespace Hilo
     private:
         void OnSuspending(Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
         void OnUnhandledException(Platform::Object^ sender, Windows::UI::Xaml::UnhandledExceptionEventArgs^ args);
+
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

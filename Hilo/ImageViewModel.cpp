@@ -18,6 +18,7 @@ using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Globalization;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::FileProperties;
@@ -106,6 +107,15 @@ void ImageViewModel::SelectedItem::set(FileInformation^ value)
     }
 }
 
+String^ ImageViewModel::MonthAndYear::get()
+{
+    Calendar cal;
+    cal.FromDateTime(m_fileDate);
+    std::wstringstream monthAndYear;
+    monthAndYear << cal.MonthAsString()->Data() << " " << cal.YearAsString()->Data();
+    return ref new String(monthAndYear.str().c_str());
+}
+
 //task<void> ImageViewModel::GetPhotoAsync()
 //{
 //    m_cts.cancel();
@@ -150,6 +160,7 @@ void ImageViewModel::Initialize(Object^ parameter)
         if (nullptr != imageViewData)
         {
             m_filePath = imageViewData->FilePath;
+            m_fileDate = imageViewData->FileDate;
             m_query = imageViewData->DateQuery;
             m_photos = nullptr;
             m_photo = nullptr;

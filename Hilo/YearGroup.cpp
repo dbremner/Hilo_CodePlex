@@ -10,6 +10,7 @@
 #include "YearGroup.h"
 #include "MonthBlock.h"
 #include "PhotoReader.h"
+#include "IExceptionPolicy.h"
 
 using namespace Hilo;
 
@@ -26,7 +27,7 @@ using namespace Windows::UI::Core;
 const std::array<int, 12> items = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
 
-YearGroup::YearGroup(IStorageFolder^ storagefolder) : m_storageFolder(storagefolder)
+YearGroup::YearGroup(IStorageFolder^ storagefolder, IExceptionPolicy^ exceptionPolicy) : m_storageFolder(storagefolder), m_exceptionPolicy(exceptionPolicy)
 {
     std::wstring wname = storagefolder->Name->Data() + 1;
     m_year = std::stoi(wname);
@@ -45,7 +46,7 @@ IObservableVector<Object^>^ YearGroup::Items::get()
         std::vector<Object^> months;
         std::for_each(begin(items), end(items), [this, &months](int month)
         {
-            auto monthBlock = ref new MonthBlock(this, month);
+            auto monthBlock = ref new MonthBlock(this, month, m_exceptionPolicy);
             months.push_back(monthBlock);
         });
         m_months = ref new Vector<Object^>(months);

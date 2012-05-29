@@ -13,6 +13,9 @@
 #include "PhotoReader.h"
 #include "RandomPhotoSelector.h"
 #include "WideFiveImageTile.h"
+#include "TaskExceptionsExtensions.h"
+#include "ExceptionPolicyFactory.h"
+
 
 using namespace concurrency;
 using namespace std;
@@ -42,20 +45,21 @@ const unsigned int BatchSize = 5;
 // multiple batches.
 const unsigned int SetSize = 3;
 
-IAsyncAction^ TileUpdateScheduler::ScheduleUpdateAsync()
+TileUpdateScheduler::TileUpdateScheduler(IExceptionPolicy^ policy) : m_exceptionPolicy(policy)
 {
-  
-    return create_async([this]
+}
+
+task<void> TileUpdateScheduler::ScheduleUpdateAsync()
+{
+
+    // We create a new task to ensure this has the opportunity to run
+    // on a different thread than the one it's invoked upon.
+    return concurrency::task<void>([this]()
     {
-        // We create a new task to ensure this has the opportunity to run
-        // on a different thread than the one it's invoked upon.
-        return concurrency::task<void>([this]()
-        {
-            // Select random pictures from the Pictures library and copy them 
-            // to a local app folder and then update the tile.
-            InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder);
-        });
-    });
+        // Select random pictures from the Pictures library and copy them 
+        // to a local app folder and then update the tile.
+        InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder);
+    }).then(ObserveException<void>(ExceptionPolicyFactory::GetCurrentPolicy()));
 }
 
 task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
@@ -94,7 +98,7 @@ task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
 
         auto copiedFileInfos = ref new Vector<StorageFile^>(begin(files),end(files));
         return RandomPhotoSelector::SelectFilesAsync(copiedFileInfos->GetView(), SetSize * BatchSize);
-    }).then([thumbnailsFolder, thumbnailStorageFolder](IVector<StorageFile^>^ selectedFiles)
+    }).then([this, thumbnailsFolder, thumbnailStorageFolder](IVector<StorageFile^>^ selectedFiles)
     {
         // Return the empty collection if the previous step did not
         // produce enough photos.
@@ -103,7 +107,8 @@ task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
             return task_from_result(ref new Vector<StorageFile^>());
         }
 
-        ThumbnailGenerator thumbnailGenerator;
+        //todo:  use m_exceptionPolicy in RP.
+        ThumbnailGenerator thumbnailGenerator(ExceptionPolicyFactory::GetCurrentPolicy());
         return thumbnailGenerator.Generate(selectedFiles, *thumbnailStorageFolder);
     }).then([this](Vector<StorageFile^>^ files)
     {

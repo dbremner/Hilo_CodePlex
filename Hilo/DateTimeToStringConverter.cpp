@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "DateTimeToStringConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace Platform;
 using namespace Windows::Foundation;

@@ -34,6 +34,8 @@ namespace HiloTests
         TEST_METHOD_INITIALIZE(Initialize)
         {
             m_imageGenerator = TestImageGenerator();
+            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_photoGroup = ref new StubPhotoGroup("");
         }
 
         TEST_METHOD_CLEANUP(Cleanup)
@@ -44,10 +46,10 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsForHub)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
             task<Object^> photoGroupTasks([model]()-> Object^ {
                 return model->PhotoGroups;
             });
@@ -61,11 +63,11 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsAsIObservableVectorOfPhotoGroups)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             TypeName pageType;
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
             task<Object^> photoGroupTasks([model]()-> Object^ {
                 return model->PhotoGroups;
             });
@@ -81,69 +83,69 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldSetupNavigateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
-            MainHubViewModel model(vector, ref new StubExceptionPolicy());
+            MainHubViewModel model(vector, m_exceptionPolicy);
 
             Assert::IsNotNull(model.NavigateToPicturesCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
-            MainHubViewModel model(vector, ref new StubExceptionPolicy());
+            MainHubViewModel model(vector, m_exceptionPolicy);
 
             Assert::IsNotNull(model.RotateImageCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldSetupCropCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
-            MainHubViewModel model(vector, ref new StubExceptionPolicy());
+            MainHubViewModel model(vector, m_exceptionPolicy);
 
             Assert::IsNotNull(model.CropImageCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldDefaultToAppBarBeingDisabledWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
-            MainHubViewModel model(vector, ref new StubExceptionPolicy());
+            MainHubViewModel model(vector, m_exceptionPolicy);
 
             Assert::IsFalse(model.IsAppBarEnabled);
         }
 
         TEST_METHOD(MainHubViewModelShouldDefaultToSelectedItemBeingNull)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
-            MainHubViewModel model(vector, ref new StubExceptionPolicy());
+            MainHubViewModel model(vector, m_exceptionPolicy);
 
             Assert::IsNull(model.SelectedItem);
         }
 
         TEST_METHOD(MainHubViewModelShouldEnableAppBarWhenSettingTheSelectedItemToAPhoto)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
             auto t = task<IVectorView<FileInformation^>^>(GetPhotosAsync());
             task_status status;
             auto files = TestHelper::RunSynced<IVectorView<FileInformation^>^>(t, status);
-            auto photo = ref new Photo(files->GetAt(0), ref new StubPhotoGroup(""));
+            auto photo = ref new Photo(files->GetAt(0), m_photoGroup, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model, photo] {
                 model->SelectedItem = photo;
@@ -154,10 +156,10 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldDisableAppBarWhenSettingTheSelectedItemToANullPtr)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model] {
                 model->SelectedItem = nullptr;
@@ -166,12 +168,12 @@ namespace HiloTests
             Assert::IsFalse(model->IsAppBarEnabled);
         }
 
-        TEST_METHOD(MainHubViewModelShouldFirePropertyChangeOfSelectedItemWhenSettingSelectedItem)
+        TEST_METHOD(MainHubViewModelShouldFirePropertyChangeForSelectedItemWhenSettingSelectedItem)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);            
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
             bool propertyChangedFired = false;
             model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
             {
@@ -180,10 +182,10 @@ namespace HiloTests
                     propertyChangedFired = true;
                 }
             });
-             auto t = task<IVectorView<FileInformation^>^>(GetPhotosAsync());
+            auto t = task<IVectorView<FileInformation^>^>(GetPhotosAsync());
             task_status status;
             auto files = TestHelper::RunSynced<IVectorView<FileInformation^>^>(t, status);
-            auto photo = ref new Photo(files->GetAt(0), ref new StubPhotoGroup(""));
+            auto photo = ref new Photo(files->GetAt(0), m_photoGroup, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model, photo] {
                 model->SelectedItem = photo;
@@ -194,10 +196,10 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldFirePropertyChangeForIsAppBarEnabledWhenSettingSelectedItem)
         {
-            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync());
+            auto photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);            
-            auto model = ref new MainHubViewModel(vector, ref new StubExceptionPolicy());
+            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
             bool propertyChangedFired = false;
             model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
             {
@@ -206,9 +208,13 @@ namespace HiloTests
                     propertyChangedFired = true;
                 }
             });
+            auto t = task<IVectorView<FileInformation^>^>(GetPhotosAsync());
+            task_status status;
+            auto files = TestHelper::RunSynced<IVectorView<FileInformation^>^>(t, status);
+            auto photo = ref new Photo(files->GetAt(0), m_photoGroup, m_exceptionPolicy);
 
-            TestHelper::RunUISynced([model] {
-                model->IsAppBarEnabled = true;
+            TestHelper::RunUISynced([model, photo] {
+                model->SelectedItem = photo;
             });
 
             Assert::IsTrue(propertyChangedFired);
@@ -233,5 +239,7 @@ namespace HiloTests
         }
     private:
         TestImageGenerator m_imageGenerator;
+        StubExceptionPolicy^ m_exceptionPolicy;
+        StubPhotoGroup^ m_photoGroup;
     };
 }

@@ -214,11 +214,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Hilo\AsyncException.h" />
+    <ClInclude Include="..\Hilo\BooleanToBrushConverter.h" />
     <ClInclude Include="..\Hilo\Common\BindableBase.h" />
     <ClInclude Include="..\Hilo\CropImageViewModel.h" />
     <ClInclude Include="..\Hilo\DateTimeToStringConverter.h" />
     <ClInclude Include="..\Hilo\DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="..\Hilo\DelegateCommand.h" />
+    <ClInclude Include="..\Hilo\ExceptionPolicyFactory.h" />
     <ClInclude Include="..\Hilo\FileInformationToBitmapImageConverter.h" />
     <ClInclude Include="..\Hilo\FileInformationToToolTipConverter.h" />
     <ClInclude Include="..\Hilo\HubPhotoGroup.h" />
@@ -257,11 +259,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Hilo\AsyncException.cpp" />
+    <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp" />
     <ClCompile Include="..\Hilo\Common\BindableBase.cpp" />
     <ClCompile Include="..\Hilo\CropImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\DateTimeToStringConverter.cpp" />
     <ClCompile Include="..\Hilo\DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="..\Hilo\DelegateCommand.cpp" />
+    <ClCompile Include="..\Hilo\ExceptionPolicyFactory.cpp" />
     <ClCompile Include="..\Hilo\FileInformationToBitmapImageConverter.cpp" />
     <ClCompile Include="..\Hilo\FileInformationToToolTipConverter.cpp" />
     <ClCompile Include="..\Hilo\HubPhotoGroup.cpp" />
@@ -284,6 +288,7 @@
     <ClCompile Include="..\Hilo\WideFiveImageTile.cpp" />
     <ClCompile Include="..\Hilo\YearGroup.cpp" />
     <ClCompile Include="AsyncExceptionTests.cpp" />
+    <ClCompile Include="BooleanToBrushConverterTests.cpp" />
     <ClCompile Include="CropImageViewModelTests.cpp" />
     <ClCompile Include="DateTimeToStringConverterTests.cpp" />
     <ClCompile Include="FileInformationToBitmapImageConverterTests.cpp" />

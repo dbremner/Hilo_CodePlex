@@ -46,21 +46,6 @@ ICommand^ CropImageViewModel::CancelCommand::get()
     return m_cancelCommand;
 }
 
-Object^ CropImageViewModel::FileName::get()
-{
-    return m_file->Name;
-}
-
-Object^ CropImageViewModel::FileDateCreated::get()
-{
-    return ref new Box<DateTime>(m_file->DateCreated);
-}
-
-Object^ CropImageViewModel::FileDateModified::get()
-{
-    return ref new Box<DateTime>(m_file->BasicProperties->DateModified);
-}
-
 bool CropImageViewModel::InProgress::get()
 {
     return m_inProgress;
@@ -102,14 +87,20 @@ ImageSource^ CropImageViewModel::Photo::get()
             m_image = ref new BitmapImage();
             m_image->SetSource(m_imageStream);
             OnPropertyChanged("Photo");
-        }, task_continuation_context::use_current());
+        }, task_continuation_context::use_current())
+            .then(ObserveException<void>(m_exceptionPolicy));
     }
     return m_image;
 }
 
 void CropImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 {
-    m_file = dynamic_cast<FileInformation^>(e->Parameter);
+	Initialize(e->Parameter);
+}
+
+void CropImageViewModel::Initialize(Object^ parameter)
+{
+    m_file = dynamic_cast<FileInformation^>(parameter);
     m_image = nullptr;
 }
 

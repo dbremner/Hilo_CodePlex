@@ -32,10 +32,12 @@
               Margin="50,50,50,110">
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   ManipulationMode="Rotate"
+                   Margin="{Binding ImageMargin}"
+                   RenderTransformOrigin="0.5, 0.5"
                    Source="{Binding Photo}" 
-                   ManipulationMode="Rotate">
+                   VerticalAlignment="Center">
                 <Image.RenderTransform>
                     <RotateTransform 
                         x:Name="ImageRotateTransform"  

@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "ThumbnailGenerator.h"
 #include "TaskExtensions.h"
+#include "IExceptionPolicy.h"
 
 using namespace concurrency;
 using namespace std;
@@ -27,6 +28,10 @@ using namespace Hilo;
 const unsigned int ThumbnailSize = 270;
 const wstring ThumbnailImagePrefix = L"thumbImage_";
 
+ThumbnailGenerator::ThumbnailGenerator(IExceptionPolicy^ policy) : m_exceptionPolicy(policy)
+{
+}
+
 task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate( 
     IVector<StorageFile^>^ files, 
     StorageFolder^ thumbnailsFolder)
@@ -35,7 +40,7 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
 
     unsigned int imageCounter = 0;
     for_each(begin(files), end(files),
-        [&imageCounter, thumbnailsFolder, &thumbnailTasks](StorageFile^ imageFile)
+        [this, &imageCounter, thumbnailsFolder, &thumbnailTasks](StorageFile^ imageFile)
     {
         wstringstream localFileName;
         localFileName << ThumbnailImagePrefix << imageCounter++ << ".jpg";
@@ -45,7 +50,8 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
             thumbnailsFolder,
             imageFile, 
             ref new String(localFileName.str().c_str()),
-            ThumbnailSize));   
+            ThumbnailSize,
+            m_exceptionPolicy));   
     });
 
     return when_all(begin(thumbnailTasks), end(thumbnailTasks)).then(
@@ -68,12 +74,13 @@ task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
     StorageFolder^ folder,
     StorageFile^ imageFile,
     String^ localFileName,
-    unsigned int thumbSize)
+    unsigned int thumbSize,
+    IExceptionPolicy^ exceptionPolicy)
 {
     task<InMemoryRandomAccessStream^> createThumbnail(
         CreateThumbnailFromPictureFileAsync(imageFile, thumbSize));
 
-    return createThumbnail.then([folder, localFileName](
+    return createThumbnail.then([exceptionPolicy, folder, localFileName](
         task<InMemoryRandomAccessStream^> createdThumbnailTask) 
     {
         InMemoryRandomAccessStream^ createdThumbnail;
@@ -81,8 +88,9 @@ task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
         {
             createdThumbnail = createdThumbnailTask.get();
         }
-        catch(Exception^)
+        catch(Exception^ ex)
         {
+            exceptionPolicy->HandleException(ex);
             // If we have any exceptions we won't return the results
             // of this task, but instead nullptr.  Downstream 
             // tasks will need to account for this.

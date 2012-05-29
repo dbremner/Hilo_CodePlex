@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -35,21 +35,6 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        property Platform::Object^ FileName
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateCreated
-        {
-            Platform::Object^ get();
-        }
-
-        property Platform::Object^ FileDateModified
-        {
-            Platform::Object^ get();
-        }
-
         property bool InProgress { bool get(); }
         property double CropOverlayLeft { double get(); }
         property double CropOverlayTop { double get(); }
@@ -61,6 +46,7 @@ namespace Hilo
         void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
         void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
         Windows::Foundation::IAsyncAction^ CropImageAsync(double actualWidth);
+		void Initialize(Platform::Object^ parameter);
     
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_file;

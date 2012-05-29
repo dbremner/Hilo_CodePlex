@@ -10,7 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\FileInformationToBitmapImageConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace Platform;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

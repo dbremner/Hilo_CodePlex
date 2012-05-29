@@ -26,28 +26,28 @@ const std::array<String^, 6> items = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", 
 task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(folder, query);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(String^ query)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query)
 {
     auto fileQuery = CreateFileQuery(folder, query);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
 }
 
@@ -65,8 +65,7 @@ Object^ PhotoReader::GetVirtualizedFiles(Platform::String^ queryString)
 Object^ PhotoReader::GetVirtualizedFiles(IStorageFolderQueryOperations^ folder, Platform::String^ queryString)
 {
     auto fileQuery = CreateFileQuery(folder, queryString);
-    
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return fileInformationFactory->GetVirtualizedFilesVector();
 }
 
@@ -78,16 +77,14 @@ task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByMont
 task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByMonth(IStorageFolderQueryOperations^ folder)
 {
     auto fileQuery = CreateVirtualFolderQueryByMonth(folder);
-
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
 }
 
 task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByYear()
 {
     auto fileQuery = CreateVirtualFolderQueryByYear(KnownFolders::PicturesLibrary);
-
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 200, ThumbnailOptions::UseCurrentScale , false);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
 }
 

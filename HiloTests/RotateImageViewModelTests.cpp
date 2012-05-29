@@ -12,14 +12,110 @@
 #include <tuple>
 #include "StubExceptionPolicy.h"
 
-using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
+
+using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace Platform;
+using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Data;
 
 namespace HiloTests
 {		
     TEST_CLASS(RotateImageViewModelTests)
     {
     public:
+        TEST_METHOD(RotateImageViewModelShouldSetupRotateCommandWhenConstructed)
+        {
+            RotateImageViewModel model(m_exceptionPolicy);
+            Assert::IsNotNull(model.RotateCommand);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetupSaveCommandWhenConstructed)
+        {
+            RotateImageViewModel model(m_exceptionPolicy);
+            Assert::IsNotNull(model.SaveCommand);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetupCancelCommandWhenConstructed)
+        {
+            RotateImageViewModel model(m_exceptionPolicy);
+            Assert::IsNotNull(model.CancelCommand);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetIsAppBarStickyWhenConstructed)
+        {
+            RotateImageViewModel model(m_exceptionPolicy);
+            Assert::IsTrue(model.IsAppBarSticky);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetImageMarginToZeroWhenSettingRotationAngleToZero)
+        {
+            auto model = ref new RotateImageViewModel(m_exceptionPolicy);
+
+            TestHelper::RunUISynced([model] {
+                model->RotationAngle = 0;
+            });
+            auto margin = dynamic_cast<Box<Thickness>^>(model->ImageMargin);
+            auto marginValue = margin->Value;
+            Assert::AreEqual(marginValue.Left, 0.0);
+            Assert::AreEqual(marginValue.Top, 0.0);
+            Assert::AreEqual(marginValue.Right, 0.0);
+            Assert::AreEqual(marginValue.Bottom, 0.0);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetImageMarginTopAndBottomToOneHundredAndTenWhenSettingRotationAngleToNinety)
+        {
+            auto model = ref new RotateImageViewModel(m_exceptionPolicy);
+
+            TestHelper::RunUISynced([model] {
+                model->RotationAngle = 90;
+            });
+            auto margin = dynamic_cast<Box<Thickness>^>(model->ImageMargin);
+            auto marginValue = margin->Value;
+            Assert::AreEqual(marginValue.Left, 0.0);
+            Assert::AreEqual(marginValue.Top, 110.0);
+            Assert::AreEqual(marginValue.Right, 0.0);
+            Assert::AreEqual(marginValue.Bottom, 110.0);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldFirePropertyChangedForRotationAngleWhenSettingRotationAngle)
+        {
+            auto model = ref new RotateImageViewModel(m_exceptionPolicy);
+            bool propertyChangedFired = false;
+            model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e)
+            {
+                if (e->PropertyName == "RotationAngle")
+                {
+                    propertyChangedFired = true;
+                }
+            });
+
+            TestHelper::RunUISynced([model] {
+                model->RotationAngle = 90;
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldFirePropertyChangedForImageMarginWhenSettingRotationAngle)
+        {
+            auto model = ref new RotateImageViewModel(m_exceptionPolicy);
+            bool propertyChangedFired = false;
+            model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e)
+            {
+                if (e->PropertyName == "ImageMargin")
+                {
+                    propertyChangedFired = true;
+                }
+            });
+
+            TestHelper::RunUISynced([model] {
+                model->RotationAngle = 90;
+            });
+
+            Assert::IsTrue(propertyChangedFired);
+        }
+        
         TEST_METHOD(RotateImageViewModelInitialRotationAngleIsZero)
         {
             TestImageGenerator imageGenerator;
@@ -84,6 +180,8 @@ namespace HiloTests
         }
 
     private:
+        StubExceptionPolicy^ m_exceptionPolicy;
+
         void TestRotation(double angle, double expected)
         {
             TestImageGenerator imageGenerator;

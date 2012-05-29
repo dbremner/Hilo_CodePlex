@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ===============================================================================
  Microsoft patterns & practices
  Hilo Guidance
@@ -22,6 +22,7 @@
     <UserControl.Resources>
         <x:String x:Key="PageTitle">Pictures</x:String>
         <local:BooleanToBrushConverter x:Key="BrushConverter" />
+        <local:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         <CollectionViewSource
             x:Name="MonthGroupedItemsViewSource"
             Source="{Binding MonthGroups}"
@@ -78,10 +79,12 @@
                               SelectionMode="None">
                         <GridView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="0" 
-                                      Background="{Binding Enabled, Converter={StaticResource BrushConverter}}"
-                                      Width="150"
-                                      Height="150">
+                                <Grid Background="{Binding Enabled, Converter={StaticResource BrushConverter}}"
+                                      Height="150"
+                                      IsTapEnabled="{Binding Enabled}"
+                                      Margin="0"
+                                      Tapped="OnZoomedOutGridItemTapped"
+                                      Width="150">
                                     <TextBlock Text="{Binding Name}"
                                                Margin="6"
                                                VerticalAlignment="Bottom"
@@ -263,7 +266,8 @@
         <AppBar x:Name="ImageViewBottomAppBar"
                 AutomationProperties.AutomationId="ImageViewBottomAppBar"
                 IsSticky="{Binding IsAppBarSticky}" 
-                Padding="10,0,10,0">
+                Padding="10,0,10,0"
+                Visibility="{Binding IsAppBarEnabled, Mode=TwoWay, Converter={StaticResource BoolToVisConverter}}">
             <Grid>
                 <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">

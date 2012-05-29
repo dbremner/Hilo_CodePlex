@@ -10,6 +10,8 @@
 #include "MonthBlock.h"
 #include "YearGroup.h"
 #include "PhotoReader.h"
+#include "IExceptionPolicy.h"
+#include "TaskExceptionsExtensions.h"
 
 using namespace Hilo;
 
@@ -19,12 +21,14 @@ using namespace Windows::ApplicationModel::Resources;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Globalization;
+using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Search;
 using namespace Windows::UI::Xaml::Media::Imaging;
+using namespace Windows::System::UserProfile;
 
-MonthBlock::MonthBlock(YearGroup^ yearGroup, unsigned int month) : m_weakYearGroup(yearGroup), m_month(month), m_count(0)
+MonthBlock::MonthBlock(YearGroup^ yearGroup, unsigned int month, IExceptionPolicy^ exceptionPolicy) : m_weakYearGroup(yearGroup), m_month(month), m_count(0), m_exceptionPolicy(exceptionPolicy)
 {
 }
 
@@ -53,10 +57,15 @@ String^ MonthBlock::BuildDateQuery()
     Calendar cal;
     cal.Year = year;
     cal.Month = m_month;
-    int lastDay = cal.LastDayInThisMonth;
     int firstDay = cal.FirstDayInThisMonth;
+    int lastDay = cal.LastDayInThisMonth;
+    DateTimeFormatter dtf("shortdate", GlobalizationPreferences::Languages);
+    cal.Day = firstDay;
+    String^ firstDate = dtf.Format(cal.ToDateTime());
+    cal.Day = lastDay;
+    String^ lastDate = dtf.Format(cal.ToDateTime());
     std::wstringstream dateRange;
-    dateRange << L"System.ItemDate:" << m_month << L"/" << firstDay << L"/" << year << ".." << m_month << L"/" << lastDay << L"/" << year;
+    dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
     return ref new String(dateRange.str().c_str());
 }
 
@@ -74,7 +83,8 @@ bool MonthBlock::Enabled::get()
             m_count = files->Size;
             m_determinedEnabled = true;
             OnPropertyChanged("Enabled");
-        }, task_continuation_context::use_current());
+        }, task_continuation_context::use_current())
+            .then(ObserveException<void>(m_exceptionPolicy));
     }
     return (m_count > 0);
 }

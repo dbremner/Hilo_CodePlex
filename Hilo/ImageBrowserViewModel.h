@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -53,11 +53,16 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        //       of the button to the SelectedItem property of the GridView.
-        property Platform::Object^ SelectedItem
+        property bool IsAppBarEnabled 
+        { 
+            bool get(); 
+            void set(bool value);
+        }
+
+        property Photo^ SelectedItem
         {
-            Platform::Object^ get();
-            void set(Platform::Object^ value);
+            Photo^ get();
+            void set(Photo^ value);
         }
 
         Photo^ GetPhotoForYearAndMonth(unsigned int year, unsigned int month);
@@ -66,18 +71,19 @@ namespace Hilo
     private:
         Platform::Collections::Vector<Platform::Object^>^ m_monthGroups;
         Platform::Collections::Vector<Platform::Object^>^ m_yearGroups;
-        bool m_inProgress;
         Windows::UI::Xaml::Input::ICommand^ m_groupCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cropImageCommand;
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
+        bool m_inProgress;
+        bool m_isAppBarEnabled;
 
         concurrency::cancellation_token_source m_cancelTokenSource;
         PhotoCache^ m_photoCache;
-        Platform::Object^ m_selectedItem;
+        Photo^ m_photo;
 
         void NavigateToGroup(Platform::Object^ parameter);
         void CropImage(Platform::Object^ parameter);
         void RotateImage(Platform::Object^ parameter);
-        bool CanEditImage(Platform::Object^ parameter);
+        bool CanCropOrRotateImage(Platform::Object^ parameter);
     };
 }

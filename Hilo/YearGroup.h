@@ -14,12 +14,13 @@
 namespace Hilo
 {
     ref class Photo;
+    interface class IExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class YearGroup sealed : public BindableBase, public IPhotoGroup
     {
     public:
-        YearGroup(Windows::Storage::IStorageFolder^ storagefolder);
+        YearGroup(Windows::Storage::IStorageFolder^ storagefolder, IExceptionPolicy^ exceptionPolicy);
 
         virtual operator Windows::Storage::IStorageFolder^ ();
 
@@ -42,5 +43,6 @@ namespace Hilo
         Windows::Storage::IStorageFolder^ m_storageFolder;
         Platform::Collections::Vector<Platform::Object^>^ m_months;
         unsigned int m_year;
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

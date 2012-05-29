@@ -10,7 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\FileInformationToToolTipConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
@@ -24,15 +24,15 @@ using namespace Windows::System::UserProfile;
 
 namespace HiloTests
 {
-	TEST_CLASS(FileInformationToToolTipConverterTests)
-	{
-	public:
-		
-		TEST_METHOD(FileInformationConverterCanConvertFileName)
-		{
+    TEST_CLASS(FileInformationToToolTipConverterTests)
+    {
+    public:
+
+        TEST_METHOD(FileInformationConverterCanConvertFileName)
+        {
             TestImageGenerator imageGenerator;
             String^ value;
-            
+
             TestHelper::RunUISynced([this, &imageGenerator, &value]()
             {
                 auto finalFile = std::make_shared<FileInformation^>(nullptr);
@@ -45,7 +45,7 @@ namespace HiloTests
                 });
 
                 TestHelper::RunSynced(t2, status);        
-			    auto fileInformationConverter = ref new FileInformationToToolTipConverter();
+                auto fileInformationConverter = ref new FileInformationToToolTipConverter();
                 TypeName fileInformationTypeName = { "FileInformation", TypeKind::Metadata } ;
                 value = safe_cast<String^>(fileInformationConverter->Convert(*finalFile, fileInformationTypeName, "FileName", "en-US"));
             });
@@ -57,51 +57,51 @@ namespace HiloTests
                 task_status status;
                 TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
             });
-		}
+        }
 
         // No longer included in tooltip
-  //      TEST_METHOD(FileInformationConverterCanConvertDateCreated)
-		//{
-		//	TestImageGenerator imageGenerator;
-  //          String^ value;
-  //          DateTime fileDateTime;
-  //          
-  //          TestHelper::RunUISynced([this, &imageGenerator, &value, &fileDateTime]()
-  //          {
-  //              auto finalFile = std::make_shared<FileInformation^>(nullptr);
-  //              task_status status;
+        //      TEST_METHOD(FileInformationConverterCanConvertDateCreated)
+        //{
+        //	TestImageGenerator imageGenerator;
+        //          String^ value;
+        //          DateTime fileDateTime;
+        //          
+        //          TestHelper::RunUISynced([this, &imageGenerator, &value, &fileDateTime]()
+        //          {
+        //              auto finalFile = std::make_shared<FileInformation^>(nullptr);
+        //              task_status status;
 
-  //              auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-  //                  .then([finalFile](FileInformation^ file)
-  //              {
-  //                  (*finalFile) = file;
-  //              });
+        //              auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
+        //                  .then([finalFile](FileInformation^ file)
+        //              {
+        //                  (*finalFile) = file;
+        //              });
 
-  //              TestHelper::RunSynced(t2, status);
-  //              fileDateTime = (*finalFile)->DateCreated;
-		//	    auto fileInformationConverter = ref new FileInformationToToolTipConverter();
-  //              TypeName fileInformationTypeName = { "FileInformation", TypeKind::Metadata } ;
-  //              value = safe_cast<String^>(fileInformationConverter->Convert(*finalFile, fileInformationTypeName, "DateCreated", "en-US"));
-  //          });
+        //              TestHelper::RunSynced(t2, status);
+        //              fileDateTime = (*finalFile)->DateCreated;
+        //	    auto fileInformationConverter = ref new FileInformationToToolTipConverter();
+        //              TypeName fileInformationTypeName = { "FileInformation", TypeKind::Metadata } ;
+        //              value = safe_cast<String^>(fileInformationConverter->Convert(*finalFile, fileInformationTypeName, "DateCreated", "en-US"));
+        //          });
 
-  //          auto dtf = ref new DateTimeFormatter("shortdate", GlobalizationPreferences::Languages);
-  //          String^ stringDateTime = dtf->Format(fileDateTime);
-  //          
-  //          Assert::AreEqual(value, stringDateTime);
+        //          auto dtf = ref new DateTimeFormatter("shortdate", GlobalizationPreferences::Languages);
+        //          String^ stringDateTime = dtf->Format(fileDateTime);
+        //          
+        //          Assert::AreEqual(value, stringDateTime);
 
-  //          TestHelper::RunUISynced([&imageGenerator]()
-  //          {
-  //              task_status status;
-  //              TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
-  //          });
-		//}
+        //          TestHelper::RunUISynced([&imageGenerator]()
+        //          {
+        //              task_status status;
+        //              TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+        //          });
+        //}
 
         TEST_METHOD(FileInformationConverterCanConvertDateTaken)
-		{
-			TestImageGenerator imageGenerator;
+        {
+            TestImageGenerator imageGenerator;
             String^ value;
             DateTime fileDateTime;
-            
+
             TestHelper::RunUISynced([this, &imageGenerator, &value, &fileDateTime]()
             {
                 auto finalFile = std::make_shared<FileInformation^>(nullptr);
@@ -115,14 +115,14 @@ namespace HiloTests
 
                 TestHelper::RunSynced(t2, status);
                 fileDateTime = Hilo::DateForFileInformation((*finalFile));
-			    auto fileInformationConverter = ref new FileInformationToToolTipConverter();
+                auto fileInformationConverter = ref new FileInformationToToolTipConverter();
                 TypeName fileInformationTypeName = { "FileInformation", TypeKind::Metadata } ;
                 value = safe_cast<String^>(fileInformationConverter->Convert(*finalFile, fileInformationTypeName, "DateTaken", "en-US"));
             });
 
             auto dtf = ref new DateTimeFormatter("shortdate", GlobalizationPreferences::Languages);
             String^ stringDateTime = dtf->Format(fileDateTime);
-            
+
             Assert::AreEqual(value, stringDateTime);
 
             TestHelper::RunUISynced([&imageGenerator]()
@@ -130,7 +130,7 @@ namespace HiloTests
                 task_status status;
                 TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
             });
-		}
+        }
 
         TEST_METHOD(FileInformationConverterReturnsUnsetValueIfFileInformationIsNull)
         {
@@ -140,5 +140,5 @@ namespace HiloTests
 
             Assert::AreEqual(value, DependencyProperty::UnsetValue);
         }
-	};
+    };
 }

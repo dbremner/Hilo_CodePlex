@@ -66,3 +66,15 @@ void ImageBrowserView::OnViewChangeCompleted(Object^ sender, SemanticZoomViewCha
         }
     }
 }
+
+void ImageBrowserView::OnZoomedOutGridItemTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e)
+{
+    auto grid = safe_cast<Grid^>(sender);
+    if (grid != nullptr)
+    {
+        if (!grid->IsTapEnabled)
+        {
+            e->Handled = true;
+        }
+    }
+}

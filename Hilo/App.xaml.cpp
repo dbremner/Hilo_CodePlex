@@ -9,9 +9,9 @@
 #include "pch.h"
 #include "MainHubView.xaml.h"
 #include "TileUpdateScheduler.h"
+#include "ExceptionPolicyFactory.h"
 
 using namespace Hilo;
-
 using namespace Platform;
 using namespace Platform::Details;
 using namespace Platform::Collections;
@@ -47,12 +47,14 @@ App::App()
 /// <param name="args">Details about the launch request and process.</param>
 void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ pArgs)
 {
+    m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
+
     if (pArgs->PreviousExecutionState == ApplicationExecutionState::Terminated)
     {
     }
 
     // Schedule tile updates.
-    TileUpdateScheduler scheduler;
+    TileUpdateScheduler scheduler(m_exceptionPolicy);
     scheduler.ScheduleUpdateAsync();
 
     // Create a Frame to act navigation context and navigate to the first page
@@ -78,7 +80,11 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 
 void App::OnUnhandledException(Object^ sender, UnhandledExceptionEventArgs^ args)
 {
+    auto exception = ref new FailureException();
+    m_exceptionPolicy->HandleException(exception);
+    
     auto e = args->Exception;
     auto m = args->Message;
-    throw ref new NotImplementedException();
+
+    throw exception;
 }

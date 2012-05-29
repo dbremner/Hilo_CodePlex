@@ -11,7 +11,6 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="using:Hilo.Converters"
     xmlns:local="using:Hilo">
 
     <!-- Standard App Bar buttons -->
@@ -205,6 +204,15 @@
     <ImageBrush x:Key="HiloPageBackgroundBrush" ImageSource="Assets/MSDN_Hilo_bgoverlay_v2_022712.png" Stretch="Uniform"/>
     
     <!-- Item templates -->
+    <ItemsPanelTemplate x:Key="HubHorizontalVirtualizingStackPanelTemplate">
+        <VirtualizingStackPanel Orientation="Horizontal" 
+                                Height="700"
+                                VerticalAlignment="Top"/>
+    </ItemsPanelTemplate>
+
+    <ItemsPanelTemplate x:Key="HubVerticalVirtualizingStackPanelTemplate">
+        <VirtualizingStackPanel Orientation="Vertical" />
+    </ItemsPanelTemplate>
 
     <!-- Grid-appropriate 250 pixel square item template as seen in the MainHubView -->
     <DataTemplate x:Key="HiloGroupedItemTemplate">
@@ -1860,7 +1868,7 @@
     <!--<DataTemplate x:Key="HiloImageToolTipDataTemplate">
             <StackPanel Margin="10">
                 <StackPanel.Resources>
-                    <converters:DateTimeToStringConverter x:Key="DateTimeConverter" />
+                    <local:DateTimeToStringConverter x:Key="DateTimeConverter" />
                 </StackPanel.Resources>
                 <TextBlock Foreground="{StaticResource ApplicationTextBrush}" 
                            Text="{Binding FileName}" />
@@ -1885,7 +1893,7 @@
     <!--<DataTemplate x:Key="HiloFlipViewImageToolTipDataTemplate">
         <StackPanel Margin="10">
             <StackPanel.Resources>
-                <converters:FileInformationToToolTipConverter x:Key="FileInformationToolTipConverter" />
+                <local:FileInformationToToolTipConverter x:Key="FileInformationToolTipConverter" />
             </StackPanel.Resources>
             <TextBlock Foreground="{StaticResource ApplicationTextBrush}" 
                        Text="{Binding Converter={StaticResource FileInformationToolTipConverter}, 

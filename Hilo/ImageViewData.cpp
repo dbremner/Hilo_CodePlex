@@ -26,6 +26,10 @@ ImageViewData::ImageViewData(Hilo::Photo^ photo)
     m_filePath = fileInfo->Path;
 }
 
+void ImageViewData::Foo(IStorageItemInformation^ s, Object^ e)
+{
+}
+
 DateTime ImageViewData::FileDate::get()
 {
     return m_fileDate;

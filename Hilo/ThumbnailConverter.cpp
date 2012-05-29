@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "ThumbnailConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace Platform;
 using namespace Windows::Storage::Streams;

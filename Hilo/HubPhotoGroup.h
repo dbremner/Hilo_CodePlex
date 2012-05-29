@@ -13,11 +13,13 @@
 
 namespace Hilo
 {
+    interface class IExceptionPolicy;
+
     [Windows::UI::Xaml::Data::Bindable]
     public ref class HubPhotoGroup sealed : public BindableBase, public IPhotoGroup
     {
     public:
-        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^>^ task);
+        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^>^ task, IExceptionPolicy^ exceptionPolicy);
 
         virtual operator Windows::Storage::IStorageFolder^ ();
 
@@ -37,5 +39,6 @@ namespace Hilo
         concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> m_task;
         Platform::Collections::Vector<Platform::Object^>^ m_photos;
         bool m_retrievedPhotos;
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\ThumbnailGenerator.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Windows::Storage;
@@ -35,7 +36,7 @@ namespace HiloTests
             auto sourceImages = GenerateSourceImages();
             auto thumbnailFolder = CreateThumbnailFolder();
 
-            ThumbnailGenerator generator;
+            ThumbnailGenerator generator(ref new StubExceptionPolicy());
 
             concurrency::task_status status;
             auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);
@@ -49,7 +50,7 @@ namespace HiloTests
             auto sourceImages = GenerateSourceImages();
             auto thumbnailFolder = CreateThumbnailFolder();
 
-            ThumbnailGenerator generator;
+            ThumbnailGenerator generator(ref new StubExceptionPolicy());
 
             concurrency::task_status status;
             auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);
@@ -70,7 +71,7 @@ namespace HiloTests
             auto sourceImages = GenerateInvalidSourceImage();
             auto thumbnailFolder = CreateThumbnailFolder();
 
-            ThumbnailGenerator generator;
+            ThumbnailGenerator generator(ref new StubExceptionPolicy());
 
             concurrency::task_status status;
             auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);

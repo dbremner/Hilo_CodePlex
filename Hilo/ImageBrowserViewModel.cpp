@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -30,8 +30,8 @@ using namespace Windows::UI::Xaml::Navigation;
 ImageBrowserViewModel::ImageBrowserViewModel(IExceptionPolicy^ exceptionPolicy) : m_inProgress(true), m_photoCache(ref new PhotoCache()), ViewModelBase(exceptionPolicy)
 {
     m_groupCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::NavigateToGroup), nullptr);
-    m_cropImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanEditImage));
-    m_rotateImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::RotateImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanEditImage));
+    m_cropImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
+    m_rotateImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::RotateImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
 }
 
 ICommand^ ImageBrowserViewModel::GroupCommand::get()
@@ -54,19 +54,34 @@ bool ImageBrowserViewModel::InProgress::get()
     return m_inProgress;
 }
 
-//       of the button to the SelectedItem property of the GridView.
-Object^ ImageBrowserViewModel::SelectedItem::get()
+bool ImageBrowserViewModel::IsAppBarEnabled::get()
 {
-    return m_selectedItem;
+    return m_isAppBarEnabled;
 }
 
-void ImageBrowserViewModel::SelectedItem::set(Object^ value)
+void ImageBrowserViewModel::IsAppBarEnabled::set(bool value)
 {
-    if (m_selectedItem != value)
+    if (m_isAppBarEnabled != value)
     {
-        m_selectedItem = value;
-        m_rotateImageCommand->CanExecute(nullptr);
+        m_isAppBarEnabled = value;
+        OnPropertyChanged("IsAppBarEnabled");
+    }
+}
+
+Photo^ ImageBrowserViewModel::SelectedItem::get()
+{
+    return m_photo;
+}
+
+void ImageBrowserViewModel::SelectedItem::set(Photo^ value)
+{
+    if (m_photo != value)
+    {
+        m_photo = value;
         m_cropImageCommand->CanExecute(nullptr);
+        m_rotateImageCommand->CanExecute(nullptr);
+        IsAppBarEnabled = value != nullptr;
+        OnPropertyChanged("SelectedItem");
     }
 }
 
@@ -88,7 +103,7 @@ Object^ ImageBrowserViewModel::MonthGroups::get()
             auto temp = ref new Vector<Object^>();
             std::for_each(begin(folders), end(folders), [this, temp](FolderInformation^ folder) 
             {
-                auto photoGroup = ref new MonthGroup(folder, m_photoCache);
+                auto photoGroup = ref new MonthGroup(folder, m_photoCache, m_exceptionPolicy);
                 temp->Append(photoGroup);
             });
             return temp;
@@ -97,6 +112,7 @@ Object^ ImageBrowserViewModel::MonthGroups::get()
             Array<Object^>^ many = ref new Array<Object^>(folders->Size);
             folders->GetMany(0, many);
             m_monthGroups->ReplaceAll(many);
+			OnPropertyChanged("MonthGroups");
         }, token, task_continuation_context::use_current()).then([this, token](task<void> priorTask)
         {
             if (token.is_canceled())
@@ -134,9 +150,9 @@ Object^ ImageBrowserViewModel::YearGroups::get()
         foldersTask.then([this](IVectorView<FolderInformation^>^ folders) 
         {
             auto temp = ref new Vector<Object^>();
-            std::for_each(begin(folders), end(folders), [temp](FolderInformation^ folder) 
+            std::for_each(begin(folders), end(folders), [this, temp](FolderInformation^ folder) 
             {
-                auto photoGroup = ref new YearGroup(folder);
+                auto photoGroup = ref new YearGroup(folder, m_exceptionPolicy);
                 temp->Append(photoGroup);
             });
             return temp;
@@ -145,6 +161,7 @@ Object^ ImageBrowserViewModel::YearGroups::get()
             Array<Object^>^ many = ref new Array<Object^>(folders->Size);
             folders->GetMany(0, many);
             m_yearGroups->ReplaceAll(many);
+			OnPropertyChanged("YearGroups");
         }, token, task_continuation_context::use_current()).then([this, token](task<void> priorTask)
         {
             if (token.is_canceled())
@@ -170,25 +187,19 @@ void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
     ViewModelBase::GoToPage(PageType::Image, imageData);
 }
 
-bool ImageBrowserViewModel::CanEditImage(Object^ parameter)
+bool ImageBrowserViewModel::CanCropOrRotateImage(Object^ paratmer)
 {
-    return (m_selectedItem == nullptr) ? false : true;
+    return (nullptr != m_photo);
 }
 
-//       SelectedItem property of the GridView, and pass it in as a parameter.
-//       But can't in CP.
 void ImageBrowserViewModel::CropImage(Object^ parameter)
 {
-    auto photo = dynamic_cast<Photo^>(m_selectedItem);
-    FileInformation^ file = photo;
+    FileInformation^ file = m_photo;
     ViewModelBase::GoToPage(PageType::Crop, file);
 }
 
-//       SelectedItem property of the GridView, and pass it in as a parameter.
-//       But can't in CP.
 void ImageBrowserViewModel::RotateImage(Object^ parameter)
 {
-    auto photo = dynamic_cast<Photo^>(m_selectedItem);
-    FileInformation^ file = photo;
+    FileInformation^ file = m_photo;
     ViewModelBase::GoToPage(PageType::Rotate, file);
 }

@@ -34,10 +34,7 @@ concurrency::task<FileInformation^> TestImageGenerator::CreateTestImageFileFromL
         auto fileQuery = picturesFolder->CreateFileQueryWithOptions(queryOptions);
         auto fileInformationFactory = ref new Windows::Storage::BulkAccess::FileInformationFactory(
             fileQuery, 
-            Windows::Storage::FileProperties::ThumbnailMode::PicturesView, 
-            200, 
-            Windows::Storage::FileProperties::ThumbnailOptions::UseCurrentScale , 
-            false);
+            Windows::Storage::FileProperties::ThumbnailMode::PicturesView);
         return fileInformationFactory->GetFilesAsync();
     }).then([this](Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^ files) {
         auto file = files->GetAt(0);

@@ -15,12 +15,13 @@ namespace Hilo
 {
     ref class Photo;
     ref class PhotoCache;
+    interface class IExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MonthGroup sealed : public BindableBase, public IPhotoGroup
     {
     public:
-        MonthGroup(Windows::Storage::IStorageFolder^ storagefolder, PhotoCache^ photoCache);
+        MonthGroup(Windows::Storage::IStorageFolder^ storagefolder, PhotoCache^ photoCache, IExceptionPolicy^ exceptionPolicy);
 
         virtual operator Windows::Storage::IStorageFolder^ ();
 
@@ -39,5 +40,6 @@ namespace Hilo
         Platform::String^ m_title;
         Platform::Collections::Vector<Platform::Object^>^ m_photos;
         Platform::WeakReference m_weakPhotoCache;
+        IExceptionPolicy^ m_exceptionPolicy;
     };
 }

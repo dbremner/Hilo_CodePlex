@@ -10,20 +10,17 @@
 
 namespace Hilo
 {
-    namespace Converters
+    public ref class ThumbnailConverter sealed : public Windows::UI::Xaml::Data::IValueConverter
     {
-        public ref class ThumbnailConverter sealed : public Windows::UI::Xaml::Data::IValueConverter
-        {
-        public:
-            virtual Platform::Object^ Convert(Platform::Object^ value,
-                Windows::UI::Xaml::Interop::TypeName targetType,
-                Platform::Object^ parameter,
-                Platform::String^ culture);
+    public:
+        virtual Platform::Object^ Convert(Platform::Object^ value,
+            Windows::UI::Xaml::Interop::TypeName targetType,
+            Platform::Object^ parameter,
+            Platform::String^ culture);
 
-            virtual Platform::Object^ ConvertBack(Platform::Object^ value,
-                Windows::UI::Xaml::Interop::TypeName targetType,
-                Platform::Object^ parameter,
-                Platform::String^ culture);
-        };
-    }
+        virtual Platform::Object^ ConvertBack(Platform::Object^ value,
+            Windows::UI::Xaml::Interop::TypeName targetType,
+            Platform::Object^ parameter,
+            Platform::String^ culture);
+    };
 }

@@ -11,6 +11,7 @@
 #include "..\Hilo\PhotoCache.h"
 #include "..\Hilo\MonthGroup.h"
 #include "..\Hilo\Photo.h"
+#include "StubExceptionPolicy.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -25,6 +26,11 @@ namespace HiloTests
     TEST_CLASS(PhotoCacheTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_exceptionPolicy = ref new StubExceptionPolicy();
+        }
+
         TEST_METHOD(PhotoCacheInsertPhotoShouldAddPhotoForYearMonth)
         {
             concurrency::task_status status;
@@ -37,21 +43,22 @@ namespace HiloTests
             PhotoCache^ photoCache = ref new PhotoCache();
             auto f = TestHelper::RunSynced<FileInformation^>(t2, status);
             Assert::AreEqual(completed, status);
-            auto photoGroup = ref new MonthGroup(KnownFolders::PicturesLibrary, photoCache);
-            auto photo = ref new Photo(f, photoGroup);
+            auto photoGroup = ref new MonthGroup(KnownFolders::PicturesLibrary, photoCache, m_exceptionPolicy);
+            auto photo = ref new Photo(f, photoGroup, m_exceptionPolicy);
+            auto cal = GetCalendarForFilePhoto(f);
 
             photoCache->InsertPhoto(photo);
 
-            auto cal = GetCalendarForFilePhoto(f);
-
             auto actual = photoCache->GetForYearAndMonth(cal->Year, cal->Month);
-            auto name =actual->Name;
+            auto name = actual->Name;
             Assert::AreEqual(photo->Name, actual->Name);
             TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
     private:
-         ICalendar^ GetCalendarForFilePhoto(FileInformation^ f)
+        StubExceptionPolicy^ m_exceptionPolicy;
+
+        ICalendar^ GetCalendarForFilePhoto(FileInformation^ f)
         {
             ICalendar^ cal = ref new Calendar();
             auto imageDate = f->ImageProperties->DateTaken;

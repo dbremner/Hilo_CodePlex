@@ -58,6 +58,12 @@
     <Filter Include="en-US">
       <UniqueIdentifier>{3d2f588c-0a85-4784-a6d8-1bace183d19c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tile">
+      <UniqueIdentifier>{f3188561-4178-4f06-ae3e-3496e086bffa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExceptionHandling">
+      <UniqueIdentifier>{54f8b6b3-46f9-443c-a628-cfc46e1fc047}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
@@ -89,12 +95,6 @@
     <ClCompile Include="HiloPage.cpp">
       <Filter>Views</Filter>
     </ClCompile>
-    <ClCompile Include="RandomPhotoSelector.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="TileUpdateScheduler.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="VariableGridView.cpp">
       <Filter>Views</Filter>
@@ -110,12 +110,6 @@
     </ClCompile>
     <ClCompile Include="RotateImageViewModel.cpp">
       <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="ThumbnailGenerator.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="WideFiveImageTile.cpp">
-      <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="ThumbnailConverter.cpp">
       <Filter>XamlExtensions</Filter>
@@ -155,13 +149,32 @@
     <ClCompile Include="MonthGroup.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
-    <ClCompile Include="AsyncException.cpp" />
     <ClCompile Include="VariableListView.cpp">
       <Filter>Views</Filter>
     </ClCompile>
     <ClCompile Include="DelegateCommand.cpp">
       <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="TileUpdateScheduler.cpp">
+      <Filter>Tile</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailGenerator.cpp">
+      <Filter>Tile</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomPhotoSelector.cpp">
+      <Filter>Tile</Filter>
+    </ClCompile>
+    <ClCompile Include="WideFiveImageTile.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncException.cpp">
+      <Filter>ExceptionHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugLoggingExceptionPolicy.cpp">
+      <Filter>ExceptionHandling</Filter>
+    </ClCompile>
+    <ClCompile Include="ExceptionPolicyFactory.cpp">
+      <Filter>ExceptionHandling</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,12 +209,6 @@
       <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="TaskExtensions.h" />
-    <ClInclude Include="RandomPhotoSelector.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="TileUpdateScheduler.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="ViewModelBase.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
@@ -228,12 +235,6 @@
     </ClInclude>
     <ClInclude Include="RotateImageViewModel.h">
       <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="ThumbnailGenerator.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="WideFiveImageTile.h">
-      <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="CropImageView.xaml.h" />
     <ClInclude Include="Photo.h">
@@ -279,14 +280,37 @@
     <ClInclude Include="IResizable.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="IExceptionPolicy.h" />
-    <ClInclude Include="TaskExceptionsExtensions.h" />
-    <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="StorageExtensions.h" />
     <ClInclude Include="VariableListView.h">
       <Filter>Views</Filter>
     </ClInclude>
-    <ClInclude Include="AsyncException.h" />
+    <ClInclude Include="TileUpdateScheduler.h">
+      <Filter>Tile</Filter>
+    </ClInclude>
+    <ClInclude Include="ThumbnailGenerator.h">
+      <Filter>Tile</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomPhotoSelector.h">
+      <Filter>Tile</Filter>
+    </ClInclude>
+    <ClInclude Include="WideFiveImageTile.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncException.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugLoggingExceptionPolicy.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="ExceptionPolicyFactory.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="IExceptionPolicy.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskExceptionsExtensions.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />

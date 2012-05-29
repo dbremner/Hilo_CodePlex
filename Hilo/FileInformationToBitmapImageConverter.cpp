@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "FileInformationToBitmapImageConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace concurrency;
 using namespace Platform;

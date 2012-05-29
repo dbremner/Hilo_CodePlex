@@ -7,17 +7,18 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
+#include "ExceptionPolicyFactory.h"
 #include "DebugLoggingExceptionPolicy.h"
+#include "windows.h"
 
 using namespace Hilo;
-using namespace Windows::Foundation;
-using namespace Platform;
 
-
-void DebugLoggingExceptionPolicy::HandleException(Exception^ exception)
+IExceptionPolicy^ ExceptionPolicyFactory::GetCurrentPolicy()
 {
-    assert(exception != nullptr);
-    std::wstringstream ss;
-    ss << "[HR: " << exception->HResult << "] " << exception->Message->Data();
-    OutputDebugString(ss.str().c_str());
+   
+    // todo:  Fix in RP.  Need to wait until RP to make sure
+    //        these marshall across boundaries correctly.  For
+    //          now we return a new logging policy.
+
+    return ref new DebugLoggingExceptionPolicy();
 }

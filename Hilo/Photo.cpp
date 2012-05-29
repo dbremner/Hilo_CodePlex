@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,6 +9,8 @@
 #include "pch.h"
 #include "Photo.h"
 #include "IPhotoGroup.h"
+#include "IExceptionPolicy.h"
+#include "TaskExceptionsExtensions.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -21,13 +23,12 @@ using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), m_thumbnail(nullptr), m_columnSpan(1), m_rowSpan(1)
+Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup, IExceptionPolicy^ exceptionPolicy) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), m_thumbnail(nullptr), m_exceptionPolicy(exceptionPolicy), m_columnSpan(1), m_rowSpan(1)
 {
 }
 
-Photo::operator IStorageFile^()
+void Photo::OnThumbnailUpdated(IStorageItemInformation^ sender, Object^ e)
 {
-    return m_fileInfo;
 }
 
 Photo::operator FileInformation^()
@@ -49,12 +50,14 @@ BitmapImage^ Photo::Thumbnail::get()
 {
     if (nullptr == m_thumbnail)
     {
-        IRandomAccessStream^ thumbnailStream = dynamic_cast<IRandomAccessStream^>(m_fileInfo->Thumbnail);
-        if (nullptr != thumbnailStream)
+        task<StorageItemThumbnail^> createThumbnail(m_fileInfo->GetThumbnailAsync(ThumbnailMode::PicturesView));
+        createThumbnail.then([this](StorageItemThumbnail^ thumbnail)
         {
+            IRandomAccessStream^ thumbnailStream = static_cast<IRandomAccessStream^>(thumbnail);
             m_thumbnail = ref new BitmapImage();
             m_thumbnail->SetSource(thumbnailStream);
-        }
+            OnPropertyChanged("Thumbnail");
+        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
     }
     return m_thumbnail;
 }
@@ -77,19 +80,4 @@ int Photo::ColumnSpan::get()
 void Photo::ColumnSpan::set(int value)
 {
     m_columnSpan = value;
-}
-
-Object^ Photo::FileName::get()
-{
-    return m_fileInfo->Name;
-}
-
-Object^ Photo::FileDateCreated::get()
-{
-    return ref new Box<DateTime>(m_fileInfo->DateCreated);
-}
-
-Object^ Photo::FileDateModified::get()
-{
-    return ref new Box<DateTime>(m_fileInfo->BasicProperties->DateModified);
 }

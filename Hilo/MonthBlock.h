@@ -13,12 +13,13 @@
 namespace Hilo
 {
     ref class YearGroup;
+    interface class IExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MonthBlock sealed : public BindableBase
     {
     public:
-        MonthBlock(YearGroup^ yearGroup, unsigned int month);
+        MonthBlock(YearGroup^ yearGroup, unsigned int month, IExceptionPolicy^ exceptionPolicy);
 
         property Platform::String^ Name 
         { 
@@ -45,6 +46,7 @@ namespace Hilo
         unsigned int m_month;
         unsigned int m_count;
         bool m_determinedEnabled;
+        IExceptionPolicy^ m_exceptionPolicy;
 
         Platform::String^ BuildDateQuery();
     };

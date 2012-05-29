@@ -31,6 +31,11 @@ namespace Hilo
             void set(Windows::Storage::BulkAccess::FileInformation^ value);
         }
 
+        property Platform::String^ MonthAndYear
+        {
+            Platform::String^ get();
+        }
+
         property Windows::UI::Xaml::Input::ICommand^ CropImageCommand
         {
             Windows::UI::Xaml::Input::ICommand^ get();
@@ -46,6 +51,7 @@ namespace Hilo
         void Initialize(Platform::Object^ parameter);
 
     private:
+        Windows::Foundation::DateTime m_fileDate;
         Platform::String^ m_filePath;
         Platform::String^ m_query;
         Windows::Storage::BulkAccess::FileInformation^ m_photo;

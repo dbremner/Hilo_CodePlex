@@ -132,6 +132,12 @@
     <ClInclude Include="..\Hilo\AsyncException.h">
       <Filter>Testable</Filter>
     </ClInclude>
+    <ClInclude Include="..\Hilo\ExceptionPolicyFactory.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\BooleanToBrushConverter.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -242,6 +248,13 @@
     <ClCompile Include="ImageViewDataTests.cpp" />
     <ClCompile Include="ImageBrowserViewModelTests.cpp" />
     <ClCompile Include="..\Hilo\DelegateCommand.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ExceptionPolicyFactory.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="BooleanToBrushConverterTests.cpp" />
+    <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
   </ItemGroup>

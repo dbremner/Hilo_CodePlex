@@ -11,6 +11,8 @@
 #include "Photo.h"
 #include "PhotoReader.h"
 #include "PhotoCache.h"
+#include "IExceptionPolicy.h"
+#include "TaskExceptionsExtensions.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -24,7 +26,7 @@ using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Search;
 using namespace Windows::UI::Core;
 
-MonthGroup::MonthGroup(IStorageFolder^ storagefolder, PhotoCache^ photoCache) : m_storageFolder(storagefolder), m_weakPhotoCache(photoCache)
+MonthGroup::MonthGroup(IStorageFolder^ storagefolder, PhotoCache^ photoCache, IExceptionPolicy^ exceptionPolicy) : m_storageFolder(storagefolder), m_weakPhotoCache(photoCache), m_exceptionPolicy(exceptionPolicy)
 {
     assert(nullptr != dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder));
 }
@@ -52,7 +54,7 @@ IObservableVector<Object^>^ MonthGroup::Items::get()
             
             std::for_each(begin(files), end(files), [this, temp, cache, &first](FileInformation^ item) 
             {
-                auto photo = ref new Photo(item, this);
+                auto photo = ref new Photo(item, this, m_exceptionPolicy);
                 temp->Append(photo);
                 if (first)
                 {
@@ -67,7 +69,7 @@ IObservableVector<Object^>^ MonthGroup::Items::get()
             Array<Object^>^ many = ref new Array<Object^>(photos->Size);
             photos->GetMany(0, many);
             m_photos->ReplaceAll(many);
-        }, concurrency::task_continuation_context::use_current());
+        }, concurrency::task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));;
     }
     return m_photos;
 }

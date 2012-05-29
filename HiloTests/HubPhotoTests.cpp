@@ -9,8 +9,8 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\Photo.h"
-#include <ppltasks.h>
 #include "StubPhotoGroup.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
@@ -29,15 +29,21 @@ namespace HiloTests
     TEST_CLASS(HubPhotoTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_photoGroup = ref new StubPhotoGroup("");
+        }
+
         TEST_METHOD(PhotoTestsCanRetrievePhotoPath)
         {
             TestImageGenerator imageGenerator;
 
             concurrency::task_status status;
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([](FileInformation^ file) 
+                .then([this](FileInformation^ file) 
             {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"));
+                return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
             });
 
             auto f = TestHelper::RunSynced<Photo^>(t2, status);
@@ -54,14 +60,14 @@ namespace HiloTests
 
             concurrency::task_status status;
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([](FileInformation^ file) 
+                .then([this](FileInformation^ file) 
             {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"));
+                return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
             });
 
             auto f = TestHelper::RunSynced<Photo^>(t2, status);
             FileInformation^ fileInfo = f;
-            
+
             Assert::AreEqual(concurrency::completed, status);
             //Assert::AreEqual("TestFile.png", f->Name);
             Assert::IsNotNull(fileInfo);
@@ -82,7 +88,7 @@ namespace HiloTests
 
                 concurrency::task_status status;
                 auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([finalFile](FileInformation^ file)
+                    .then([finalFile](FileInformation^ file)
                 {
                     (*finalFile) = file;
                     // Ensure generation of thumbnail for test.
@@ -90,9 +96,9 @@ namespace HiloTests
                 }).then([finalFile]( StorageItemThumbnail^ thumbnail)
                 {
                     return (*finalFile);
-                }).then([](FileInformation^ file) 
+                }).then([this](FileInformation^ file) 
                 {
-                    return ref new Photo(file, ref new StubPhotoGroup("Test"));
+                    return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
                 });
 
                 auto f = TestHelper::RunSynced<Photo^>(t2, status);
@@ -108,5 +114,9 @@ namespace HiloTests
                 TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
             });
         }
+
+    private:
+        StubExceptionPolicy^ m_exceptionPolicy;
+        StubPhotoGroup^ m_photoGroup;
     };
 }

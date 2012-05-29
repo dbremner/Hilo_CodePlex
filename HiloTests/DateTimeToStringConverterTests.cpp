@@ -10,7 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\DateTimeToStringConverter.h"
 
-using namespace Hilo::Converters;
+using namespace Hilo;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;

@@ -11,6 +11,7 @@
 #include "..\Hilo\ImageViewData.h"
 #include "..\Hilo\Photo.h"
 #include "StubPhotoGroup.h"
+#include "StubExceptionPolicy.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -25,14 +26,19 @@ namespace HiloTests
     TEST_CLASS(ImageViewDataTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_exceptionPolicy = ref new StubExceptionPolicy();
+        }
+
         TEST_METHOD(ImageViewDataShouldInitilizeFileNameAndDateFromPhoto)
         {
             TestImageGenerator imageGenerator;
             concurrency::task_status status;
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([](FileInformation^ file) 
+                .then([this](FileInformation^ file) 
             {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"));
+                return ref new Photo(file, ref new StubPhotoGroup("Test"), m_exceptionPolicy);
             });
             auto f = TestHelper::RunSynced<Photo^>(t2, status);
             FileInformation^ fileInfo = f;
@@ -51,9 +57,9 @@ namespace HiloTests
             TestImageGenerator imageGenerator;
             concurrency::task_status status;
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([](FileInformation^ file) 
+                .then([this](FileInformation^ file) 
             {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"));
+                return ref new Photo(file, ref new StubPhotoGroup("Test"), m_exceptionPolicy);
             });
             auto f = TestHelper::RunSynced<Photo^>(t2, status);
             FileInformation^ fileInfo = f;
@@ -79,5 +85,8 @@ namespace HiloTests
 
             Assert::AreEqual(expectedDateQuery, query);
         }
+
+     private:
+        StubExceptionPolicy^ m_exceptionPolicy;
     };
 }

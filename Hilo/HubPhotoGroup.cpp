@@ -9,6 +9,7 @@
 #include "pch.h"
 #include "HubPhotoGroup.h"
 #include "Photo.h"
+#include "TaskExceptionsExtensions.h"
 
 using namespace Hilo;
 
@@ -21,7 +22,12 @@ using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Core;
 
-HubPhotoGroup::HubPhotoGroup(String^ title, String^ emptyTitle, IAsyncOperation<IVectorView<FileInformation^>^>^ task) : m_title(title), m_emptyTitle(emptyTitle),  m_task(task), m_retrievedPhotos(false)
+HubPhotoGroup::HubPhotoGroup(
+    String^ title, 
+    String^ emptyTitle, 
+    IAsyncOperation<IVectorView<FileInformation^>^>^ task,
+    IExceptionPolicy^ exceptionPolicy) 
+    : m_title(title), m_emptyTitle(emptyTitle),  m_task(task), m_retrievedPhotos(false), m_exceptionPolicy(exceptionPolicy)
 {
 }
 
@@ -41,7 +47,7 @@ IObservableVector<Object^>^ HubPhotoGroup::Items::get()
             bool first = true;
             std::for_each(begin(files), end(files), [this, temp, &first](FileInformation^ item) 
             {
-                auto photo = ref new Photo(item, this);
+                auto photo = ref new Photo(item, this, m_exceptionPolicy);
                 if (first)
                 {
                     photo->ColumnSpan = 2;
@@ -59,7 +65,8 @@ IObservableVector<Object^>^ HubPhotoGroup::Items::get()
             m_photos->ReplaceAll(many);
             OnPropertyChanged("Items");
             OnPropertyChanged("Title");
-        }, concurrency::task_continuation_context::use_current());
+        }, concurrency::task_continuation_context::use_current())
+            .then(ObserveException<void>(m_exceptionPolicy));
     }
     return m_photos;
 }
