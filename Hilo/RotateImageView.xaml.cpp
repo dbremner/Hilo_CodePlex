@@ -13,7 +13,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-
 using namespace Hilo;
 
 using namespace Windows::Foundation;
@@ -42,21 +41,9 @@ RotateImageView::RotateImageView()
     m_viewModel = dynamic_cast<Hilo::RotateImageViewModel^>(DataContext);
 }
 
-void RotateImageView::OnNavigatedTo(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedTo(e);
-}
-
-void RotateImageView::OnNavigatedFrom(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedFrom(e);
-}
-
 void RotateImageView::OnManipulationDelta(ManipulationDeltaRoutedEventArgs^ e)
 {
-    // Set rotation angle (convert to degrees from radians)
-    // Note: This will change for CP which will then report degrees instead of radians
-    m_viewModel->RotationAngle += (e->Delta.Rotation * 180) / (float)M_PI;
+    m_viewModel->RotationAngle += e->Delta.Rotation ;
 }
 
 void RotateImageView::OnManipulationCompleted(ManipulationCompletedRoutedEventArgs^ e)

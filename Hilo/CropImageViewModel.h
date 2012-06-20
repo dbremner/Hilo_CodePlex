@@ -13,14 +13,17 @@
 namespace Hilo
 {
     interface class IExceptionPolicy;
+    interface class IPhoto;
+    interface class IRepository;
+    ref class ImageNavigationData;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class CropImageViewModel sealed : public ImageBase
     {
     public:
-        CropImageViewModel(IExceptionPolicy^ exceptionPolicy);
+        CropImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
 
-        property Windows::UI::Xaml::Media::ImageSource^ Photo
+        property Windows::UI::Xaml::Media::ImageSource^ Image
         {
             Windows::UI::Xaml::Media::ImageSource^ get();
         }
@@ -39,23 +42,28 @@ namespace Hilo
         property double CropOverlayLeft { double get(); }
         property double CropOverlayTop { double get(); }
         property double CropOverlayHeight { double get(); }
-        property double CropOverlayWidth { double get(); }
+        property double CropOverlayWidth { double get();} 
         property bool IsCropOverlayVisible { bool get(); }
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
         void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
         void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
         Windows::Foundation::IAsyncAction^ CropImageAsync(double actualWidth);
-		void Initialize(Platform::Object^ parameter);
-    
+
+    internal:
+        void Initialize(ImageNavigationData^ navigationData);
+
     private:
-        Windows::Storage::BulkAccess::FileInformation^ m_file;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
+        IRepository^ m_repository;
+        IPhoto^ m_photo;
+        Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ m_image;
         Windows::Storage::Streams::IRandomAccessStream^ m_imageStream;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
         bool m_inProgress;
         bool m_isCropOverlayVisible;
+        bool m_isSaving;
 
         double m_left;
         double m_top;
@@ -68,6 +76,14 @@ namespace Hilo
         double m_cropOverlayWidth;
         double m_actualHeight;
         double m_actualWidth;       
+
+        unsigned int m_cropX;
+        unsigned int m_cropY;
+
+        void ChangeInProgress(bool value);
+        concurrency::task<void> GetImageAsync();
+        concurrency::task<void> EncodeImageAsync();
+        byte* GetPointerToPixelData(Windows::Storage::Streams::IBuffer^ buffer);
 
         // Member functions that implement Commands
         void SaveImage(Platform::Object^ parameter);

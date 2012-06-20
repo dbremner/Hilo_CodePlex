@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,16 +8,14 @@
 //===============================================================================
 #include "pch.h"
 #include "ImageBase.h"
-#include "PhotoReader.h"
-
-using namespace Hilo;
 
 using namespace concurrency;
+using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Pickers;
 using namespace Windows::Storage::Streams;
 
@@ -25,56 +23,52 @@ ImageBase::ImageBase(IExceptionPolicy^ exceptionPolicy) : ViewModelBase(exceptio
 {
 }
 
-Windows::Foundation::IAsyncAction^ ImageBase::SaveImageAsync(FileInformation^ file, IRandomAccessStream^ ras)
+IAsyncOperation<Windows::Storage::StorageFile^>^ ImageBase::GetFileNameFromFileSavePickerAsync(Platform::String^ fileType)
+{
+    return create_async([this, fileType]{ return GetFileNameFromFileSavePickerAsyncImpl(fileType); });
+}
+
+IAsyncAction^ ImageBase::SaveImageAsync(StorageFile^ file, IRandomAccessStream^ ras)
 {
     return create_async([this, file, ras]{ return SaveImageAsyncImpl(file, ras); });
 }
-task<void> ImageBase::SaveImageAsyncImpl(FileInformation^ file, IRandomAccessStream^ ras)
+
+task<StorageFile^> ImageBase::GetFileNameFromFileSavePickerAsyncImpl(String^ fileType)
 {
     auto fileExtension = ref new Vector<String^>();
-    fileExtension->Append(file->FileType);
+    fileExtension->Append(fileType);
 
     auto savePicker = ref new FileSavePicker();
     savePicker->SuggestedStartLocation = PickerLocationId::PicturesLibrary;    
     savePicker->FileTypeChoices->Insert("Image", fileExtension);
-    savePicker->DefaultFileExtension = file->FileType;
-
-    std::shared_ptr<IBuffer^> buffer = std::make_shared<IBuffer^>(nullptr);
-    std::shared_ptr<String^> newFileName = std::make_shared<String^>(nullptr);
-
-    IInputStream^ inputStream = ras->GetInputStreamAt(0);
-    unsigned int size = static_cast<unsigned int>(ras->Size);
-    auto streamReader = ref new DataReader(inputStream);
-        
-    task<unsigned int> loadStreamTask(streamReader->LoadAsync(size));
-    return loadStreamTask.then([streamReader, savePicker, buffer, size](unsigned int loadedBytes)
-    {
-        *buffer = streamReader->ReadBuffer(size);
-        return savePicker->PickSaveFileAsync();
-    }).then([newFileName](StorageFile^ file) 
+    savePicker->DefaultFileExtension = fileType;
+   
+    auto filePickerTask = create_task(savePicker->PickSaveFileAsync());
+    return filePickerTask.then([](StorageFile^ file)
     {
         if (file == nullptr)
         {
             cancel_current_task();
         }
-        *newFileName = file->Name;
         return file;
-    }).then([buffer](StorageFile^ file)
-    {
-        return FileIO::WriteBufferAsync(file, *buffer);
-    }).then([newFileName]() 
-    {
-        PhotoReader reader;
-        return reader.GetPhotosAsync(*newFileName, 1);
-    }).then([this](IVectorView<FileInformation^>^ files) 
-    {
-        FileInformation^ fi;
-        if (files->Size > 0)
-        {
-            fi = files->GetAt(0);
-        }
+    });
+}
 
-        // todo: this will break the navigation metaphor and we cna't pass data: ViewModelBase::GoToPage(PageType::Image, fi);
+task<void> ImageBase::SaveImageAsyncImpl(StorageFile^ file, IRandomAccessStream^ ras)
+{
+    std::shared_ptr<IBuffer^> buffer = std::make_shared<IBuffer^>(nullptr);
+
+    IInputStream^ inputStream = ras->GetInputStreamAt(0);
+    unsigned int size = static_cast<unsigned int>(ras->Size);
+    auto streamReader = ref new DataReader(inputStream);
+        
+    auto loadStreamTask = create_task(streamReader->LoadAsync(size));
+    return loadStreamTask.then([streamReader, buffer, size, file](unsigned int loadedBytes)
+    {
+        *buffer = streamReader->ReadBuffer(size);
+        return FileIO::WriteBufferAsync(file, *buffer);
+    }).then([this]() 
+    {
         ViewModelBase::GoBack();
     });
 }

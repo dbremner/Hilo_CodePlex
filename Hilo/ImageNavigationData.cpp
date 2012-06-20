@@ -7,58 +7,80 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "ImageViewData.h"
-#include "Photo.h"
+#include "ImageNavigationData.h"
+#include "IPhoto.h"
 
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
 using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::System::UserProfile;
 
-ImageViewData::ImageViewData(Hilo::Photo^ photo)
+ImageNavigationData::ImageNavigationData(Hilo::IPhoto^ photo)
 {
-    FileInformation^ fileInfo = photo;
-    m_fileDate = DateForFileInformation(fileInfo);
-    m_filePath = fileInfo->Path;
+    m_fileDate = photo->DateTaken;
+    m_filePath = photo->Path;
 }
 
-void ImageViewData::Foo(IStorageItemInformation^ s, Object^ e)
+ImageNavigationData::ImageNavigationData(String^ serializedData)
 {
+    std::wstring data(serializedData->Data());
+
+    auto index = data.find('|');
+    assert(index > 0);
+
+    auto path = data.substr(0, index);
+    auto date = data.substr(index+1, data.length());
+
+    DateTime fileDate;
+    fileDate.UniversalTime = _wtoi64(date.c_str());
+
+    m_filePath = ref new String(path.c_str());
+    m_fileDate = fileDate;
 }
 
-DateTime ImageViewData::FileDate::get()
+DateTime ImageNavigationData::FileDate::get()
 {
     return m_fileDate;
 }
 
-String^ ImageViewData::FilePath::get()
+String^ ImageNavigationData::FilePath::get()
 {
     return m_filePath;
 }
 
-String^ ImageViewData::DateQuery::get()
+String^ ImageNavigationData::DateQuery::get()
 {
     if (nullptr == m_dateQuery)
     {
         Calendar cal;
-        cal.FromDateTime(m_fileDate);
+        cal.SetDateTime(m_fileDate);
 
         int lastDay = cal.LastDayInThisMonth;
         int firstDay = cal.FirstDayInThisMonth;
         DateTimeFormatter dtf("shortdate", GlobalizationPreferences::Languages);
         cal.Day = firstDay;
-        String^ firstDate = dtf.Format(cal.ToDateTime());
+        String^ firstDate = dtf.Format(cal.GetDateTime());
 
         cal.Day = lastDay;
-        String^ lastDate = dtf.Format(cal.ToDateTime());
-        
+        String^ lastDate = dtf.Format(cal.GetDateTime());
+
         std::wstringstream dateRange;
         dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
         m_dateQuery = ref new String(dateRange.str().c_str());
     }
     return m_dateQuery;
+}
+
+String^ ImageNavigationData::SerializeToString()
+{
+    std::wstringstream stringStream;
+
+    stringStream << m_filePath->Data() << L"|" << m_fileDate.UniversalTime ;
+    
+    return ref new String(stringStream.str().c_str());
 }

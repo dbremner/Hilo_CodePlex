@@ -10,33 +10,20 @@
 
 namespace Hilo
 {
-    ref class Photo;
-
-    ref class ImageViewData sealed
+    public interface class IQueryOperation
     {
-    public:
-        ImageViewData(Photo^ photo);
-
-        property Platform::String^ FilePath
+        property Platform::String^ Query
         {
             Platform::String^ get();
+            void set(Platform::String^ value);
         }
 
-        property Windows::Foundation::DateTime FileDate
+        property unsigned int MaxNumberOfItems
         {
-            Windows::Foundation::DateTime get();
+            unsigned int get();
+            void set(unsigned int value);
         }
 
-        property Platform::String^ DateQuery
-        {
-            Platform::String^ get();
-        }
-
-    private:
-        Windows::Foundation::DateTime m_fileDate;
-        Platform::String^ m_dateQuery;
-        Platform::String^ m_filePath;
-
-        void Foo(Windows::Storage::BulkAccess::IStorageItemInformation^ s, Platform::Object^ e);
+        Platform::Object^ GetOperator();
     };
 }

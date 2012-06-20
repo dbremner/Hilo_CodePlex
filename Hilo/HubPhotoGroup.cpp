@@ -8,65 +8,43 @@
 //===============================================================================
 #include "pch.h"
 #include "HubPhotoGroup.h"
+#include "IPhoto.h"
+#include "IResizable.h"
 #include "Photo.h"
+#include "IRepository.h"
+#include "SimpleQueryOperation.h"
 #include "TaskExceptionsExtensions.h"
 
-using namespace Hilo;
-
 using namespace concurrency;
+using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage::Search;
 using namespace Windows::UI::Core;
 
-HubPhotoGroup::HubPhotoGroup(
-    String^ title, 
-    String^ emptyTitle, 
-    IAsyncOperation<IVectorView<FileInformation^>^>^ task,
-    IExceptionPolicy^ exceptionPolicy) 
-    : m_title(title), m_emptyTitle(emptyTitle),  m_task(task), m_retrievedPhotos(false), m_exceptionPolicy(exceptionPolicy)
+const unsigned int MaxNumberOfPictures = 6;
+
+HubPhotoGroup::HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, IRepository^ repository, IExceptionPolicy^ exceptionPolicy) : 
+    m_title(title), m_emptyTitle(emptyTitle), m_retrievedPhotos(false), m_repository(repository), m_exceptionPolicy(exceptionPolicy)
 {
+    m_dataToken = m_repository->DataChanged += ref new DataChangedEventHandler(this, &HubPhotoGroup::OnDataChanged);
 }
 
-HubPhotoGroup::operator IStorageFolder^()
+HubPhotoGroup::~HubPhotoGroup()
 {
-    return nullptr;
+    m_repository->DataChanged -= m_dataToken;
 }
 
-IObservableVector<Object^>^ HubPhotoGroup::Items::get()
+IObservableVector<IPhoto^>^ HubPhotoGroup::Items::get()
 {
     if (m_photos == nullptr)
     {
-        m_photos = ref new Vector<Object^>();
-        m_task.then([this](IVectorView<FileInformation^>^ files) 
-        {
-            auto temp = ref new Vector<Object^>();
-            bool first = true;
-            std::for_each(begin(files), end(files), [this, temp, &first](FileInformation^ item) 
-            {
-                auto photo = ref new Photo(item, this, m_exceptionPolicy);
-                if (first)
-                {
-                    photo->ColumnSpan = 2;
-                    photo->RowSpan = 2;
-                    first = false;
-                }                
-                temp->Append(photo);
-            });
-            return temp;
-        }).then([this](Vector<Object^>^ photos)
-        {
-            m_retrievedPhotos = true;
-            Array<Object^>^ many = ref new Array<Object^>(photos->Size);
-            photos->GetMany(0, many);
-            m_photos->ReplaceAll(many);
-            OnPropertyChanged("Items");
-            OnPropertyChanged("Title");
-        }, concurrency::task_continuation_context::use_current())
-            .then(ObserveException<void>(m_exceptionPolicy));
+        OnDataChanged();
     }
     return m_photos;
 }
@@ -83,4 +61,40 @@ String^ HubPhotoGroup::Title::get()
         return m_emptyTitle;
     }
     return m_title;
+}
+
+task<void> HubPhotoGroup::QueryPhotosAsync()
+{
+    // Only need to call this once and have to check since this can be called from multiple places.
+    if (m_photos == nullptr)
+    {
+        m_photos = ref new Vector<IPhoto^>();
+    }
+
+    task<IVectorView<IPhoto^>^> t = create_task(m_repository->GetPhotosForGroupWithQueryOperationAsync(this, ref new SimpleQueryOperation(nullptr, MaxNumberOfPictures)));
+
+    return t.then([this](IVectorView<IPhoto^>^ photos)
+    {
+        m_retrievedPhotos = true;
+        if (photos->Size > 0)
+        {
+            Array<IPhoto^>^ many = ref new Array<IPhoto^>(photos->Size);
+            photos->GetMany(0, many);
+            m_photos->ReplaceAll(many);
+            IResizable^ firstPhoto = dynamic_cast<IResizable^>(m_photos->GetAt(0));
+            if (nullptr != firstPhoto)
+            {
+                firstPhoto->ColumnSpan = 2;
+                firstPhoto->RowSpan = 2;
+            }
+            OnPropertyChanged("Items");
+            
+        }
+        OnPropertyChanged("Title");
+    });
+}
+
+void HubPhotoGroup::OnDataChanged()
+{
+    QueryPhotosAsync().then(ObserveException<void>(m_exceptionPolicy));
 }

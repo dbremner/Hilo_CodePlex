@@ -8,7 +8,9 @@
 //===============================================================================
 #include "pch.h"
 #include "StubPhotoGroup.h"
+#include "..\Hilo\IPhoto.h"
 
+using namespace Hilo;
 using namespace HiloTests;
 using namespace Platform;
 using namespace Platform::Collections;
@@ -29,7 +31,7 @@ String^ StubPhotoGroup::Title::get()
     return "";
 }
 
-IObservableVector<Platform::Object^>^ StubPhotoGroup::Items::get()
+IObservableVector<IPhoto^>^ StubPhotoGroup::Items::get()
 {
-    return ref new Vector<Object^>();
+    return ref new Vector<IPhoto^>();
 }

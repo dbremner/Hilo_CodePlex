@@ -19,10 +19,10 @@ concurrency::task<FileInformation^> TestImageGenerator::CreateTestImageFileFromL
     Platform::String^ newName)
 {
     StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-    return concurrency::task<Windows::Storage::StorageFile^>(installStorageFolder->GetFileAsync("Images\\" + fileName))
+    return concurrency::create_task(installStorageFolder->GetFileAsync("Images\\" + fileName))
         .then([newName](Windows::Storage::StorageFile^ file) {
             return file->CopyAsync(Windows::Storage::KnownFolders::PicturesLibrary, newName, Windows::Storage::NameCollisionOption::ReplaceExisting);
-    }).then([](Windows::Storage::StorageFile^ file) {
+    }).then([](Windows::Storage::StorageFile^ file) {		
         auto fileTypeFilter = ref new Platform::Collections::Vector<Platform::String^>();
         fileTypeFilter->Append(".png");
         fileTypeFilter->Append(".jpg");
@@ -47,10 +47,10 @@ concurrency::task<void> HiloTests::TestImageGenerator::DeleteFilesAsync()
 {
     std::vector<concurrency::task<void>> deleteTasks;
 
-    std::for_each(std::begin(m_createdFiles), std::end(m_createdFiles), [&deleteTasks](IStorageItem^ filePath)
+    for (auto filePath : m_createdFiles)
     {
-        deleteTasks.push_back(concurrency::task<void>(filePath->DeleteAsync()));
-    });
+        deleteTasks.push_back(concurrency::create_task(filePath->DeleteAsync()));
+    }
 
     return concurrency::when_all(begin(deleteTasks), end(deleteTasks)).then([this]()
     {
@@ -61,7 +61,7 @@ concurrency::task<void> HiloTests::TestImageGenerator::DeleteFilesAsync()
 concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestImageGenerator::CreateTestImagesFromLocalFolder( Platform::String^ fileName, unsigned int count, Platform::String^ nameBase /*= "test"*/, Platform::String^ extension /*= ".png" */ )
 {
     Windows::Storage::StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-    return concurrency::task<Windows::Storage::StorageFile^>(installStorageFolder->GetFileAsync("Images\\" + fileName))
+    return concurrency::create_task(installStorageFolder->GetFileAsync("Images\\" + fileName))
         .then([nameBase, extension, count](Windows::Storage::StorageFile^ file) {
 
             std::vector<concurrency::task<Windows::Storage::StorageFile^>> tasks;
@@ -70,7 +70,7 @@ concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestI
             {
                 Platform::String^ newName = nameBase + i + extension;
 
-                tasks.push_back(concurrency::task<Windows::Storage::StorageFile^>(file->CopyAsync(Windows::Storage::KnownFolders::PicturesLibrary, newName, Windows::Storage::NameCollisionOption::ReplaceExisting)));
+                tasks.push_back(concurrency::create_task(file->CopyAsync(Windows::Storage::KnownFolders::PicturesLibrary, newName, Windows::Storage::NameCollisionOption::ReplaceExisting)));
             }
             return concurrency::when_all(tasks.begin(), tasks.end());
     }).then([extension, count](std::vector<Windows::Storage::StorageFile^> files) {
@@ -82,7 +82,7 @@ concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestI
         queryOptions->IndexerOption = Windows::Storage::Search::IndexerOption::DoNotUseIndexer;
         Platform::String^ filter = "";
 
-        std::for_each(files.begin(), files.end(), [&filter](Windows::Storage::StorageFile^ file)
+        for (auto file : files)
         {             
             if (filter != "")
             {
@@ -90,17 +90,17 @@ concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestI
             }
 
             filter += "System.FileName:=\"" + file->Name + "\"";
-        });
+        }
 
         queryOptions->ApplicationSearchFilter = filter;
         auto fileQuery = picturesFolder->CreateFileQueryWithOptions(queryOptions);
         return fileQuery->GetFilesAsync(0, count);
     }).then([this](IVectorView<StorageFile^>^ files)
     {
-        std::for_each(begin(files), end(files), [this](StorageFile^ item) 
+        for (auto item : files)
         {
             m_createdFiles.push_back(item);
-        });
+        }
 
         return files;
     });

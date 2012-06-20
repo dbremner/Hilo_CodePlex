@@ -10,16 +10,17 @@
 #include "AsyncException.h"
 #include "TaskExceptionsExtensions.h"
 
+using namespace concurrency;
 using namespace Hilo;
 using namespace Windows::Foundation;
 
 IAsyncAction^ AsyncException::ObserveWithPolicy(IExceptionPolicy^ policy, IAsyncAction^ antecedent)
 {
-     return concurrency::create_async([antecedent, policy]
-            {
-                return concurrency::task<void>([antecedent]{ return antecedent; })
-                        .then(ObserveException<void>(policy));
-            });
+    return create_async([antecedent, policy]
+    {
+        return create_task([antecedent]{ return antecedent; })
+            .then(ObserveException<void>(policy));
+    });
 }
 
 

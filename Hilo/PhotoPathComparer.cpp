@@ -6,17 +6,22 @@
 // This code released under the terms of the 
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
-#pragma once
+#include "pch.h"
+#include "PhotoPathComparer.h"
+#include "IPhoto.h"
 
-namespace Hilo
+using namespace Hilo;
+
+bool PhotoPathComparer::operator()(IPhoto^ left, IPhoto^ right) const
 {
-    inline Windows::Foundation::DateTime DateForFileInformation(Windows::Storage::BulkAccess::FileInformation^ fileInfo)
+    if (nullptr == left && nullptr == right)
     {
-        auto dateTaken = fileInfo->ImageProperties->DateTaken;
-        if (dateTaken.UniversalTime == 0)
-        {
-            dateTaken = fileInfo->BasicProperties->DateModified;
-        }
-        return dateTaken;
+        return true;
     }
+    if (nullptr == left || nullptr == right)
+    {
+        return false;
+    }
+    bool equal = left->Path == right->Path;
+    return equal;
 }

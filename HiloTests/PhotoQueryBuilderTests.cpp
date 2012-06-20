@@ -8,24 +8,28 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\PhotoReader.h"
-
-using namespace Hilo;
+#include "..\Hilo\PhotoQueryBuilder.h"
 
 using namespace concurrency;
+using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {
-    TEST_CLASS(PhotoReaderTests)
+    TEST_CLASS(PhotoQueryBuilderTests)
     {
     public:
 
         TEST_METHOD_INITIALIZE(Initialize)
         {
             m_imageGenerator = TestImageGenerator();
+            concurrency::task_status status;
+            auto images = TestHelper::RunSynced(
+                m_imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"), 
+                status);
+            Assert::AreEqual(concurrency::task_status::completed, status);
         }
 
         TEST_METHOD_CLEANUP(Cleanup)
@@ -34,29 +38,18 @@ namespace HiloTests
             TestHelper::RunSynced(m_imageGenerator.DeleteFilesAsync(), status);
         }
 
-        TEST_METHOD(PhotoReaderShouldReadNoMoreThanMaxNumberOfPhotos)
+        TEST_METHOD(PhotoQueryBuilderShouldReadNoMoreThanMaxNumberOfPhotos)
         {
-            PhotoReader reader;
+            PhotoQueryBuilder query;
             unsigned int maxNumberOfItems = 5;
-            task<IVectorView<FileInformation^>^> t = reader.GetPhotosAsync("", maxNumberOfItems);
-            task_status status;            
+            auto result = query.GetPhotosAsync("", maxNumberOfItems);
+            task_status status;
             
-            auto result = TestHelper::RunSynced(t, status);
+            auto photos = TestHelper::RunSynced(result.GetStorageItemsTask(), status);
 
             Assert::AreEqual(completed, status);
-            Assert::IsTrue(result->Size <= maxNumberOfItems);
+            Assert::IsTrue(photos->Size <= maxNumberOfItems);
         }
-
-        TEST_METHOD(PhotoReaderShouldGetVirtualizedFileList)
-        {
-            concurrency::task_status status;
-            auto photos = TestHelper::RunSynced(
-                m_imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 1, "random_test"),
-                status);
-
-            Assert::AreEqual(concurrency::completed, status); 
-        }
-
     private:
         TestImageGenerator m_imageGenerator;
     };

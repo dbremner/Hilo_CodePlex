@@ -9,12 +9,12 @@
 #pragma once
 #include "..\Hilo\IExceptionPolicy.h"
 
-namespace HiloTests {
-
-    ref class StubExceptionPolicy : public Hilo::IExceptionPolicy
+namespace HiloTests 
+{
+    ref class StubExceptionPolicy sealed : public Hilo::IExceptionPolicy
     {
     public:
-        Platform::Exception^ SuppliedException;
+        property Platform::Exception^ SuppliedException;
         virtual void HandleException(Platform::Exception^ exception);
     };
 }

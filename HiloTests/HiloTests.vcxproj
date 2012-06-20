@@ -27,12 +27,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{ddb676f4-6d05-482e-9d3e-c042ae14df5c}</ProjectGuid>
+    <ProjectGuid>{5dbadc64-9396-4844-91fa-b5e3bf5c95f7}</ProjectGuid>
     <RootNamespace>HiloTests</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxPackage>True</AppxPackage>
+    <AppxPackageIncludePrivateSymbols>true</AppxPackageIncludePrivateSymbols>
     <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
-    <AppContainerApplication>true</AppContainerApplication>
-    <AppXPackage>True</AppXPackage></PropertyGroup>
+    <AppContainerApplication>true</AppContainerApplication></PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -108,9 +109,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros">
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
     <PackageCertificateKeyFile>HiloTests_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>CAD26F603730CA4B843AA41AF1C430C84AAADE34</PackageCertificateThumbprint>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -217,42 +218,50 @@
     <ClInclude Include="..\Hilo\BooleanToBrushConverter.h" />
     <ClInclude Include="..\Hilo\Common\BindableBase.h" />
     <ClInclude Include="..\Hilo\CropImageViewModel.h" />
-    <ClInclude Include="..\Hilo\DateTimeToStringConverter.h" />
-    <ClInclude Include="..\Hilo\DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="..\Hilo\DelegateCommand.h" />
-    <ClInclude Include="..\Hilo\ExceptionPolicyFactory.h" />
-    <ClInclude Include="..\Hilo\FileInformationToBitmapImageConverter.h" />
-    <ClInclude Include="..\Hilo\FileInformationToToolTipConverter.h" />
+    <ClInclude Include="..\Hilo\FileQueryOperation.h" />
+    <ClInclude Include="..\Hilo\FileRepository.h" />
+    <ClInclude Include="..\Hilo\FolderQueryOperation.h" />
+    <ClInclude Include="..\Hilo\FileSizeConverter.h" />
+    <ClInclude Include="..\Hilo\HubGroupType.h" />
     <ClInclude Include="..\Hilo\HubPhotoGroup.h" />
     <ClInclude Include="..\Hilo\IExceptionPolicy.h" />
     <ClInclude Include="..\Hilo\ImageBase.h" />
     <ClInclude Include="..\Hilo\ImageBrowserViewModel.h" />
-    <ClInclude Include="..\Hilo\ImageViewData.h" />
+    <ClInclude Include="..\Hilo\ImageNavigationData.h" />
     <ClInclude Include="..\Hilo\ImageViewModel.h" />
+    <ClInclude Include="..\Hilo\IPhoto.h" />
     <ClInclude Include="..\Hilo\IPhotoGroup.h" />
+    <ClInclude Include="..\Hilo\IRepository.h" />
     <ClInclude Include="..\Hilo\IResizable.h" />
+    <ClInclude Include="..\Hilo\IResourceLoader.h" />
+    <ClInclude Include="..\Hilo\LocalResourceLoader.h" />
     <ClInclude Include="..\Hilo\MainHubViewModel.h" />
     <ClInclude Include="..\Hilo\MonthBlock.h" />
     <ClInclude Include="..\Hilo\MonthGroup.h" />
-    <ClInclude Include="..\Hilo\PageType.h" />
     <ClInclude Include="..\Hilo\Photo.h" />
     <ClInclude Include="..\Hilo\PhotoCache.h" />
-    <ClInclude Include="..\Hilo\PhotoReader.h" />
+    <ClInclude Include="..\Hilo\PhotoGroupData.h" />
+    <ClInclude Include="..\Hilo\PhotoPathComparer.h" />
+    <ClInclude Include="..\Hilo\PhotoQueryBuilder.h" />
+    <ClInclude Include="..\Hilo\PhotoQueryBuilderResult.h" />
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h" />
     <ClInclude Include="..\Hilo\RotateImageViewModel.h" />
-    <ClInclude Include="..\Hilo\TaskExceptionsExtensions.h" />
-    <ClInclude Include="..\Hilo\StorageExtensions.h" />
-    <ClInclude Include="..\Hilo\TaskExtensions.h" />
-    <ClInclude Include="..\Hilo\ThumbnailConverter.h" />
+    <ClInclude Include="..\Hilo\SimpleQueryOperation.h" />
     <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
-    <ClInclude Include="..\Hilo\TileUpdateScheduler.h" />
     <ClInclude Include="..\Hilo\ViewModelBase.h" />
-    <ClInclude Include="..\Hilo\ViewModelLocator.h" />
     <ClInclude Include="..\Hilo\WideFiveImageTile.h" />
     <ClInclude Include="..\Hilo\YearGroup.h" />
+    <ClInclude Include="DispatchedEvent.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="StubExceptionPolicy.h" />
+    <ClInclude Include="StubPhoto.h" />
+    <ClInclude Include="StubPhotoCache.h" />
     <ClInclude Include="StubPhotoGroup.h" />
+    <ClInclude Include="StubQueryOperation.h" />
+    <ClInclude Include="StubRepository.h" />
+    <ClInclude Include="StubResourceLoader.h" />
+    <ClInclude Include="StubYearGroup.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestHelper.h" />
     <ClInclude Include="TestImageGenerator.h" />
@@ -262,41 +271,45 @@
     <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp" />
     <ClCompile Include="..\Hilo\Common\BindableBase.cpp" />
     <ClCompile Include="..\Hilo\CropImageViewModel.cpp" />
-    <ClCompile Include="..\Hilo\DateTimeToStringConverter.cpp" />
-    <ClCompile Include="..\Hilo\DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="..\Hilo\DelegateCommand.cpp" />
-    <ClCompile Include="..\Hilo\ExceptionPolicyFactory.cpp" />
-    <ClCompile Include="..\Hilo\FileInformationToBitmapImageConverter.cpp" />
-    <ClCompile Include="..\Hilo\FileInformationToToolTipConverter.cpp" />
+    <ClCompile Include="..\Hilo\FileQueryOperation.cpp" />
+    <ClCompile Include="..\Hilo\FileRepository.cpp" />
+    <ClCompile Include="..\Hilo\FileSizeConverter.cpp" />
+    <ClCompile Include="..\Hilo\FolderQueryOperation.cpp" />
     <ClCompile Include="..\Hilo\HubPhotoGroup.cpp" />
     <ClCompile Include="..\Hilo\ImageBase.cpp" />
     <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp" />
-    <ClCompile Include="..\Hilo\ImageViewData.cpp" />
+    <ClCompile Include="..\Hilo\ImageNavigationData.cpp" />
     <ClCompile Include="..\Hilo\ImageViewModel.cpp" />
+    <ClCompile Include="..\Hilo\LocalResourceLoader.cpp" />
     <ClCompile Include="..\Hilo\MainHubViewModel.cpp" />
     <ClCompile Include="..\Hilo\MonthBlock.cpp" />
     <ClCompile Include="..\Hilo\MonthGroup.cpp" />
     <ClCompile Include="..\Hilo\Photo.cpp" />
     <ClCompile Include="..\Hilo\PhotoCache.cpp" />
-    <ClCompile Include="..\Hilo\PhotoReader.cpp" />
+    <ClCompile Include="..\Hilo\PhotoGroupData.cpp" />
+    <ClCompile Include="..\Hilo\PhotoPathComparer.cpp" />
+    <ClCompile Include="..\Hilo\PhotoQueryBuilder.cpp" />
     <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp" />
     <ClCompile Include="..\Hilo\RotateImageViewModel.cpp" />
-    <ClCompile Include="..\Hilo\ThumbnailConverter.cpp" />
+    <ClCompile Include="..\Hilo\SimpleQueryOperation.cpp" />
     <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp" />
-    <ClCompile Include="..\Hilo\TileUpdateScheduler.cpp" />
     <ClCompile Include="..\Hilo\ViewModelBase.cpp" />
     <ClCompile Include="..\Hilo\WideFiveImageTile.cpp" />
     <ClCompile Include="..\Hilo\YearGroup.cpp" />
     <ClCompile Include="AsyncExceptionTests.cpp" />
     <ClCompile Include="BooleanToBrushConverterTests.cpp" />
     <ClCompile Include="CropImageViewModelTests.cpp" />
-    <ClCompile Include="DateTimeToStringConverterTests.cpp" />
-    <ClCompile Include="FileInformationToBitmapImageConverterTests.cpp" />
-    <ClCompile Include="FileInformationToToolTipConverterTests.cpp" />
+    <ClCompile Include="DispatchedEvent.cpp" />
+    <ClCompile Include="FileSizeConverterTests.cpp" />
+    <ClCompile Include="HubPhotoGroupTests.cpp" />
+    <ClCompile Include=".\PhotoTests.cpp" />
     <ClCompile Include="ImageBrowserViewModelTests.cpp" />
     <ClCompile Include="ImageViewDataTests.cpp" />
     <ClCompile Include="ImageViewModelTests.cpp" />
     <ClCompile Include="MainHubViewModelTests.cpp" />
+    <ClCompile Include="MonthBlockTests.cpp" />
+    <ClCompile Include="MonthGroupTests.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -305,20 +318,24 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="HubPhotoGroupTests.cpp" />
     <ClCompile Include="PhotoCacheTests.cpp" />
-    <ClCompile Include="PhotoReaderTests.cpp" />
+    <ClCompile Include=".\PhotoQueryBuilderTests.cpp" />
     <ClCompile Include="RandomPhotoSelectorTests.cpp" />
     <ClCompile Include="RotateImageViewModelTests.cpp" />
     <ClCompile Include="StubExceptionPolicy.cpp" />
+    <ClCompile Include="StubPhoto.cpp" />
+    <ClCompile Include="StubPhotoCache.cpp" />
     <ClCompile Include="StubPhotoGroup.cpp" />
+    <ClCompile Include="StubQueryOperation.cpp" />
+    <ClCompile Include="StubRepository.cpp" />
+    <ClCompile Include="StubResourceLoader.cpp" />
+    <ClCompile Include="StubYearGroup.cpp" />
     <ClCompile Include="TaskExceptionTests.cpp" />
     <ClCompile Include="TestHelper.cpp" />
-    <ClCompile Include="HubPhotoTests.cpp" />
     <ClCompile Include="TestImageGenerator.cpp" />
-    <ClCompile Include="ThumbnailConverterTests.cpp" />
     <ClCompile Include="ThumbnailGeneratorTests.cpp" />
     <ClCompile Include="WideTile05Tests.cpp" />
+    <ClCompile Include="YearGroupTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="CppUnitTestFramework, Version=11.0" />
@@ -328,6 +345,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <None Include="HiloTests_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\InvalidImageFile.jpg" />
@@ -335,9 +353,6 @@
     <Image Include="Images\UnitTestSmallLogo.png" />
     <Image Include="Images\UnitTestSplashScreen.png" />
     <Image Include="Images\UnitTestStoreLogo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="HiloTests_TemporaryKey.pfx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

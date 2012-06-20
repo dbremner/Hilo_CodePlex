@@ -15,7 +15,7 @@ namespace Hilo
     template <typename Result>
     concurrency::task<Result> task_from_result(Result result)
     {
-        return concurrency::task<Result>([result]() -> Result { return result; });
+        return concurrency::create_task([result]() -> Result { return result; });
     }
 
 }

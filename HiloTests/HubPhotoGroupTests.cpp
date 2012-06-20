@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,12 +8,15 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "..\Hilo\IPhoto.h"
+#include "..\Hilo\IRepository.h"
 #include "..\Hilo\HubPhotoGroup.h"
 #include "StubExceptionPolicy.h"
-
-using namespace Hilo;
+#include "StubPhoto.h"
+#include "StubRepository.h"
 
 using namespace concurrency;
+using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
 using namespace Platform::Collections;
@@ -28,63 +31,55 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_generator = TestImageGenerator();
+            m_repository = ref new StubRepository();
+            m_exceptionPolicy = ref new StubExceptionPolicy();
         }
 
-        TEST_METHOD_CLEANUP(Cleanup)
+        TEST_METHOD(HubPhotoGroupShouldCallRepositoryToGetPhotos)
         {
-            concurrency::task_status status;
-            TestHelper::RunSynced(m_generator.DeleteFilesAsync(), status);
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            task_status status;
+            
+             TestHelper::RunUISynced([photoGroup, &status]
+            {
+                TestHelper::RunSynced(photoGroup->QueryPhotosAsync(), status);
+            });
+
+            Assert::AreEqual(completed, status);
+            Assert::IsTrue(m_repository->GetPhotosForGroupWithQueryOperationAsyncCalled);
         }
 
-        TEST_METHOD(HubPhotoGroupShouldCallFunctionToGetPhotos)
+        TEST_METHOD(HubPhotoGroupShouldReturnEmptyTitleWhenNoPicturesArePresent)
         {
-            bool photosNull = false;
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            task_status status;
 
-            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", GetPhotosAsync(), ref new StubExceptionPolicy());
-            Object^ items;
-
-            TestHelper::RunUISynced([this, photoGroup, &items]() {
-                items = photoGroup->Items;
+            TestHelper::RunUISynced([photoGroup, &status]
+            {
+                TestHelper::RunSynced(photoGroup->QueryPhotosAsync(), status);
             });
 
-            Assert::IsNotNull(items);
+            Assert::AreEqual(completed, status);
+            Assert::AreEqual("No Title", photoGroup->Title);
         }
 
-        /*TEST_METHOD(HubPhotoGroupShouldReturnEmptyTitleWhenNoPicturesArePresent)
+        TEST_METHOD(HubPhotoGroupShouldReturnTitleWhenPicturesArePresent)
         {
-            auto task = create_async([]() {
-                auto empty = ref new Vector<FileInformation^>();
-                return empty->GetView();
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            task_status status;
+            m_repository->PhotoToReturn = ref new StubPhoto();
+
+            TestHelper::RunUISynced([photoGroup, &status]
+            {
+                TestHelper::RunSynced(photoGroup->QueryPhotosAsync(), status);
             });
 
-            HubPhotoGroup^ photoGroup = ref new HubPhotoGroup("Test", "No Test", task);
-            Object^ items;
-
-            TestHelper::RunUISynced([this, photoGroup, &items]() {
-                items = photoGroup->Items;
-            });
-
-            Assert::AreEqual("No Test", photoGroup->Title);
-        }*/
-
-        IAsyncOperation<IVectorView<FileInformation^>^>^ GetPhotosAsync()
-        {
-            concurrency::task_status status;
-            FileInformation^ file = TestHelper::RunSynced<FileInformation^>(m_generator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
-
-            task<IVectorView<FileInformation^>^> task([file]()-> IVectorView<FileInformation^>^ {
-                Vector<FileInformation^>^ files = ref new Vector<FileInformation^>();
-                files->Append(file);
-                return files->GetView();
-            });
-
-            return create_async([task]() { 
-                return task;
-            });
+            Assert::AreEqual(completed, status);
+            Assert::AreEqual("Title", photoGroup->Title);
         }
 
     private:
-        TestImageGenerator m_generator;
+        StubRepository^ m_repository;
+        StubExceptionPolicy^ m_exceptionPolicy;
     };
 }

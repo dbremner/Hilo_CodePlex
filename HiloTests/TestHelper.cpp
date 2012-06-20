@@ -42,7 +42,8 @@ void TestHelper::RunUISynced(std::function<void ()>&& action)
 
         });
 
-        task<void> uiTask(wnd->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal,
+        auto uiTask = create_task(wnd->Dispatcher->RunAsync(
+            Windows::UI::Core::CoreDispatcherPriority::Normal,
             callback));
         task_status status = TaskWait<void>(uiTask);
         
@@ -61,6 +62,9 @@ void TestHelper::RunUISynced(std::function<void ()>&& action)
 template<typename T>
 task_status TestHelper::TaskWait(task<T>& t, bool pump)
 {
+    Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
+    Windows::UI::Core::CoreDispatcher^ dispatcher = wnd->Dispatcher;
+
     HANDLE hEvent = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, WRITE_OWNER | EVENT_ALL_ACCESS);
     if (hEvent == NULL)
     {
@@ -83,9 +87,13 @@ task_status TestHelper::TaskWait(task<T>& t, bool pump)
 
     if (pump)
     {
-        //WaitForMultipleObjectsEx(1, &hEvent, true, INFINITE, true);
-        DWORD dummy;
-        CoWaitForMultipleHandles(0x8, INFINITE, 1, &hEvent, &dummy);
+        // Spin wait and exercise message pump
+        DWORD waitResult = STATUS_PENDING;
+        while(waitResult != WAIT_OBJECT_0)
+        {
+            dispatcher->ProcessEvents(Windows::UI::Core::CoreProcessEventsOption::ProcessAllIfPresent);
+            waitResult = WaitForSingleObjectEx(hEvent, 0, true);
+        }
     }
     else
     {

@@ -6,19 +6,27 @@
 // This code released under the terms of the 
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
+//
+// App.xaml.cpp
+// Implementation of the App class
+//
+
 #include "pch.h"
-#include "MainHubView.xaml.h"
+#include "Common\SuspensionManager.h"
+#include "MainHubView.g.h"
 #include "TileUpdateScheduler.h"
 #include "ExceptionPolicyFactory.h"
+#include "HiloPage.h"
 
+using namespace concurrency;
 using namespace Hilo;
+using namespace Hilo::Common;
 using namespace Platform;
-using namespace Platform::Details;
-using namespace Platform::Collections;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
@@ -28,6 +36,8 @@ using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 
+// The Grid Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234226
+
 /// <summary>
 /// Initializes the singleton application object.  This is the first line of authored code
 /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -36,35 +46,60 @@ App::App()
 {
     InitializeComponent();
     Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
-    UnhandledException += ref new UnhandledExceptionEventHandler(this, &App::OnUnhandledException);
 }
 
 /// <summary>
-/// Invoked when the application is launched normally by the end user.  Other entry points
-/// will be used when the application is launched to open a specific file, to display
-/// search results, and so forth.
+/// Invoked when the application is launched normally by the end user.  Other entry points will
+/// be used when the application is launched to open a specific file, to display search results,
+/// and so forth.
 /// </summary>
-/// <param name="args">Details about the launch request and process.</param>
-void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ pArgs)
+/// <param name="pArgs">Details about the launch request and process.</param>
+void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
 {
     m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
 
-    if (pArgs->PreviousExecutionState == ApplicationExecutionState::Terminated)
+    // Do not repeat app initialization when already running, just ensure that
+    // the window is active
+    if (pArgs->PreviousExecutionState == ApplicationExecutionState::Running)
     {
+        Window::Current->Activate();
+        return;
     }
 
-    // Schedule tile updates.
-    TileUpdateScheduler scheduler(m_exceptionPolicy);
-    scheduler.ScheduleUpdateAsync();
-
-    // Create a Frame to act navigation context and navigate to the first page
+    // Create a Frame to act as the navigation context and associate it with
+    // a SuspensionManager key
     auto rootFrame = ref new Frame();
-    TypeName mainHubType = { MainHubView::typeid->FullName, TypeKind::Metadata };
-    rootFrame->Navigate(mainHubType);
+    SuspensionManager::RegisterFrame(rootFrame, "AppFrame");
 
-    // Place the frame in the current Window and ensure that it is active
-    Window::Current->Content = rootFrame;
-    Window::Current->Activate();
+    auto prerequisite = create_task([]{});
+    if (pArgs->PreviousExecutionState == ApplicationExecutionState::Terminated)
+    {
+        // Restore the saved session state only when appropriate, scheduling the
+        // final launch steps after the restore is complete
+        prerequisite = SuspensionManager::RestoreAsync();
+    }
+    prerequisite.then([=]()
+    {
+        TileUpdateScheduler scheduler;
+        scheduler.ScheduleUpdateAsync(m_exceptionPolicy);
+
+    }).then([=]()
+    {
+        // When the navigation stack isn't restored navigate to the first page,
+        // configuring the new page by passing required information as a navigation
+        // parameter
+        if (rootFrame->Content == nullptr)
+        {
+            if (!rootFrame->Navigate(TypeName(MainHubView::typeid)))
+            {
+                throw ref new FailureException("Failed to create initial page");
+            }
+        }
+
+        // Place the frame in the current Window and ensure that it is active
+        Window::Current->Content = rootFrame;
+        Window::Current->Activate();
+    }, task_continuation_context::use_current());
 }
 
 /// <summary>
@@ -76,15 +111,14 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 /// <param name="e">Details about the suspend request.</param>
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
-}
+    (void) sender;	// Unused parameter
 
-void App::OnUnhandledException(Object^ sender, UnhandledExceptionEventArgs^ args)
-{
-    auto exception = ref new FailureException();
-    m_exceptionPolicy->HandleException(exception);
+    auto deferral = e->SuspendingOperation->GetDeferral();
     
-    auto e = args->Exception;
-    auto m = args->Message;
-
-    throw exception;
+    HiloPage::IsSuspending = true;
+    SuspensionManager::SaveAsync().then([=]()
+    {
+        HiloPage::IsSuspending = false;
+        deferral->Complete();
+    });
 }

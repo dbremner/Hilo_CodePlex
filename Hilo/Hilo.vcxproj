@@ -27,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{c2d1b68a-21e0-4cf8-91be-5a28ca3fa574}</ProjectGuid>
+    <ProjectGuid>{44fdb5f0-7979-4922-a6b4-10f5437b91e9}</ProjectGuid>
     <RootNamespace>Hilo</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
@@ -91,17 +91,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <PackageCertificateKeyFile>Hilo_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>8DFFB9856F343463E31E4A86EE9A28F46D04B433</PackageCertificateThumbprint>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -111,14 +129,16 @@
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="CropImageViewModel.h" />
-    <ClInclude Include="DateTimeToStringConverter.h" />
     <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="DelegateCommand.h" />
     <ClInclude Include="ExceptionPolicyFactory.h" />
-    <ClInclude Include="FileInformationToBitmapImageConverter.h" />
-    <ClInclude Include="FileInformationToToolTipConverter.h" />
+    <ClInclude Include="FileQueryOperation.h" />
+    <ClInclude Include="FolderQueryOperation.h" />
+    <ClInclude Include="FileSizeConverter.h" />
+    <ClInclude Include="HasPhotosConverter.h" />
     <ClInclude Include="HiloPage.h" />
     <ClInclude Include="HubGroupType.h" />
+    <ClInclude Include="HubPhotoGroup.h" />
     <ClInclude Include="IExceptionPolicy.h" />
     <ClInclude Include="ImageBase.h" />
     <ClInclude Include="ImageBrowserView.xaml.h">
@@ -128,25 +148,24 @@
     <ClInclude Include="ImageView.xaml.h">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="ImageViewData.h" />
+    <ClInclude Include=".\ImageNavigationData.h" />
     <ClInclude Include="ImageViewModel.h" />
+    <ClInclude Include="IMonthBlock.h" />
+    <ClInclude Include="IPhoto.h" />
+    <ClInclude Include="IPhotoCache.h" />
     <ClInclude Include="IPhotoGroup.h" />
+    <ClInclude Include=".\IQueryOperation.h" />
     <ClInclude Include="IResizable.h" />
+    <ClInclude Include="IResourceLoader.h" />
+    <ClInclude Include="IYearGroup.h" />
+    <ClInclude Include="LocalResourceLoader.h" />
     <ClInclude Include="MainHubView.xaml.h">
       <DependentUpon>MainHubView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="MainHubViewModel.h" />
     <ClInclude Include="MonthBlock.h" />
-    <ClInclude Include="Photo.h" />
-    <ClInclude Include="PhotoCache.h" />
     <ClInclude Include="MonthGroup.h" />
-    <ClInclude Include="RotateImageView.xaml.h">
-      <DependentUpon>RotateImageView.xaml</DependentUpon>
-    </ClInclude>
-    <ClInclude Include="RotateImageViewModel.h" />
-    <ClInclude Include="TaskExceptionsExtensions.h" />
-    <ClInclude Include="StorageExtensions.h" />
-    <ClInclude Include="TileUpdateScheduler.h" />
+    <ClInclude Include="NullPhotoGroup.h" />
     <ClInclude Include="PageType.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BindableBase.h" />
@@ -154,15 +173,28 @@
     <ClInclude Include="Common\BooleanNegationConverter.h" />
     <ClInclude Include="Common\LayoutAwarePage.h" />
     <ClInclude Include="Common\RichTextColumns.h" />
+    <ClInclude Include="Common\SuspensionManager.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="HubPhotoGroup.h" />
-    <ClInclude Include="PhotoReader.h" />
+    <ClInclude Include="Photo.h" />
+    <ClInclude Include="PhotoCache.h" />
+    <ClInclude Include=".\IRepository.h" />
+    <ClInclude Include=".\FileRepository.h" />
+    <ClInclude Include="PhotoGroupData.h" />
+    <ClInclude Include="PhotoPathComparer.h" />
+    <ClInclude Include=".\PhotoQueryBuilder.h" />
+    <ClInclude Include=".\PhotoQueryBuilderResult.h" />
     <ClInclude Include="RandomPhotoSelector.h" />
+    <ClInclude Include="RotateImageView.xaml.h">
+      <DependentUpon>RotateImageView.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="RotateImageViewModel.h" />
+    <ClInclude Include="SimpleQueryOperation.h" />
+    <ClInclude Include="TaskExceptionsExtensions.h" />
     <ClInclude Include="TaskExtensions.h" />
-    <ClInclude Include="ThumbnailConverter.h" />
     <ClInclude Include="ThumbnailGenerator.h" />
+    <ClInclude Include="TileUpdateScheduler.h" />
     <ClInclude Include="VariableGridView.h" />
     <ClInclude Include="VariableListView.h" />
     <ClInclude Include="ViewModelBase.h" />
@@ -174,27 +206,15 @@
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="ApplicationStyles.xaml">
-      <DeploymentContent>true</DeploymentContent>
-    </Page>
+    <Page Include="ApplicationStyles.xaml" />
     <Page Include="Common\StandardStyles.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="CropImageView.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ImageBrowserView.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ImageView.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MainHubView.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="RotateImageView.xaml">
-      <SubType>Designer</SubType>
-    </Page>
+    <Page Include="CropImageView.xaml" />
+    <Page Include="ImageBrowserView.xaml" />
+    <Page Include="ImageView.xaml" />
+    <Page Include="MainHubView.xaml" />
+    <Page Include="RotateImageView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -202,6 +222,14 @@
     </AppxManifest>
     <None Include="Common\ReadMe.txt" />
     <None Include="Hilo_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Hilo150b.png" />
+    <Image Include="Assets\Hilo30.png" />
+    <Image Include="Assets\Hilo310b.png" />
+    <Image Include="Assets\MSDN_Hilo_bgoverlay_v2_022712.png" />
+    <Image Include="Assets\MSDN_Hilo_Splash_v2_022712.png" />
+    <Image Include="Assets\StoreLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">
@@ -214,42 +242,37 @@
     <ClCompile Include="Common\BooleanNegationConverter.cpp" />
     <ClCompile Include="Common\LayoutAwarePage.cpp" />
     <ClCompile Include="Common\RichTextColumns.cpp" />
+    <ClCompile Include="Common\SuspensionManager.cpp" />
     <ClCompile Include="CropImageView.xaml.cpp">
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="CropImageViewModel.cpp" />
-    <ClCompile Include="DateTimeToStringConverter.cpp" />
     <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="DelegateCommand.cpp" />
     <ClCompile Include="ExceptionPolicyFactory.cpp" />
-    <ClCompile Include="FileInformationToBitmapImageConverter.cpp" />
-    <ClCompile Include="FileInformationToToolTipConverter.cpp" />
+    <ClCompile Include="FileQueryOperation.cpp" />
+    <ClCompile Include="FolderQueryOperation.cpp" />
+    <ClCompile Include="FileSizeConverter.cpp" />
+    <ClCompile Include="HasPhotosConverter.cpp" />
     <ClCompile Include="HiloPage.cpp" />
+    <ClCompile Include="HubPhotoGroup.cpp" />
     <ClCompile Include="ImageBase.cpp" />
     <ClCompile Include="ImageBrowserView.xaml.cpp">
       <DependentUpon>ImageBrowserView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="ImageBrowserViewModel.cpp" />
+    <ClCompile Include="ImageNavigationData.cpp" />
     <ClCompile Include="ImageView.xaml.cpp">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="ImageViewData.cpp" />
     <ClCompile Include="ImageViewModel.cpp" />
+    <ClCompile Include="LocalResourceLoader.cpp" />
     <ClCompile Include="MainHubView.xaml.cpp">
       <DependentUpon>MainHubView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="MainHubViewModel.cpp" />
     <ClCompile Include="MonthBlock.cpp" />
-    <ClCompile Include="Photo.cpp" />
-    <ClCompile Include="PhotoCache.cpp" />
     <ClCompile Include="MonthGroup.cpp" />
-    <ClCompile Include="RotateImageView.xaml.cpp">
-      <DependentUpon>RotateImageView.xaml</DependentUpon>
-    </ClCompile>
-    <ClCompile Include="RotateImageViewModel.cpp" />
-    <ClCompile Include="ThumbnailConverter.cpp" />
-    <ClCompile Include="ThumbnailGenerator.cpp" />
-    <ClCompile Include="TileUpdateScheduler.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -258,23 +281,26 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="HubPhotoGroup.cpp" />
-    <ClCompile Include="PhotoReader.cpp" />
+    <ClCompile Include="Photo.cpp" />
+    <ClCompile Include="PhotoCache.cpp" />
+    <ClCompile Include=".\FileRepository.cpp" />
+    <ClCompile Include="PhotoGroupData.cpp" />
+    <ClCompile Include="PhotoPathComparer.cpp" />
+    <ClCompile Include=".\PhotoQueryBuilder.cpp" />
     <ClCompile Include="RandomPhotoSelector.cpp" />
+    <ClCompile Include="RotateImageView.xaml.cpp">
+      <DependentUpon>RotateImageView.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="RotateImageViewModel.cpp" />
+    <ClCompile Include="SimpleQueryOperation.cpp" />
+    <ClCompile Include="ThumbnailGenerator.cpp" />
+    <ClCompile Include="TileUpdateScheduler.cpp" />
     <ClCompile Include="VariableGridView.cpp" />
     <ClCompile Include="VariableListView.cpp" />
     <ClCompile Include="ViewModelBase.cpp" />
     <ClCompile Include="ViewModelLocator.cpp" />
     <ClCompile Include="WideFiveImageTile.cpp" />
     <ClCompile Include="YearGroup.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Assets\Hilo150b.png" />
-    <Image Include="Assets\Hilo30.png" />
-    <Image Include="Assets\Hilo310b.png" />
-    <Image Include="Assets\MSDN_Hilo_bgoverlay_v2_022712.png" />
-    <Image Include="Assets\MSDN_Hilo_Splash_v2_022712.png" />
-    <Image Include="Assets\StoreLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Include="en-US\Resources.resw" />

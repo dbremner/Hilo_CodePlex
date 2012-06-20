@@ -9,6 +9,7 @@
 #pragma once
 #include "Common\BindableBase.h"
 #include "IResizable.h"
+#include "IPhoto.h"
 
 namespace Hilo 
 {
@@ -16,24 +17,81 @@ namespace Hilo
     interface class IExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class Photo sealed : public BindableBase, public IResizable
+    public ref class Photo sealed : public Common::BindableBase, public IResizable, public IPhoto
     {
     public:
         Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, IExceptionPolicy^ exceptionPolicy);
-
-        operator Windows::Storage::BulkAccess::FileInformation^ ();
-
-        property Platform::String^ Name { Platform::String^ get(); }
-
-        property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Thumbnail 
-        { 
-            Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
-        }
+        virtual ~Photo();
 
         property IPhotoGroup^ Group
         {
-            IPhotoGroup^ get();
+            virtual IPhotoGroup^ get();
         }
+
+        property Platform::String^ Name 
+        { 
+            virtual Platform::String^ get(); 
+        }
+
+        property Platform::String^ Path
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Platform::String^ FormattedPath
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Platform::String^ FileType
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Windows::Foundation::DateTime DateTaken
+        {
+            virtual Windows::Foundation::DateTime get();
+        }
+
+        property Platform::String^ FormattedDateTaken
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Platform::String^ FormattedTimeTaken
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Platform::String^ Resolution
+        {
+            virtual Platform::String^ get();
+        }
+
+        property unsigned long long FileSize
+        {
+            virtual unsigned long long get();
+        }
+
+        property Platform::String^ DisplayType
+        {
+            virtual Platform::String^ get();
+        }
+
+        property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Thumbnail 
+        { 
+            virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
+        }
+
+        property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Image
+        { 
+            virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
+        }
+
+        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
+        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
+
+        virtual void ClearImageData();
 
         property int ColumnSpan 
         {
@@ -50,12 +108,14 @@ namespace Hilo
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
         Platform::WeakReference m_weakPhotoGroup;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
+        //Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
+        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         IExceptionPolicy^ m_exceptionPolicy;
+        Windows::Foundation::EventRegistrationToken m_thumbnailUpdatedEventToken;
         int m_columnSpan;
         int m_rowSpan;
 
-        void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ e);
+        void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ args);
     };
 
 }

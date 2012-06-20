@@ -19,6 +19,9 @@ namespace HiloTests
         template <typename T>
         static T RunSynced(concurrency::task<T> t, concurrency::task_status& status, bool pump = true)
         {
+            Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
+            Windows::UI::Core::CoreDispatcher^ dispatcher = wnd->Dispatcher;
+
             HANDLE hEvent = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
             if (hEvent == NULL)
             {
@@ -32,32 +35,40 @@ namespace HiloTests
                 {
                     result = previousTask.get();
                     status = concurrency::completed;
-               } 
+                } 
                 catch(...)
                 {
                     status = concurrency::canceled;
                 }
                 SetEvent(hEvent);
-            });
+            }, concurrency::task_continuation_context::use_arbitrary());
 
             if (pump)
             {
-                DWORD dummy;
-                CoWaitForMultipleHandles(0x8, INFINITE, 1, &hEvent, &dummy);
+                // Spin wait and exercise message pump
+                DWORD waitResult = STATUS_PENDING;
+                while(waitResult != WAIT_OBJECT_0)
+                {
+                    dispatcher->ProcessEvents(Windows::UI::Core::CoreProcessEventsOption::ProcessAllIfPresent);
+                    waitResult = WaitForSingleObjectEx(hEvent, 0, true);
+                }
             }
             else
             {
-                WaitForSingleObjectEx(hEvent, INFINITE,true);
-
+                WaitForSingleObjectEx(hEvent, INFINITE, true);
             }
-            CloseHandle(hEvent);
 
+            CloseHandle(hEvent);
 
             return result;
         }
 
-        static void RunSynced(concurrency::task<void> t, concurrency::task_status& status, bool pump = true)
+        template<>
+        static void RunSynced<void>(concurrency::task<void> t, concurrency::task_status& status, bool pump)
         {
+            Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
+            Windows::UI::Core::CoreDispatcher^ dispatcher = wnd->Dispatcher;
+
             HANDLE hEvent = CreateEventEx(NULL, NULL, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
             if (hEvent == NULL)
             {
@@ -70,23 +81,27 @@ namespace HiloTests
                 {
                     previousTask.get();
                     status = concurrency::completed;
-               } 
+                } 
                 catch(...)
                 {
                     status = concurrency::canceled;
                 }
                 SetEvent(hEvent);
-            });
+            }, concurrency::task_continuation_context::use_arbitrary());
 
             if (pump)
             {
-                DWORD dummy;
-                CoWaitForMultipleHandles(0x8, INFINITE, 1, &hEvent, &dummy);
+                // Spin wait and exercise message pump
+                DWORD waitResult = STATUS_PENDING;
+                while(waitResult != WAIT_OBJECT_0)
+                {
+                    dispatcher->ProcessEvents(Windows::UI::Core::CoreProcessEventsOption::ProcessAllIfPresent);
+                    waitResult = WaitForSingleObjectEx(hEvent, 0, true);
+                }
             }
             else
             {
-                WaitForSingleObjectEx(hEvent, INFINITE,true);
-
+                WaitForSingleObjectEx(hEvent, INFINITE, true);
             }
             CloseHandle(hEvent);
 

@@ -13,14 +13,17 @@
 namespace Hilo
 {
     interface class IExceptionPolicy;
+    interface class IRepository;
+    interface class IPhoto;
+    ref class ImageNavigationData;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class RotateImageViewModel sealed : public ImageBase
     {
     public:
-        RotateImageViewModel(IExceptionPolicy^ exceptionPolicy);
+        RotateImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
 
-        property Windows::UI::Xaml::Media::ImageSource^ Photo
+        property Windows::UI::Xaml::Media::ImageSource^ Image
         {
             Windows::UI::Xaml::Media::ImageSource^ get();
         }
@@ -40,10 +43,12 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        property Platform::Object^ ImageMargin
+        property Windows::UI::Xaml::Thickness ImageMargin
         {
-            Platform::Object^ get();
+            Windows::UI::Xaml::Thickness get();
         }
+        
+        property bool InProgress { bool get(); }
 
         ///<summary>Returns the rotation angle for image display.</summary>
         property double RotationAngle 
@@ -52,26 +57,34 @@ namespace Hilo
             void set(double value);
         }
 
+        virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
+        virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-
-        void Initialize(Windows::Storage::BulkAccess::FileInformation^ image);
 
         void EndRotation();
 
+    internal:
+        void Initialize(ImageNavigationData^ navigationData);
+
     private:
-        Windows::Storage::BulkAccess::FileInformation^ m_file;
+        IRepository^ m_repository;
+        IPhoto^ m_photo;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         Windows::Storage::Streams::IRandomAccessStream^ m_randomAccessStream;
         Windows::UI::Xaml::Input::ICommand^ m_rotateCommand;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
-        Platform::Object^ m_imageMargin;
+        Windows::UI::Xaml::Thickness m_imageMargin;
+        bool m_inProgress;
         bool m_isSaving;
         double m_rotationAngle;
         bool m_isExifOrientation;
         unsigned int m_exifOrientation;
+        ImageNavigationData^ m_navigationData;
         
-        concurrency::task<void> RotateImageViewModel::DoRotate(double angle);
+        void ChangeInProgress(bool value);
+        concurrency::task<IPhoto^> GetImagePhotoAsync();
+        concurrency::task<void> RotateImageViewModel::RotateImageAsync(double angle);
         unsigned int ConvertExifOrientationToDegreesRotation(unsigned int exifOrientationFlag);
         unsigned int ConvertDegreesRotationToExifOrientation(unsigned int angle);
 

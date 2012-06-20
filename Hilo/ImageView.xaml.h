@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,8 +9,7 @@
 #pragma once
 
 #include "HiloPage.h"
-#include "FileInformationToBitmapImageConverter.h" // Required by generated header
-#include "FileInformationToToolTipConverter.h" // Required by generated header
+#include "FileSizeConverter.h" // Required by generated header
 #include "ImageView.g.h"
 
 namespace Hilo
@@ -20,15 +19,15 @@ namespace Hilo
     public:
         ImageView();
 
-    protected:
-        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
 
     private:
-        void OnPhotosSelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
-        void OnImageViewTopAppBarClosed(Platform::Object^ sender, Platform::Object^ e);
-        void OnImageViewTopAppBarOpened(Platform::Object^ sender, Platform::Object^ e);
+        void OnFilmStripLoaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+        void OnImagePointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+        void OnImagePointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+        void OnImagePointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 
-        Hilo::ImageViewModel^ m_viewModel;
+        Windows::Foundation::EventRegistrationToken m_filmStripLoadedToken;
+        bool m_pointerPressed;
+        Windows::Foundation::Point m_pointer;
     };
 }

@@ -7,18 +7,19 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
+#include "IPhotoCache.h"
 
 namespace Hilo
 {
-    ref class Photo;
-
-    public ref class PhotoCache sealed
+    interface class IPhoto;
+    
+    public ref class PhotoCache sealed : public IPhotoCache
     {
     public:
         PhotoCache();
 
-        void InsertPhoto(Photo^ photo);
-        Photo^ GetForYearAndMonth(int year, int month);
+        virtual void InsertPhoto(IPhoto^ photo);
+        virtual IPhoto^ GetForYearAndMonth(int year, int month);
 
     private:
         typedef std::map<int, Platform::WeakReference> MonthPhoto;

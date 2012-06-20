@@ -28,9 +28,13 @@ namespace Hilo
             {
                 result = antecedent.get();
             }
+            catch(const concurrency::task_canceled)
+            {
+                // don't need to run canceled tasks through the policy
+            }
             catch(const std::exception&)
             {
-                // todo: Can pass a string for RP
+                // todo: replace in RP
                 auto translatedException = ref new Platform::FailureException();
                 m_handler->HandleException(translatedException);
                 throw;
@@ -49,29 +53,28 @@ namespace Hilo
 
     template<>
     concurrency::task<void> ObserveException<void>::operator()(concurrency::task<void> antecedent) const
+    {
+        try 
         {
-            try 
-            {
-                antecedent.get();
-            }
-            catch(const concurrency::task_canceled)
-            {
-                // don't need to capture canceled exceptions
-                throw;
-            }
-            catch(const std::exception&)
-            {
-                // todo: Can pass a string for RP
-                auto translatedException = ref new Platform::FailureException();
-                m_handler->HandleException(translatedException);
-                throw;
-            }
-            catch(Platform::Exception^ ex)
-            {
-                m_handler->HandleException(ex);
-                throw;
-            }
-
-            return antecedent;
+            antecedent.get();
         }
+        catch(const concurrency::task_canceled)
+        {
+            // don't need to run canceled tasks through the policy
+        }
+        catch(const std::exception&)
+        {
+            //todo: replace in RP
+            auto translatedException = ref new Platform::FailureException();
+            m_handler->HandleException(translatedException);
+            throw;
+        }
+        catch(Platform::Exception^ ex)
+        {
+            m_handler->HandleException(ex);
+            throw;
+        }
+
+        return antecedent;
+    }
 }

@@ -23,31 +23,23 @@ CropImageView::CropImageView()
 {
 	InitializeComponent();
     m_cropImageViewModel = static_cast<CropImageViewModel^>(DataContext);
+    m_sizeChangedAttached = false;
 }
 
-/// <summary>
-/// Invoked when this page is about to be displayed in a Frame.
-/// </summary>
-/// <param name="e">Event data that describes how this page was reached.  The Parameter
-/// property is typically used to configure the page.</param>
-void CropImageView::OnNavigatedTo(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedTo(e);
-}
-
-void CropImageView::OnNavigatedFrom(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedFrom(e);
-}
-
-void CropImageView::OnPhotoSizeChanged(Platform::Object^ sender, SizeChangedEventArgs^ e)
+void CropImageView::OnSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
 {
     m_cropImageViewModel->CalculateInitialCropOverlayPosition(
         Photo->TransformToVisual(CropImageGrid), 
         Photo->RenderSize.Width, Photo->RenderSize.Height);
+
+    if (!m_sizeChangedAttached)
+    {
+        SizeChanged += ref new SizeChangedEventHandler(this, &CropImageView::OnSizeChanged);
+        m_sizeChangedAttached = true;
+    }
 }
 
-void CropImageView::OnThumbDragDelta(Platform::Object^ sender, DragDeltaEventArgs^ e)
+void CropImageView::OnThumbDragDelta(Object^ sender, DragDeltaEventArgs^ e)
 {
     if (!m_cropImageViewModel->InProgress)
     {

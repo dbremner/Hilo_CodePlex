@@ -6,7 +6,7 @@
 // This code released under the terms of the 
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
-    #pragma once
+#pragma once
 
 #include "ViewModelBase.h"
 
@@ -14,7 +14,7 @@ namespace Hilo
 {
     ref class HubPhotoGroup;
     interface class IExceptionPolicy;
-    ref class Photo;
+    interface class IPhoto;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MainHubViewModel sealed : public ViewModelBase
@@ -22,9 +22,9 @@ namespace Hilo
     public:
         MainHubViewModel(Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ photoGroups, IExceptionPolicy^ exceptionPolicy);
 
-        property Platform::Object^ PhotoGroups
+        property Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ PhotoGroups
         {
-            Platform::Object^ get();
+            Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ get();
         }
 
         property Windows::UI::Xaml::Input::ICommand^ NavigateToPicturesCommand
@@ -42,19 +42,14 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
-        property bool IsAppBarEnabled 
-        { 
-            bool get(); 
-            void set(bool value);
-        }
-
-        property Photo^ SelectedItem
+        // These are really IPhoto^ but XAML cannot convert any underlying
+        // real object (e.g. Photo) back to IPhoto which results in strange
+        // side effects (such as the AppBar not working).
+        property Platform::Object^ SelectedItem
         {
-            Photo^ get();
-            void set(Photo^ value);
+            Platform::Object^ get();
+            void set(Platform::Object^ value);
         }
-
-        void NavigateToImageView(Photo^ photo);
 
     private:
         Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ m_photoGroups;
@@ -62,7 +57,7 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_cropImageCommand;
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
         bool m_isAppBarEnabled;
-        Photo^ m_photo;
+        IPhoto^ m_photo;
         HubPhotoGroup^ m_pictureGroup;
 
         void NavigateToPictures(Platform::Object^ parameter);

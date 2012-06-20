@@ -9,7 +9,11 @@
 #include "pch.h"
 #include "DelegateCommand.h"
 #include "RotateImageViewModel.h"
-#include "PhotoReader.h"
+#include "IRepository.h"
+#include "IPhoto.h"
+#include "NullPhotoGroup.h"
+#include "ImageNavigationData.h"
+#include "SimpleQueryOperation.h"
 #include "TaskExceptionsExtensions.h"
 
 #define EXIFOrientationPropertyName "System.Photo.Orientation"
@@ -22,7 +26,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Imaging;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Pickers;
 using namespace Windows::Storage::Search;
@@ -33,7 +36,13 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::UI::Xaml::Navigation;
 
-RotateImageViewModel::RotateImageViewModel(IExceptionPolicy^ exceptionPolicy) : ImageBase(exceptionPolicy)
+Platform::String^ const RotationStateKey = "rotation";
+Platform::String^ const MarginLeftStateKey = "margin-left";
+Platform::String^ const MarginTopStateKey = "margin-top";
+Platform::String^ const MarginRightStateKey = "margin-right";
+Platform::String^ const MarginBottomStateKey = "margin-bottom";
+
+RotateImageViewModel::RotateImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy) : ImageBase(exceptionPolicy), m_repository(repository), m_imageMargin(Thickness(0.0))
 {
     m_rotateCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::Rotate90), nullptr);
     m_saveCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::SaveImage), nullptr);
@@ -57,9 +66,14 @@ ICommand^ RotateImageViewModel::CancelCommand::get()
     return m_cancelCommand;
 }
 
-Object^ RotateImageViewModel::ImageMargin::get()
+Thickness RotateImageViewModel::ImageMargin::get()
 {
     return m_imageMargin;
+}
+
+bool RotateImageViewModel::InProgress::get()
+{
+    return m_inProgress;
 }
 
 double RotateImageViewModel::RotationAngle::get()
@@ -86,17 +100,24 @@ void RotateImageViewModel::RotationAngle::set( double value )
     OnPropertyChanged("RotationAngle");
 }
 
-ImageSource^ RotateImageViewModel::Photo::get()
+ImageSource^ RotateImageViewModel::Image::get()
 {
-    if (m_image == nullptr && m_file != nullptr)
+    if (m_image == nullptr)
     {
-        auto fileOpenTask = task<ImageProperties^>(m_file->Properties->GetImagePropertiesAsync());
-        fileOpenTask.then([this](ImageProperties^ properties)
+        GetImagePhotoAsync().then([this] (IPhoto^ photo)
+        {
+            if (photo == nullptr)
+            {
+                cancel_current_task();
+            }
+            m_photo = photo;
+            return m_photo->GetImagePropertiesAsync();
+        }).then([this](ImageProperties^ properties)
         {
             auto requestedProperty = ref new Vector<String^>();
             requestedProperty->Append(EXIFOrientationPropertyName);
             return properties->RetrievePropertiesAsync(requestedProperty);
-        }).then([this](IMap<String^, Object^>^ properties)
+        }, task_continuation_context::use_arbitrary()).then([this](IMap<String^, Object^>^ properties)
         {
             auto orientationProperty = dynamic_cast<IPropertyValue^>(properties->Lookup(EXIFOrientationPropertyName));
             if (orientationProperty != nullptr)
@@ -104,14 +125,14 @@ ImageSource^ RotateImageViewModel::Photo::get()
                 m_isExifOrientation = true;
                 m_exifOrientation = orientationProperty->GetUInt16();
             }
-            return m_file->OpenReadAsync();
+            return m_photo->OpenReadAsync();
         }).then([this](IRandomAccessStreamWithContentType^ imageData)
         {
             m_randomAccessStream = imageData;
             m_image = ref new BitmapImage();
             m_image->SetSource(m_randomAccessStream);
-            OnPropertyChanged("Photo");
-        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+            OnPropertyChanged("Image");
+        }).then(ObserveException<void>(m_exceptionPolicy));
     }
     return m_image;
 }
@@ -122,7 +143,7 @@ void RotateImageViewModel::Rotate90(Object^ parameter)
     EndRotation();
 }
 
-concurrency::task<void> RotateImageViewModel::DoRotate(double angle)
+concurrency::task<void> RotateImageViewModel::RotateImageAsync(double angle)
 {
     assert(angle < 360);
     while (angle < 0)
@@ -130,69 +151,82 @@ concurrency::task<void> RotateImageViewModel::DoRotate(double angle)
         angle += 360;
     }
 
+    auto continuationContext = task_continuation_context::use_arbitrary();
     auto bitmapEncoder = std::make_shared<BitmapEncoder^>(nullptr);
     auto ras = ref new InMemoryRandomAccessStream();
     BitmapRotation rotation = static_cast<BitmapRotation>((int)floor(angle / 90));
 
-    return task<BitmapDecoder^>(BitmapDecoder::CreateAsync(m_randomAccessStream))
+    return create_task(BitmapDecoder::CreateAsync(m_randomAccessStream))
         .then([ras](BitmapDecoder^ decoder)
     {
         return BitmapEncoder::CreateForTranscodingAsync(ras, decoder);
-    }).then([this, rotation](BitmapEncoder^ encoder)
+    }, continuationContext).then([this, rotation, continuationContext](BitmapEncoder^ encoder)
     {
-        auto rotationTask = task<void>([]{});
-
         // If the file format supports EXIF orientation then update the orientation flag
         // to reflect any user-specified rotation. Otherwise, perform a hard rotate 
         // using the BitmapTransform class.
         if (m_isExifOrientation)
         {
-            // Generate a new thumbnail to reflect any rotation operation
-            encoder->IsThumbnailGenerated = true;
-
             auto currentExifOrientationDegrees = ConvertExifOrientationToDegreesRotation(m_exifOrientation);
             auto exifOrientationToApply = ConvertDegreesRotationToExifOrientation(safe_cast<unsigned int>(RotationAngle + currentExifOrientationDegrees));
             auto orientedTypedValue = ref new BitmapTypedValue(exifOrientationToApply, PropertyType::UInt16);
             auto properties = ref new Map<String^, BitmapTypedValue^>();
             properties->Insert(EXIFOrientationPropertyName, orientedTypedValue);
 
-            return rotationTask.then([encoder, properties]()
+            return create_task([]{}).then([encoder, properties]()
             {
                 return encoder->BitmapProperties->SetPropertiesAsync(properties);
-            }).then([encoder]()
+            }, continuationContext).then([encoder]()
             {
                 return encoder;
-            });
+            }, continuationContext);
         }
-        return rotationTask.then([encoder, rotation]()
+        return create_task([]{}).then([encoder, rotation]()
         {
             encoder->BitmapTransform->Rotation = rotation;
             return encoder;
-        });
-    }).then([bitmapEncoder](BitmapEncoder^ encoder)
+        }, continuationContext);
+    }, continuationContext).then([bitmapEncoder](BitmapEncoder^ encoder)
     {        
+        // Force a new thumbnail to reflect any rotation operation
+        encoder->IsThumbnailGenerated = true;
         (*bitmapEncoder) = encoder;
         return encoder->FlushAsync();
-    }).then([bitmapEncoder](task<void> encodeTask)
+    }, continuationContext).then([bitmapEncoder](task<void> encodeTask)
     {
         try
         {
             encodeTask.get();
         }
-        catch(...)
+        catch(Exception^ ex)
         {
-            // If the encoder does not support writing a thumbnail, then try again
-            // but disable thumbnail generation.
-            (*bitmapEncoder)->IsThumbnailGenerated = false;
-            (*bitmapEncoder)->FlushAsync();
+            switch (ex->HResult)
+            {
+            case WINCODEC_ERR_UNSUPPORTEDOPERATION:
+                // If the encoder does not support writing a thumbnail, then
+                // disable thumbnail generation before trying again.
+                (*bitmapEncoder)->IsThumbnailGenerated = false;
+                break;
+            default:
+                throw ex;
+            }
         }
-    }).then([this, ras]()
+        if ((*bitmapEncoder)->IsThumbnailGenerated == false)
+        {
+            return (*bitmapEncoder)->FlushAsync();
+        }
+        IAsyncAction^ action = create_async([]{});
+        return action;
+    }, continuationContext).then([this, ras]()
     {
         m_randomAccessStream = ras;
-        m_image->SetSource(m_randomAccessStream);
-        RotationAngle = 0;
-        OnPropertyChanged("Photo");
     });
+}
+
+void RotateImageViewModel::ChangeInProgress(bool value)
+{
+    m_inProgress = value;
+    OnPropertyChanged("InProgress");
 }
 
 void RotateImageViewModel::SaveImage(Object^ parameter)
@@ -200,21 +234,28 @@ void RotateImageViewModel::SaveImage(Object^ parameter)
     if (m_isSaving) return;
 
     m_isSaving = true;
-    DoRotate(RotationAngle).then([this]()
+    auto file = std::make_shared<StorageFile^>(nullptr);
+
+    task<StorageFile^> saveTask = create_task(ImageBase::GetFileNameFromFileSavePickerAsync(m_photo->FileType));
+    saveTask.then([this, file](StorageFile^ f)
     {
-        return ImageBase::SaveImageAsync(m_file, m_randomAccessStream);
-    }).then([this](task<void> savedTask)
+        ChangeInProgress(true);
+        (*file) = f;
+        return RotateImageAsync(RotationAngle);
+    }).then([this, file]()
     {
-        try 
-        {
-            savedTask.get();
-        }
-        catch(...)
-        {
-            m_isSaving = false;
-            throw;
-        }
+        return ImageBase::SaveImageAsync((*file), m_randomAccessStream);
+    }).then([this](task<void> priorTask)
+    {
         m_isSaving = false;
+        ChangeInProgress(false);
+        try
+        {
+            priorTask.get();
+        }
+        catch(const concurrency::task_canceled&)
+        {
+        }
     }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
@@ -223,16 +264,68 @@ void RotateImageViewModel::CancelRotate(Object^ parameter)
     ViewModelBase::GoBack();
 }
 
-void RotateImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
+void RotateImageViewModel::LoadState(IMap<String^, Object^>^ stateMap) 
 {
-    Initialize(dynamic_cast<FileInformation^>(e->Parameter));
+    if (stateMap != nullptr)
+    {
+        if (stateMap->HasKey(RotationStateKey))
+            m_rotationAngle = static_cast<double>(stateMap->Lookup(RotationStateKey));
+
+        Thickness margin(0.0);
+        if (stateMap->HasKey(MarginRightStateKey))
+            margin.Left = static_cast<double>(stateMap->Lookup(MarginRightStateKey));
+
+        if (stateMap->HasKey(MarginTopStateKey))
+            margin.Top = static_cast<double>(stateMap->Lookup(MarginTopStateKey));
+
+        if (stateMap->HasKey(MarginRightStateKey))
+            margin.Right = static_cast<double>(stateMap->Lookup(MarginRightStateKey));
+
+        if (stateMap->HasKey(MarginBottomStateKey))
+            margin.Bottom = static_cast<double>(stateMap->Lookup(MarginBottomStateKey));
+
+        m_imageMargin = margin;
+    }
 }
 
-void RotateImageViewModel::Initialize(FileInformation^ image )
+void RotateImageViewModel::SaveState(IMap<String^, Object^>^ stateMap) 
 {
-    m_file = image;
-    assert(m_file!= nullptr);    
+    stateMap->Insert(RotationStateKey, m_rotationAngle);
+    stateMap->Insert(MarginLeftStateKey, m_imageMargin.Left);
+    stateMap->Insert(MarginTopStateKey, m_imageMargin.Top);
+    stateMap->Insert(MarginRightStateKey, m_imageMargin.Right);
+    stateMap->Insert(MarginBottomStateKey, m_imageMargin.Bottom);
+}
+
+void RotateImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
+{
+    String^ data = dynamic_cast<String^>(e->Parameter); 
+    ImageNavigationData^ photoData = ref new ImageNavigationData(data);
+
+    Initialize(photoData);
+}
+
+
+void RotateImageViewModel::Initialize(ImageNavigationData^ navigationData)
+{
+    assert(navigationData != nullptr);
+    m_photo = nullptr;
     m_image = nullptr;
+    m_navigationData = navigationData;
+}
+
+concurrency::task<IPhoto^> RotateImageViewModel::GetImagePhotoAsync()
+{
+    auto t = create_task(m_repository->GetPhotoForGroupWithQueryOperationAsync(ref new NullPhotoGroup(), ref new SimpleQueryOperation(m_navigationData->FilePath)));
+    return t.then([this](IPhoto^ photo)
+    {
+        if (nullptr !=  photo)
+        {
+            return photo;
+        }
+
+        return static_cast<IPhoto^>(nullptr);
+    });
 }
 
 void RotateImageViewModel::EndRotation()
@@ -277,3 +370,5 @@ unsigned int RotateImageViewModel::ConvertDegreesRotationToExifOrientation(unsig
         return 1;
     }
 }
+
+

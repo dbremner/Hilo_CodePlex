@@ -8,8 +8,8 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\ImageViewData.h"
-#include "..\Hilo\Photo.h"
+#include "..\Hilo\ImageNavigationData.h"
+#include "StubPhoto.h"
 #include "StubPhotoGroup.h"
 #include "StubExceptionPolicy.h"
 
@@ -23,7 +23,7 @@ using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {
-    TEST_CLASS(ImageViewDataTests)
+    TEST_CLASS(ImageNavigationDataTests)
     {
     public:
         TEST_METHOD_INITIALIZE(Initialize)
@@ -31,62 +31,62 @@ namespace HiloTests
             m_exceptionPolicy = ref new StubExceptionPolicy();
         }
 
-        TEST_METHOD(ImageViewDataShouldInitilizeFileNameAndDateFromPhoto)
+        TEST_METHOD(ImageNavigationDataShouldInitilizeFileNameAndDateFromPhoto)
         {
-            TestImageGenerator imageGenerator;
-            concurrency::task_status status;
-            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([this](FileInformation^ file) 
-            {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"), m_exceptionPolicy);
-            });
-            auto f = TestHelper::RunSynced<Photo^>(t2, status);
-            FileInformation^ fileInfo = f;
-            auto expectedDate = DateForFileInformation(fileInfo);
-            auto expectedFilePath = fileInfo->Path;
+            StubPhoto^ photo = ref new StubPhoto();
+            photo->Path = "Foo";
+            photo->DateTaken = GetDateTaken();
+            String^ expectedPath = "Foo";
+            DateTime expectedDate = GetDateTaken();;
 
-            ImageViewData^ data = ref new ImageViewData(f);
+            ImageNavigationData^ data = ref new ImageNavigationData(photo);
 
             Assert::AreEqual(expectedDate.UniversalTime, data->FileDate.UniversalTime);
-            Assert::AreEqual(expectedFilePath, data->FilePath);
-            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+            Assert::AreEqual(expectedPath, data->FilePath);
         }
 
-        TEST_METHOD(ImageViewDataShouldReturnDateQueryForFileSystem)
+        TEST_METHOD(ImageNavigationDataShouldReturnDateQueryForFileSystem)
         {
-            TestImageGenerator imageGenerator;
-            concurrency::task_status status;
-            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([this](FileInformation^ file) 
-            {
-                return ref new Photo(file, ref new StubPhotoGroup("Test"), m_exceptionPolicy);
-            });
-            auto f = TestHelper::RunSynced<Photo^>(t2, status);
-            FileInformation^ fileInfo = f;
-            auto expectedDate = DateForFileInformation(fileInfo);
+            StubPhoto^ photo = ref new StubPhoto();
+            photo->Path = "Foo";
+            photo->DateTaken = GetDateTaken();
+            String^ expectedPath = "Foo";
+            DateTime expectedDate = GetDateTaken();
             Calendar cal;
-            cal.FromDateTime(expectedDate);
+            cal.SetDateTime(expectedDate);
             int lastDay = cal.LastDayInThisMonth;
             int firstDay = cal.FirstDayInThisMonth;
             cal.Day = firstDay;
             DateTimeFormatter dtf(YearFormat::Full,
-                    MonthFormat::Numeric, 
-                    DayFormat::Default, 
-                    DayOfWeekFormat::None);
-            String^ firstDate = dtf.Format(cal.ToDateTime());        
+                MonthFormat::Numeric, 
+                DayFormat::Default, 
+                DayOfWeekFormat::None);
+            String^ firstDate = dtf.Format(cal.GetDateTime());        
             cal.Day = lastDay;
-            String^ lastDate = dtf.Format(cal.ToDateTime());
+            String^ lastDate = dtf.Format(cal.GetDateTime());
             std::wstringstream dateRange;
             dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
             auto expectedDateQuery = ref new String(dateRange.str().c_str());
-            ImageViewData^ data = ref new ImageViewData(f);
+            ImageNavigationData^ data = ref new ImageNavigationData(photo);
 
             auto query = data->DateQuery;
 
             Assert::AreEqual(expectedDateQuery, query);
         }
 
-     private:
+    private:
         StubExceptionPolicy^ m_exceptionPolicy;
+
+        static DateTime GetDateTaken()
+        {
+            Calendar cal;
+            cal.Day = 23;
+            cal.Month = 5;
+            cal.Year = 2012;
+            cal.Hour = 1;
+            cal.Minute = 30;
+            cal.Second = 0;
+            return cal.GetDateTime();
+        }
     };
 }

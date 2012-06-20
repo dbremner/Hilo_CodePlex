@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,7 +9,6 @@
 #pragma once
 
 #include "HiloPage.h"
-#include "DateTimeToStringConverter.h" // Required by generated header
 #include "RotateImageView.g.h"
 
 namespace Hilo
@@ -20,15 +19,12 @@ namespace Hilo
         RotateImageView();
 
     protected:
-        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-
         virtual void OnManipulationCompleted(Windows::UI::Xaml::Input::ManipulationCompletedRoutedEventArgs^ e) override;
         virtual void OnManipulationDelta(Windows::UI::Xaml::Input::ManipulationDeltaRoutedEventArgs^ e) override;
 
 
     private:
-        Hilo::RotateImageViewModel^ m_viewModel;
+        RotateImageViewModel^ m_viewModel;
         void PhotoSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
     };
 }

@@ -1,15 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
-  <Identity Name="0896de6b-051d-4528-ac23-e3b047bbc535" Publisher="CN=scottden" Version="1.0.0.0" />
+  <Identity Name="d587c387-98d3-4a94-a363-0b03f8ed7907" Publisher="CN=bobbrum" Version="1.0.0.0" />
   <Properties>
     <DisplayName>Hilo</DisplayName>
-    <PublisherDisplayName>scottden</PublisherDisplayName>
+    <PublisherDisplayName>bobbrum</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <Description>Hilo</Description>
   </Properties>
   <Prerequisites>
-    <OSMinVersion>6.2</OSMinVersion>
-    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+    <OSMinVersion>6.2.0</OSMinVersion>
+    <OSMaxVersionTested>6.2.0</OSMaxVersionTested>
   </Prerequisites>
   <Resources>
     <Resource Language="x-generate" />
@@ -17,7 +16,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Hilo.App">
       <VisualElements DisplayName="Hilo" Logo="Assets\Hilo150b.png" SmallLogo="Assets\Hilo30.png" Description="Hilo" ForegroundText="light" BackgroundColor="#292929">
-        <DefaultTile ShowName="noLogos" WideLogo="Assets\Hilo310b.png" />
+        <DefaultTile ShowName="noLogos" WideLogo="Assets\Hilo310b.png" ShortName="Hilo" />
         <SplashScreen Image="Assets\MSDN_Hilo_Splash_v2_022712.png" BackgroundColor="#292929" />
       </VisualElements>
     </Application>

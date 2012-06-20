@@ -12,8 +12,8 @@
 #include "PageType.h"
 #include "MainHubViewModel.h"
 #include "HubGroupType.h"
-#include "ImageViewData.h"
-#include "Photo.h"
+#include "ImageNavigationData.h"
+#include "IPhoto.h"
 
 using namespace Hilo;
 using namespace Platform;
@@ -40,38 +40,23 @@ MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroup
     });
 }
 
-Object^ MainHubViewModel::PhotoGroups::get()
+IObservableVector<HubPhotoGroup^>^ MainHubViewModel::PhotoGroups::get()
 {
     return m_photoGroups;
 }
 
-bool MainHubViewModel::IsAppBarEnabled::get()
-{
-    return m_isAppBarEnabled;
-}
-
-void MainHubViewModel::IsAppBarEnabled::set(bool value)
-{
-    if (m_isAppBarEnabled != value)
-    {
-        m_isAppBarEnabled = value;
-        OnPropertyChanged("IsAppBarEnabled");
-    }
-}
-
-Photo^ MainHubViewModel::SelectedItem::get()
+Object^ MainHubViewModel::SelectedItem::get()
 {
     return m_photo;
 }
 
-void MainHubViewModel::SelectedItem::set(Photo^ value)
+void MainHubViewModel::SelectedItem::set(Object^ value)
 {
     if (m_photo != value)
     {
-        m_photo = value;
+        m_photo = dynamic_cast<IPhoto^>(value);
         m_cropImageCommand->CanExecute(nullptr);
         m_rotateImageCommand->CanExecute(nullptr);
-        IsAppBarEnabled = value != nullptr;
         OnPropertyChanged("SelectedItem");
     }
 }
@@ -91,15 +76,6 @@ ICommand^ MainHubViewModel::RotateImageCommand::get()
     return m_rotateImageCommand;
 }
 
-void MainHubViewModel::NavigateToImageView(Photo^ photo)
-{
-    if (nullptr != photo)
-    {
-        auto data = ref new ImageViewData(photo);
-        ViewModelBase::GoToPage(PageType::Browse, nullptr); 
-    }
-}
-
 void MainHubViewModel::NavigateToPictures(Object^ parameter)
 {
     ViewModelBase::GoToPage(PageType::Browse, nullptr); 
@@ -112,14 +88,14 @@ bool MainHubViewModel::CanNavigateToPictures(Object^ parameter)
 
 void MainHubViewModel::CropImage(Object^ parameter)
 {
-    FileInformation^ fileInfo = m_photo;
-    ViewModelBase::GoToPage(PageType::Crop, fileInfo);
+    auto data = ref new ImageNavigationData(m_photo);
+    ViewModelBase::GoToPage(PageType::Crop, data->SerializeToString());
 }
 
 void MainHubViewModel::RotateImage(Object^ parameter)
 {
-    FileInformation^ fileInfo = m_photo;
-    ViewModelBase::GoToPage(PageType::Rotate, fileInfo);
+    auto data = ref new ImageNavigationData(m_photo);
+    ViewModelBase::GoToPage(PageType::Rotate, data->SerializeToString());
 }
 
 bool MainHubViewModel::CanCropOrRotateImage(Object^ paratmer)

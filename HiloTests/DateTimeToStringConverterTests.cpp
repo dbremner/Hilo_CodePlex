@@ -32,8 +32,8 @@ namespace HiloTests
             auto dtf = ref new DateTimeFormatter("shortdate", GlobalizationPreferences::Languages);
 
             Calendar^ calendar = ref new Calendar();
-            calendar->Now();
-            DateTime dateTime = calendar->ToDateTime();
+            calendar->SetToNow();
+            DateTime dateTime = calendar->GetDateTime();
             String^ stringDateTime = dtf->Format(dateTime);
 
             auto dateTimeConverter = ref new DateTimeToStringConverter();

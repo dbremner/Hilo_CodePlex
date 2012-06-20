@@ -20,9 +20,9 @@ namespace Hilo
 #pragma warning(push)
 #pragma warning(disable: 4449)
     [Windows::Foundation::Metadata::WebHostHidden]
-    public ref class ViewModelBase : public BindableBase
+    public ref class ViewModelBase : public Common::BindableBase
     {
-    public:
+    internal:
         ViewModelBase(IExceptionPolicy^ exceptionPolicy);
 
     public:
@@ -31,6 +31,10 @@ namespace Hilo
         event PageNavigateEventHandler^ NavigateToPage;
 
         property bool IsAppBarSticky { bool get(); void set(bool value); }
+        property bool IsAppBarOpen { bool get(); void set(bool value); }
+
+        virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap);
+        virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap);
 
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
         virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
@@ -39,9 +43,12 @@ namespace Hilo
         virtual void GoBack();
         virtual void GoHome();
         virtual void GoToPage(PageType page, Platform::Object^ parameter);
-
+	
+	protected private:
         bool m_isAppBarSticky;
+        bool m_isAppBarOpen;
         Hilo::IExceptionPolicy^ m_exceptionPolicy;
     };
 #pragma warning(pop)
 }
+

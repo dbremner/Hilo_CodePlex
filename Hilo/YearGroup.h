@@ -9,20 +9,20 @@
 #pragma once
 
 #include "Common\BindableBase.h"
-#include "IPhotoGroup.h"
+#include "IYearGroup.h"
 
 namespace Hilo
 {
-    ref class Photo;
     interface class IExceptionPolicy;
+    interface class IMonthBlock;
+    interface class IRepository;
+    interface class IQueryOperation;
 
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class YearGroup sealed : public BindableBase, public IPhotoGroup
+    public ref class YearGroup sealed : public Common::BindableBase, public IYearGroup
     {
     public:
-        YearGroup(Windows::Storage::IStorageFolder^ storagefolder, IExceptionPolicy^ exceptionPolicy);
-
-        virtual operator Windows::Storage::IStorageFolder^ ();
+        YearGroup(Platform::String^ name, IRepository^ repository, IQueryOperation^ operation, IExceptionPolicy^ exceptionPolicy);
 
         property Platform::String^ Title
         { 
@@ -31,18 +31,20 @@ namespace Hilo
 
         property unsigned int Year
         {
-            unsigned int get();
+            virtual unsigned int get();
         }
 
-        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
+        property Windows::Foundation::Collections::IObservableVector<IMonthBlock^>^ Items
         {
-            virtual Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
+            virtual Windows::Foundation::Collections::IObservableVector<IMonthBlock^>^ get();
         }
 
     private:
-        Windows::Storage::IStorageFolder^ m_storageFolder;
-        Platform::Collections::Vector<Platform::Object^>^ m_months;
-        unsigned int m_year;
+        Platform::String^ m_name;
+        IRepository^ m_repository;
+        IQueryOperation^ m_operation;
         IExceptionPolicy^ m_exceptionPolicy;
+        unsigned int m_year;
+        Platform::Collections::Vector<IMonthBlock^>^ m_months;
     };
 }

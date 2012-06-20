@@ -39,8 +39,7 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
     vector<task<StorageFile^>> thumbnailTasks;
 
     unsigned int imageCounter = 0;
-    for_each(begin(files), end(files),
-        [this, &imageCounter, thumbnailsFolder, &thumbnailTasks](StorageFile^ imageFile)
+    for (auto imageFile : files)
     {
         wstringstream localFileName;
         localFileName << ThumbnailImagePrefix << imageCounter++ << ".jpg";
@@ -51,20 +50,20 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
             imageFile, 
             ref new String(localFileName.str().c_str()),
             ThumbnailSize,
-            m_exceptionPolicy));   
-    });
+            m_exceptionPolicy));
+    }
 
     return when_all(begin(thumbnailTasks), end(thumbnailTasks)).then(
         [](vector<StorageFile^> files)
     {
         auto result = ref new Platform::Collections::Vector<StorageFile^>();
-        for_each(begin(files), end(files), [result](StorageFile^ file)
+        for (auto file : files)
         {
             if (file != nullptr)
             {
                 result->Append(file);
             }
-        });
+        }
 
         return result;
     });
@@ -77,7 +76,7 @@ task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
     unsigned int thumbSize,
     IExceptionPolicy^ exceptionPolicy)
 {
-    task<InMemoryRandomAccessStream^> createThumbnail(
+    auto createThumbnail = create_task(
         CreateThumbnailFromPictureFileAsync(imageFile, thumbSize));
 
     return createThumbnail.then([exceptionPolicy, folder, localFileName](
@@ -108,7 +107,7 @@ task<StorageFile^> ThumbnailGenerator::InternalSaveToFile(
 {
     auto imageFile = make_shared<StorageFile^>(nullptr);
     auto streamReader = ref new DataReader(stream);
-    task<unsigned int> loadStreamTask(
+    auto loadStreamTask = create_task(
         streamReader->LoadAsync(static_cast<unsigned int>(stream->Size)));
 
     return loadStreamTask.then(
@@ -139,7 +138,7 @@ task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPicture
     auto decoder = make_shared<BitmapDecoder^>(nullptr);
     auto pixelProvider = make_shared<PixelDataProvider^>(nullptr);
     auto resizedImageStream = ref new InMemoryRandomAccessStream();
-    task<StorageItemThumbnail^> createThumbnail(
+    auto createThumbnail = create_task(
         sourceFile->GetThumbnailAsync(
         ThumbnailMode::PicturesView, 
         ThumbnailSize));

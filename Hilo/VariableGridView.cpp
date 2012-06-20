@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -26,6 +26,5 @@ void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element
         element->SetValue(VariableSizedWrapGrid::RowSpanProperty, model->RowSpan);
     }
 
-    //GridView::PrepareContainerForItemOverride(element, item);
-    ((IItemsControlOverrides^)this->__abi_baseclass)->PrepareContainerForItemOverride(element, item);
+    GridView::PrepareContainerForItemOverride(element, item);
 }

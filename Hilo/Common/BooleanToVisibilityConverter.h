@@ -10,14 +10,17 @@
 
 namespace Hilo
 {
-        /// <summary>
-        /// Value converter that translates true to <see cref="Visibility.Visible"/> and false
-        /// to <see cref="Visibility.Collapsed"/>.
-        /// </summary>
-        public ref class BooleanToVisibilityConverter sealed : Windows::UI::Xaml::Data::IValueConverter
-        {
-        public:
-            virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^);
-            virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^);
-        };
+	namespace Common
+	{
+		/// <summary>
+		/// Value converter that translates true to <see cref="Visibility::Visible"/> and false
+		/// to <see cref="Visibility::Collapsed"/>.
+		/// </summary>
+		public ref class BooleanToVisibilityConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+		{
+		public:
+			virtual Platform::Object^ Convert(Platform::Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object^ parameter, Platform::String^ language);
+			virtual Platform::Object^ ConvertBack(Platform::Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object^ parameter, Platform::String^ language);
+		};
+	}
 }

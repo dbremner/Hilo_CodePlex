@@ -23,38 +23,45 @@ using namespace Windows::Storage::Search;
 
 const std::array<String^, 6> items = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif" };
 
+PhotoReaderResult<FileInformation^> PhotoReader::GetPhotosAsyncNew(String^ query, unsigned int maxNumberOfItems)
+{
+    auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
+    return PhotoReaderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)), fileQuery);
+}
+
 task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
+    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(folder, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
+    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(String^ query)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
+    return create_task(fileInformationFactory->GetFilesAsync());
 }
 
 task<IVectorView<FileInformation^>^> PhotoReader::GetAllPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query)
 {
     auto fileQuery = CreateFileQuery(folder, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FileInformation^>^>(fileInformationFactory->GetFilesAsync());
+    return create_task(fileInformationFactory->GetFilesAsync());
 }
 
 task<IVectorView<StorageFile^>^> PhotoReader::GetPhotoStorageFilesAsync(String^ query, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
-    return concurrency::task<IVectorView<StorageFile^>^>(fileQuery->GetFilesAsync(0, maxNumberOfItems));
+    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems));
 }
 
 Object^ PhotoReader::GetVirtualizedFiles(Platform::String^ queryString)
@@ -78,14 +85,14 @@ task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByMont
 {
     auto fileQuery = CreateVirtualFolderQueryByMonth(folder);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
+    return create_task(fileInformationFactory->GetFoldersAsync());
 }
 
 task<IVectorView<FolderInformation^>^> PhotoReader::GetVirtualPhotoFoldersByYear()
 {
     auto fileQuery = CreateVirtualFolderQueryByYear(KnownFolders::PicturesLibrary);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return task<IVectorView<FolderInformation^>^>(fileInformationFactory->GetFoldersAsync());
+    return create_task(fileInformationFactory->GetFoldersAsync());
 }
 
 StorageFolderQueryResult^ PhotoReader::CreateVirtualFolderQueryByYear(IStorageFolderQueryOperations^ folder)
@@ -113,5 +120,6 @@ StorageFileQueryResult^ PhotoReader::CreateFileQuery(IStorageFolderQueryOperatio
     queryOptions->FolderDepth = FolderDepth::Deep;
     queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     queryOptions->ApplicationSearchFilter = query;
+    queryOptions->SetThumbnailPrefetch(ThumbnailMode::PicturesView, 190, ThumbnailOptions::UseCurrentScale);
     return folder->CreateFileQueryWithOptions(queryOptions);
 }

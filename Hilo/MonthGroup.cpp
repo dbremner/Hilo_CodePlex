@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,10 +9,15 @@
 #include "pch.h"
 #include "MonthGroup.h"
 #include "Photo.h"
-#include "PhotoReader.h"
-#include "PhotoCache.h"
+#include "IPhotoCache.h"
 #include "IExceptionPolicy.h"
+#include "IRepository.h"
+#include "IQueryOperation.h"
+#include "IResourceLoader.h"
+#include "PhotoGroupData.h"
 #include "TaskExceptionsExtensions.h"
+
+#define MaxNumberOfThumbnailsPerMonthGroup 9
 
 using namespace concurrency;
 using namespace Hilo;
@@ -26,59 +31,84 @@ using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::Search;
 using namespace Windows::UI::Core;
 
-MonthGroup::MonthGroup(IStorageFolder^ storagefolder, PhotoCache^ photoCache, IExceptionPolicy^ exceptionPolicy) : m_storageFolder(storagefolder), m_weakPhotoCache(photoCache), m_exceptionPolicy(exceptionPolicy)
+MonthGroup::MonthGroup(String^ title, IPhotoCache^ photoCache, IRepository^ repository, IQueryOperation^ queryOperation, IExceptionPolicy^ exceptionPolicy) : m_title(title), m_weakPhotoCache(photoCache), m_repository(repository), m_queryOperation(queryOperation), m_exceptionPolicy(exceptionPolicy)
 {
-    assert(nullptr != dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder));
+    m_dataToken = m_repository->DataChanged += ref new DataChangedEventHandler(this, &MonthGroup::OnDataChanged);
 }
 
-MonthGroup::operator IStorageFolder^()
+MonthGroup::~MonthGroup()
 {
-    return m_storageFolder;
+    m_repository->DataChanged -= m_dataToken;
 }
 
-IObservableVector<Object^>^ MonthGroup::Items::get()
+IObservableVector<IPhoto^>^ MonthGroup::Items::get()
 {
     if (nullptr == m_photos)
     {
-        m_photos = ref new Vector<Object^>();
-        IStorageFolderQueryOperations^ query = dynamic_cast<IStorageFolderQueryOperations^>(m_storageFolder);
-        assert(query != nullptr);
-        PhotoReader reader;
-        task<IVectorView<FileInformation^>^> photosTask = reader.GetPhotosAsync(query, "", 9);
-
-        photosTask.then([this](IVectorView<FileInformation^>^ files)
-        {
-            auto temp = ref new Vector<Object^>();
-            bool first = true;
-            PhotoCache^ cache = m_weakPhotoCache.Resolve<PhotoCache>();
-            
-            std::for_each(begin(files), end(files), [this, temp, cache, &first](FileInformation^ item) 
-            {
-                auto photo = ref new Photo(item, this, m_exceptionPolicy);
-                temp->Append(photo);
-                if (first)
-                {
-                    cache->InsertPhoto(photo);
-                }
-                first = false;
-            });
-
-            return temp;
-        }, concurrency::task_continuation_context::use_current()).then([this](Vector<Object^>^ photos)
-        {
-            Array<Object^>^ many = ref new Array<Object^>(photos->Size);
-            photos->GetMany(0, many);
-            m_photos->ReplaceAll(many);
-        }, concurrency::task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));;
+        OnDataChanged();
     }
     return m_photos;
 }
 
+bool MonthGroup::HasPhotos::get()
+{
+    return m_count > 0;
+}
+
+task<void> MonthGroup::QueryPhotosAsync()
+{
+    // Only need to call this once and have to check since this can be called from multiple places.
+    if (nullptr == m_photos)
+    {
+        m_photos = ref new Vector<IPhoto^>();
+    }
+
+    auto photosTask = create_task(m_repository->GetPhotoGroupDataForGroupWithQueryOperationAsync(this, m_queryOperation));
+    m_photos->Clear();
+    return photosTask.then([this](PhotoGroupData^ photoGroupData)
+    {
+        auto temp = ref new Vector<IPhoto^>();
+        bool first = true;
+        IPhotoCache^ cache = m_weakPhotoCache.Resolve<IPhotoCache>();
+        m_count = photoGroupData->Size;
+        auto photos = photoGroupData->Photos;
+        for (auto item : photos)
+        {
+            m_photos->Append(item);
+            //temp->Append(item);
+            if (first)
+            {
+                cache->InsertPhoto(item);
+            }
+            first = false;
+        }
+
+        return temp;
+    }).then([this](Vector<IPhoto^>^ photos)
+    {
+        Array<IPhoto^>^ many = ref new Array<IPhoto^>(photos->Size);
+        photos->GetMany(0, many);
+        //m_photos->ReplaceAll(many);
+    });
+}
+
 String^ MonthGroup::Title::get()
 {
-    if (nullptr != m_title)
+    std::wstringstream title;
+    title << m_title->Data();
+    if (m_count > 0)
     {
-        return m_title;
+        title << L" (" << m_count.ToString()->Data() << L")";
     }
-    return m_storageFolder->Name;
+    return ref new String(title.str().c_str());
+}
+
+void MonthGroup::OnDataChanged()
+{
+    QueryPhotosAsync().then([this]
+    {
+        OnPropertyChanged("Items");
+        OnPropertyChanged("Title");
+        OnPropertyChanged("HasPhotos");
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }

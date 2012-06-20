@@ -12,7 +12,7 @@
 
 namespace HiloTests
 {
-    public ref class StubPhotoGroup sealed : public Hilo::IPhotoGroup
+    ref class StubPhotoGroup sealed : public Hilo::IPhotoGroup
     {
     public:
         StubPhotoGroup(Platform::String^ name);
@@ -24,9 +24,9 @@ namespace HiloTests
             virtual Platform::String^ get();
         }
 
-        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
+        property Windows::Foundation::Collections::IObservableVector<Hilo::IPhoto^>^ Items
         {
-            virtual Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
+            virtual Windows::Foundation::Collections::IObservableVector<Hilo::IPhoto^>^ get();
         }
     };
 }

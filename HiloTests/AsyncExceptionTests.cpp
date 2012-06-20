@@ -56,5 +56,4 @@ namespace HiloTests
             Assert::IsNull(policy->SuppliedException);
         }
     };
-
 }

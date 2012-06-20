@@ -9,9 +9,13 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\PhotoCache.h"
-#include "..\Hilo\MonthGroup.h"
-#include "..\Hilo\Photo.h"
+#include "..\Hilo\IRepository.h"
+#include "..\Hilo\IQueryOperation.h"
+#include "..\Hilo\IExceptionPolicy.h"
 #include "StubExceptionPolicy.h"
+#include "StubRepository.h"
+#include "StubQueryOperation.h"
+#include "StubPhoto.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -28,47 +32,32 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
+            m_repository = ref new StubRepository();
             m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_queryOperation = ref new StubQueryOperation(nullptr);
         }
 
         TEST_METHOD(PhotoCacheInsertPhotoShouldAddPhotoForYearMonth)
         {
-            concurrency::task_status status;
-            TestImageGenerator imageGenerator;
-            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-                .then([](FileInformation^ file) 
-            {
-                return file;
-            });
+         
             PhotoCache^ photoCache = ref new PhotoCache();
-            auto f = TestHelper::RunSynced<FileInformation^>(t2, status);
-            Assert::AreEqual(completed, status);
-            auto photoGroup = ref new MonthGroup(KnownFolders::PicturesLibrary, photoCache, m_exceptionPolicy);
-            auto photo = ref new Photo(f, photoGroup, m_exceptionPolicy);
-            auto cal = GetCalendarForFilePhoto(f);
+            auto photo = ref new StubPhoto();
+            ICalendar^ cal = ref new Calendar();
+            cal->Year = 2012;
+            cal->Month = 5;
+            cal->Day = 5;
+            photo->DateTaken = cal->GetDateTime();
 
             photoCache->InsertPhoto(photo);
 
             auto actual = photoCache->GetForYearAndMonth(cal->Year, cal->Month);
             auto name = actual->Name;
             Assert::AreEqual(photo->Name, actual->Name);
-            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
-
-        ICalendar^ GetCalendarForFilePhoto(FileInformation^ f)
-        {
-            ICalendar^ cal = ref new Calendar();
-            auto imageDate = f->ImageProperties->DateTaken;
-            if (imageDate.UniversalTime == 0) 
-            {
-                imageDate = f->BasicProperties->DateModified;
-            }
-            cal->FromDateTime(imageDate);
-
-            return cal;
-        }
+        IExceptionPolicy^ m_exceptionPolicy;
+        IRepository^ m_repository;
+        IQueryOperation^ m_queryOperation;
     };
 }

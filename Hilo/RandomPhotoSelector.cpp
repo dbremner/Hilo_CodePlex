@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,23 +8,25 @@
 //===============================================================================
 #include "pch.h"
 #include "RandomPhotoSelector.h"
-#include "PhotoReader.h"
 #include <map>
+#include <random>
 #include <ctime>
 #include <ppltasks.h>
 #include <collection.h>
 
 using namespace concurrency;
+using namespace std;
 using namespace Windows::Storage;
 using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Foundation::Collections;
+using namespace Hilo;
 
-typedef std::map<unsigned int, bool> RandomMap;
+typedef map<unsigned int, bool> RandomMap;
 
-task<IVector<StorageFile^>^> Hilo::RandomPhotoSelector::SelectFilesAsync(IVectorView<StorageFile^>^ photos, unsigned int count )
+task<IVector<StorageFile^>^> RandomPhotoSelector::SelectFilesAsync(IVectorView<StorageFile^>^ photos, unsigned int count )
 {
-    return task<IVector<StorageFile^>^>(
-        [photos, count]() 
+    return create_task(
+        [photos, count]() -> IVector<StorageFile^>^
     {
         auto selectedImages = RandomPhotoSelector::CreateRandomizedVector(photos->Size, count);
 
@@ -40,20 +42,18 @@ task<IVector<StorageFile^>^> Hilo::RandomPhotoSelector::SelectFilesAsync(IVector
     });
 }
 
-std::vector<unsigned int> Hilo::RandomPhotoSelector::CreateRandomizedVector(unsigned int vectorSize, unsigned int sampleSize)
+vector<unsigned int> RandomPhotoSelector::CreateRandomizedVector(unsigned int vectorSize, unsigned int sampleSize)
 {
     RandomMap numbers;
 
-    std::vector<unsigned int> result;
+    vector<unsigned int> result;
 
     if (vectorSize >= sampleSize)
     {
-
-        srand((unsigned int)time(NULL));
+        mt19937 rand(static_cast<unsigned int>(time(NULL)));
         while (numbers.size() < sampleSize)
         {
-            
-            int pickFile = (unsigned int) rand() % vectorSize;
+            int pickFile = static_cast<unsigned int>(rand() % vectorSize);
 
             if (numbers.find(pickFile) == numbers.end())
             {

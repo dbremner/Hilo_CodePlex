@@ -13,33 +13,48 @@
 
 namespace Hilo
 {
-    ref class Photo;
-    ref class PhotoCache;
+    interface class IPhotoCache;
     interface class IExceptionPolicy;
+    interface class IPhoto;
+    interface class IRepository;
+    interface class IQueryOperation;
+    interface class IResourceLoader;
 
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class MonthGroup sealed : public BindableBase, public IPhotoGroup
+    public ref class MonthGroup sealed : public Common::BindableBase, public IPhotoGroup
     {
     public:
-        MonthGroup(Windows::Storage::IStorageFolder^ storagefolder, PhotoCache^ photoCache, IExceptionPolicy^ exceptionPolicy);
-
-        virtual operator Windows::Storage::IStorageFolder^ ();
-
+        MonthGroup(Platform::String^ title, IPhotoCache^ photoCache, IRepository^ repository, IQueryOperation^ queryOperation, IExceptionPolicy^ exceptionPolicy);
+        ~MonthGroup();
+        
         property Platform::String^ Title 
         { 
             virtual Platform::String^ get();
         }
 
-        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
+        property Windows::Foundation::Collections::IObservableVector<IPhoto^>^ Items
         {
-            virtual Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
+            virtual Windows::Foundation::Collections::IObservableVector<IPhoto^>^ get();
         }
 
+        property bool HasPhotos
+        {
+            bool get();
+        }
+
+    internal:
+        concurrency::task<void> QueryPhotosAsync();
+
     private:
-        Windows::Storage::IStorageFolder^ m_storageFolder;
         Platform::String^ m_title;
-        Platform::Collections::Vector<Platform::Object^>^ m_photos;
         Platform::WeakReference m_weakPhotoCache;
+        IRepository^ m_repository;
+        IQueryOperation^ m_queryOperation;
         IExceptionPolicy^ m_exceptionPolicy;
+        Platform::Collections::Vector<IPhoto^>^ m_photos;
+        unsigned int m_count;
+        Windows::Foundation::EventRegistrationToken m_dataToken;
+
+        void OnDataChanged();
     };
 }

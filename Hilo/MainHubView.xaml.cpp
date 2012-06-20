@@ -7,7 +7,7 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "ImageViewData.h"
+#include "ImageNavigationData.h"
 #include "MainHubView.xaml.h"
 
 
@@ -28,17 +28,7 @@ void MainHubView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
     auto photo = dynamic_cast<Photo^>(e->ClickedItem);
     if (nullptr !=  photo)
     {
-        auto imageData = ref new ImageViewData(photo);
-        HiloPage::NavigateToPage(PageType::Image, imageData);
+        auto imageData = ref new ImageNavigationData(photo);
+        HiloPage::NavigateToPage(PageType::Image, imageData->SerializeToString());
     }
-}
-
-void MainHubView::OnNavigatedTo(NavigationEventArgs^ e )
-{
-    HiloPage::OnNavigatedTo(e);
-}
-
-void MainHubView::OnNavigatedFrom(NavigationEventArgs^ e )
-{
-    HiloPage::OnNavigatedFrom(e);
 }

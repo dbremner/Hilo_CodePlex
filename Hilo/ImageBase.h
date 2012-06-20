@@ -19,14 +19,16 @@ namespace Hilo
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ImageBase : public ViewModelBase
     {
-    public:
+    internal:
         ImageBase(IExceptionPolicy^ exceptionPolicy);
         
     protected:
-        Windows::Foundation::IAsyncAction^ SaveImageAsync(Windows::Storage::BulkAccess::FileInformation^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
+        Windows::Foundation::IAsyncOperation<Windows::Storage::StorageFile^>^ GetFileNameFromFileSavePickerAsync(Platform::String^ fileType);
+        Windows::Foundation::IAsyncAction^ SaveImageAsync(Windows::Storage::StorageFile^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
 
     private:
-        concurrency::task<void> SaveImageAsyncImpl(Windows::Storage::BulkAccess::FileInformation^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
+        concurrency::task<Windows::Storage::StorageFile^> GetFileNameFromFileSavePickerAsyncImpl(Platform::String^ fileType);
+        concurrency::task<void> SaveImageAsyncImpl(Windows::Storage::StorageFile^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
     };
 #pragma warning(pop)
 }

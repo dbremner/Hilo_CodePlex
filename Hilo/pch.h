@@ -14,11 +14,9 @@
 #pragma once
 
 #include <assert.h>
+#include <collection.h>
 #include <ppltasks.h>
 #include <sstream>
-#include <collection.h>
-#include <vccorlib.h>
 #include "TaskExtensions.h"
 #include "TaskExceptionsExtensions.h"
-#include "StorageExtensions.h"
 #include "App.xaml.h"

@@ -112,13 +112,17 @@ namespace HiloTests
         Windows::Storage::StorageFolder^ CreateThumbnailFolder()
         {
             concurrency::task_status status;
-            Windows::Storage::StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+            // Windows::Storage::StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+            auto installStorageFolder = Windows::Storage::KnownFolders::PicturesLibrary;
+                        
+            auto createFolderTask = concurrency::create_task(installStorageFolder->CreateFolderAsync(
+                "ThumbnailTestGeneratorTestFolder", 
+                Windows::Storage::CreationCollisionOption::ReplaceExisting));
 
             auto folder = TestHelper::RunSynced(
-                concurrency::task<StorageFolder^>(installStorageFolder->CreateFolderAsync(
-                "ThumbnailTestGeneratorTestFolder", 
-                Windows::Storage::CreationCollisionOption::ReplaceExisting)), 
-                status);
+               createFolderTask, 
+               status);
+
             Assert::AreEqual(concurrency::task_status::completed, status);
 
             return folder;

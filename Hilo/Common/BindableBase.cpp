@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "BindableBase.h"
 
-using namespace Hilo;
+using namespace Hilo::Common;
 
 using namespace Platform;
 using namespace Windows::UI::Xaml::Data;
@@ -20,5 +20,5 @@ using namespace Windows::UI::Xaml::Data;
 /// <param name="propertyName">Name of the property used to notify listeners.</param>
 void BindableBase::OnPropertyChanged(String^ propertyName)
 {
-    PropertyChanged(this, ref new PropertyChangedEventArgs(propertyName));
+	PropertyChanged(this, ref new PropertyChangedEventArgs(propertyName));
 }

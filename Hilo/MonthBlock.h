@@ -9,44 +9,55 @@
 #pragma once
 
 #include "Common\BindableBase.h"
+#include "IMonthBlock.h"
 
 namespace Hilo
 {
-    ref class YearGroup;
+    interface class IYearGroup;
     interface class IExceptionPolicy;
+    interface class IRepository;
+    interface class IQueryOperation;
+    interface class IResourceLoader;
 
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class MonthBlock sealed : public BindableBase
+    public ref class MonthBlock sealed : public Common::BindableBase, public IMonthBlock
     {
     public:
-        MonthBlock(YearGroup^ yearGroup, unsigned int month, IExceptionPolicy^ exceptionPolicy);
+        MonthBlock(IYearGroup^ yearGroup, unsigned int month, IResourceLoader^ resourceLoader, IRepository^ repository, IQueryOperation^ queryOperation, IExceptionPolicy^ exceptionPolicy);
 
         property Platform::String^ Name 
         { 
-            Platform::String^ get(); 
+            virtual Platform::String^ get(); 
         }
 
-        property bool Enabled
+        property bool HasPhotos
         { 
-            bool get();
+            virtual bool get();
         }
 
         property unsigned int Month
         {
-            unsigned int get();
+            virtual unsigned int get();
         }
 
-        property YearGroup^ Group
+        property IYearGroup^ Group
         {
-            YearGroup^ get();
+            virtual IYearGroup^ get();
         }
+
+    internal:
+        concurrency::task<void> QueryPhotoCount();
 
     private:
         Platform::WeakReference m_weakYearGroup;
         unsigned int m_month;
-        unsigned int m_count;
-        bool m_determinedEnabled;
+        IResourceLoader^ m_resourceLoader;
+        IRepository^ m_repository;
+        IQueryOperation^ m_queryOperation;
         IExceptionPolicy^ m_exceptionPolicy;
+        unsigned int m_count;
+        bool m_runOperation;
+        bool m_runningOperation;
 
         Platform::String^ BuildDateQuery();
     };

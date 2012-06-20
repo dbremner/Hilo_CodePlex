@@ -8,78 +8,101 @@
 //===============================================================================
 #include "pch.h"
 #include "LayoutAwarePage.h"
+#include "SuspensionManager.h"
 
-using namespace Hilo;
+using namespace Hilo::Common;
 
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::System;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::ViewManagement;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::UI::Xaml::Interop;
+using namespace Windows::UI::Xaml::Navigation;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="LayoutAwarePage"/> class.
 /// </summary>
 LayoutAwarePage::LayoutAwarePage()
 {
-    if (Windows::ApplicationModel::DesignMode::DesignModeEnabled) return;
+	if (Windows::ApplicationModel::DesignMode::DesignModeEnabled)
+	{
+		return;
+	}
 
-    // Map application view state to visual state for this page when it is part of the visual tree
-    Loaded += ref new RoutedEventHandler(this, &LayoutAwarePage::StartLayoutUpdates);
-    Unloaded += ref new RoutedEventHandler(this, &LayoutAwarePage::StopLayoutUpdates);
+	// Create an empty default view model
+	DefaultViewModel = ref new Map<String^, Object^>(std::less<String^>());
 
-    // Establish the default view model as the initial DataContext
-    DataContext = _defaultViewModel = ref new Map<String^, Object^>(std::less<String^>());
+	// When this page is part of the visual tree make two changes:
+	// 1) Map application view state to visual state for the page
+	// 2) Handle keyboard and mouse navigation requests
+	Loaded += ref new RoutedEventHandler([=](Object^ sender, RoutedEventArgs^ e)
+	{
+		this->StartLayoutUpdates(sender, e);
+
+		// Keyboard and mouse navigation only apply when occupying the entire window
+		if (this->ActualHeight == Window::Current->Bounds.Height &&
+			this->ActualWidth == Window::Current->Bounds.Width)
+		{
+			// Listen to the window directly so focus isn't required
+			_acceleratorKeyEventToken = Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated +=
+				ref new TypedEventHandler<CoreDispatcher^, AcceleratorKeyEventArgs^>(this,
+				&LayoutAwarePage::CoreDispatcher_AcceleratorKeyActivated);
+			_pointerPressedEventToken = Window::Current->CoreWindow->PointerPressed +=
+				ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this,
+				&LayoutAwarePage::CoreWindow_PointerPressed);
+			_navigationShortcutsRegistered = true;
+		}
+	});
+
+	// Undo the same changes when the page is no longer visible
+	Unloaded += ref new RoutedEventHandler([=](Object^ sender, RoutedEventArgs^ e)
+	{
+		this->StopLayoutUpdates(sender, e);
+		if (_navigationShortcutsRegistered)
+		{
+			Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated -= _acceleratorKeyEventToken;
+			Window::Current->CoreWindow->PointerPressed -= _pointerPressedEventToken;
+			_navigationShortcutsRegistered = false;
+		}
+	});
+}
+
+static DependencyProperty^ _defaultViewModelProperty =
+	DependencyProperty::Register("DefaultViewModel",
+	TypeName(IObservableMap<String^, Object^>::typeid), TypeName(LayoutAwarePage::typeid), nullptr);
+
+/// <summary>
+/// Identifies the <see cref="DefaultViewModel"/> dependency property.
+/// </summary>
+DependencyProperty^ LayoutAwarePage::DefaultViewModelProperty::get()
+{
+	return _defaultViewModelProperty;
 }
 
 /// <summary>
-/// Gets an implementation of <see cref="IObservableMap<String, Object>"/> set as the page's
-/// default <see cref="DataContext"/>.  This instance can be bound and surfaces property change
-/// notifications making it suitable for use as a trivial view model.
+/// Gets an implementation of <see cref="IObservableMap&lt;String, Object&gt;"/> designed to be
+/// used as a trivial view model.
 /// </summary>
-IObservableMap<Platform::String^, Object^>^ LayoutAwarePage::DefaultViewModel::get()
+IObservableMap<String^, Object^>^ LayoutAwarePage::DefaultViewModel::get()
 {
-    return _defaultViewModel;
+	return safe_cast<IObservableMap<String^, Object^>^>(GetValue(DefaultViewModelProperty));
 }
 
 /// <summary>
-/// Gets a value indicating whether visual states can be a loose interpretation of the actual
-/// application view state.  This is often convenient when a page layout is space constrained.
+/// Sets an implementation of <see cref="IObservableMap&lt;String, Object&gt;"/> designed to be
+/// used as a trivial view model.
 /// </summary>
-/// <remarks>
-/// The default value of false indicates that the visual state is identical to the view state,
-/// meaning that Filled is only used when another application is snapped.  When set to true
-/// FullScreenLandscape is used to indicate that at least 1366 virtual pixels of horizontal real
-/// estate are available - even if another application is snapped - and Filled indicates a lesser
-/// width, even if no other application is snapped.  On a smaller display such as a 1024x768
-/// panel this will result in the visual state Filled whenever the device is in landscape
-/// orientation.
-/// </remarks>
-bool LayoutAwarePage::UseFilledStateForNarrowWindow::get()
+void LayoutAwarePage::DefaultViewModel::set(IObservableMap<String^, Object^>^ value)
 {
-    return _useFilledStateForNarrowWindow;
+	SetValue(DefaultViewModelProperty, value);
 }
 
-/// <summary>
-/// Sets a value indicating whether visual states can be a loose interpretation of the actual
-/// application view state.  This is often convenient when a page layout is space constrained.
-/// </summary>
-/// <remarks>
-/// The default value of false indicates that the visual state is identical to the view state,
-/// meaning that Filled is only used when another application is snapped.  When set to true
-/// FullScreenLandscape is used to indicate that at least 1366 virtual pixels of horizontal real
-/// estate are available - even if another application is snapped - and Filled indicates a lesser
-/// width, even if no other application is snapped.  On a smaller display such as a 1024x768
-/// panel this will result in the visual state Filled whenever the device is in landscape
-/// orientation.
-/// </remarks>
-void LayoutAwarePage::UseFilledStateForNarrowWindow::set(bool value)
-{
-    _useFilledStateForNarrowWindow = value;
-    this->InvalidateVisualState();
-}
+#pragma region Navigation support
 
 /// <summary>
 /// Invoked as an event handler to navigate backward in the page's associated <see cref="Frame"/>
@@ -89,24 +112,128 @@ void LayoutAwarePage::UseFilledStateForNarrowWindow::set(bool value)
 /// <param name="e">Event data describing the conditions that led to the event.</param>
 void LayoutAwarePage::GoHome(Object^ sender, RoutedEventArgs^ e)
 {
-    // Use the navigation frame to return to the topmost page
-    if (Frame != nullptr)
-    {
-        while (Frame->CanGoBack) Frame->GoBack();
-    }
+	(void) sender;	// Unused parameter
+	(void) e;	// Unused parameter
+
+	// Use the navigation frame to return to the topmost page
+	if (Frame != nullptr)
+	{
+		while (Frame->CanGoBack)
+		{
+			Frame->GoBack();
+		}
+	}
 }
 
 /// <summary>
-/// Invoked as an event handler to navigate backward in the page's associated <see cref="Frame"/>
-/// to go back one step on the navigation stack.
+/// Invoked as an event handler to navigate backward in the navigation stack
+/// associated with this page's <see cref="Frame"/>.
 /// </summary>
 /// <param name="sender">Instance that triggered the event.</param>
 /// <param name="e">Event data describing the conditions that led to the event.</param>
 void LayoutAwarePage::GoBack(Object^ sender, RoutedEventArgs^ e)
 {
-    // Use the navigation frame to return to the previous page
-    if (Frame != nullptr && Frame->CanGoBack) Frame->GoBack();
+	(void) sender;	// Unused parameter
+	(void) e;	// Unused parameter
+
+	// Use the navigation frame to return to the previous page
+	if (Frame != nullptr && Frame->CanGoBack)
+	{
+		Frame->GoBack();
+	}
 }
+
+/// <summary>
+/// Invoked as an event handler to navigate forward in the navigation stack
+/// associated with this page's <see cref="Frame"/>.
+/// </summary>
+/// <param name="sender">Instance that triggered the event.</param>
+/// <param name="e">Event data describing the conditions that led to the event.</param>
+void LayoutAwarePage::GoForward(Object^ sender, RoutedEventArgs^ e)
+{
+	(void) sender;	// Unused parameter
+	(void) e;	// Unused parameter
+
+	// Use the navigation frame to advance to the next page
+	if (Frame != nullptr && Frame->CanGoForward)
+	{
+		Frame->GoForward();
+	}
+}
+
+/// <summary>
+/// Invoked on every keystroke, including system keys such as Alt key combinations, when
+/// this page is active and occupies the entire window.  Used to detect keyboard navigation
+/// between pages even when the page itself doesn't have focus.
+/// </summary>
+/// <param name="sender">Instance that triggered the event.</param>
+/// <param name="args">Event data describing the conditions that led to the event.</param>
+void LayoutAwarePage::CoreDispatcher_AcceleratorKeyActivated(CoreDispatcher^ sender,
+															 AcceleratorKeyEventArgs^ args)
+{
+	auto virtualKey = args->VirtualKey;
+
+	// Only investigate further when Left, Right, or the dedicated Previous or Next keys
+	// are pressed
+	if ((args->EventType == CoreAcceleratorKeyEventType::SystemKeyDown ||
+		args->EventType == CoreAcceleratorKeyEventType::KeyDown) &&
+		(virtualKey == VirtualKey::Left || virtualKey == VirtualKey::Right ||
+		(int)virtualKey == 166 || (int)virtualKey == 167))
+	{
+		auto coreWindow = Window::Current->CoreWindow;
+		auto downState = Windows::UI::Core::CoreVirtualKeyStates::Down;
+		bool menuKey = (coreWindow->GetKeyState(VirtualKey::Menu) & downState) == downState;
+		bool controlKey = (coreWindow->GetKeyState(VirtualKey::Control) & downState) == downState;
+		bool shiftKey = (coreWindow->GetKeyState(VirtualKey::Shift) & downState) == downState;
+		bool noModifiers = !menuKey && !controlKey && !shiftKey;
+		bool onlyAlt = menuKey && !controlKey && !shiftKey;
+
+		if (((int)virtualKey == 166 && noModifiers) ||
+			(virtualKey == VirtualKey::Left && onlyAlt))
+		{
+			// When the previous key or Alt+Left are pressed navigate back
+			args->Handled = true;
+			GoBack(this, ref new RoutedEventArgs());
+		}
+		else if (((int)virtualKey == 167 && noModifiers) ||
+			(virtualKey == VirtualKey::Right && onlyAlt))
+		{
+			// When the next key or Alt+Right are pressed navigate forward
+			args->Handled = true;
+			GoForward(this, ref new RoutedEventArgs());
+		}
+	}
+}
+
+/// <summary>
+/// Invoked on every mouse click, touch screen tap, or equivalent interaction when this
+/// page is active and occupies the entire window.  Used to detect browser-style next and
+/// previous mouse button clicks to navigate between pages.
+/// </summary>
+/// <param name="sender">Instance that triggered the event.</param>
+/// <param name="args">Event data describing the conditions that led to the event.</param>
+void LayoutAwarePage::CoreWindow_PointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
+{
+	auto properties = args->CurrentPoint->Properties;
+
+	// Ignore button chords with the left, right, and middle buttons
+	if (properties->IsLeftButtonPressed || properties->IsRightButtonPressed ||
+		properties->IsMiddleButtonPressed) return;
+
+	// If back or foward are pressed (but not both) navigate appropriately
+	bool backPressed = properties->IsXButton1Pressed;
+	bool forwardPressed = properties->IsXButton2Pressed;
+	if (backPressed ^ forwardPressed)
+	{
+		args->Handled = true;
+		if (backPressed) GoBack(this, ref new RoutedEventArgs());
+		if (forwardPressed) GoForward(this, ref new RoutedEventArgs());
+	}
+}
+
+#pragma endregion
+
+#pragma region Visual state switching
 
 /// <summary>
 /// Invoked as an event handler, typically on the <see cref="Loaded"/> event of a
@@ -125,27 +252,27 @@ void LayoutAwarePage::GoBack(Object^ sender, RoutedEventArgs^ e)
 /// <seealso cref="InvalidateVisualState"/>
 void LayoutAwarePage::StartLayoutUpdates(Object^ sender, RoutedEventArgs^ e)
 {
-    auto control = safe_cast<Control^>(sender);
-    if (_layoutAwareControls == nullptr) {
-        // Start listening to view state changes when there are controls interested in updates
-        _layoutAwareControls = ref new Vector<Control^>();
-        _viewStateEventToken = ApplicationView::GetForCurrentView()->ViewStateChanged += ref new TypedEventHandler<ApplicationView^,ApplicationViewStateChangedEventArgs^>(this, &LayoutAwarePage::ViewStateChanged);
-        _windowSizeEventToken = Window::Current->SizeChanged += ref new WindowSizeChangedEventHandler(this, &LayoutAwarePage::WindowSizeChanged);
-    }
-    _layoutAwareControls->Append(control);
+	(void) e;	// Unused parameter
 
-    // Set the initial visual state of the control
-    VisualStateManager::GoToState(control, DetermineVisualState(ApplicationView::Value), false);
-}
+	auto control = safe_cast<Control^>(sender);
+	if (_layoutAwareControls == nullptr)
+	{
+		// Start listening to view state changes when there are controls interested in updates
+		_layoutAwareControls = ref new Vector<Control^>();
+		_windowSizeEventToken = Window::Current->SizeChanged += ref new WindowSizeChangedEventHandler(this, &LayoutAwarePage::WindowSizeChanged);
+	}
+	_layoutAwareControls->Append(control);
 
-void LayoutAwarePage::ViewStateChanged(ApplicationView^ sender, ApplicationViewStateChangedEventArgs^ e)
-{
-    InvalidateVisualState(e->ViewState);
+	// Set the initial visual state of the control
+	VisualStateManager::GoToState(control, DetermineVisualState(ApplicationView::Value), false);
 }
 
 void LayoutAwarePage::WindowSizeChanged(Object^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ e)
 {
-    if (_useFilledStateForNarrowWindow) InvalidateVisualState();
+	(void) sender;	// Unused parameter
+	(void) e;	// Unused parameter
+
+	InvalidateVisualState();
 }
 
 /// <summary>
@@ -161,19 +288,20 @@ void LayoutAwarePage::WindowSizeChanged(Object^ sender, Windows::UI::Core::Windo
 /// <seealso cref="StartLayoutUpdates"/>
 void LayoutAwarePage::StopLayoutUpdates(Object^ sender, RoutedEventArgs^ e)
 {
-    auto control = safe_cast<Control^>(sender);
-    unsigned int index;
-    if (_layoutAwareControls != nullptr && _layoutAwareControls->IndexOf(control, &index))
-    {
-        _layoutAwareControls->RemoveAt(index);
-        if (_layoutAwareControls->Size == 0)
-        {
-            // Stop listening to view state changes when no controls are interested in updates
-            ApplicationView::GetForCurrentView()->ViewStateChanged -= _viewStateEventToken;
-            Window::Current->SizeChanged -= _windowSizeEventToken;
-            _layoutAwareControls = nullptr;
-        }
-    }
+	(void) e;	// Unused parameter
+
+	auto control = safe_cast<Control^>(sender);
+	unsigned int index;
+	if (_layoutAwareControls != nullptr && _layoutAwareControls->IndexOf(control, &index))
+	{
+		_layoutAwareControls->RemoveAt(index);
+		if (_layoutAwareControls->Size == 0)
+		{
+			// Stop listening to view state changes when no controls are interested in updates
+			Window::Current->SizeChanged -= _windowSizeEventToken;
+			_layoutAwareControls = nullptr;
+		}
+	}
 }
 
 /// <summary>
@@ -184,25 +312,20 @@ void LayoutAwarePage::StopLayoutUpdates(Object^ sender, RoutedEventArgs^ e)
 /// <param name="viewState">View state for which a visual state is desired.</param>
 /// <returns>Visual state name used to drive the <see cref="VisualStateManager"/></returns>
 /// <seealso cref="InvalidateVisualState"/>
-Platform::String^ LayoutAwarePage::DetermineVisualState(ApplicationViewState viewState)
+String^ LayoutAwarePage::DetermineVisualState(ApplicationViewState viewState)
 {
-    auto actualViewState = viewState;
-    if (_useFilledStateForNarrowWindow &&
-        (viewState == ApplicationViewState::Filled ||
-        viewState == ApplicationViewState::FullScreenLandscape))
-    {
-        // Allow pages to request that the Filled state be used only for landscape layouts narrower
-        // than 1366 virtual pixels
-        auto windowWidth = Window::Current->Bounds.Width;
-        actualViewState = windowWidth >= 1366 ? ApplicationViewState::FullScreenLandscape : ApplicationViewState::Filled;
-    }
-    switch (actualViewState)
-    {
-    case ApplicationViewState::Filled: return "Filled";
-    case ApplicationViewState::Snapped: return "Snapped";
-    case ApplicationViewState::FullScreenPortrait: return "FullScreenPortrait";
-    default: case ApplicationViewState::FullScreenLandscape: return "FullScreenLandscape";
-    }
+	switch (viewState)
+	{
+	case ApplicationViewState::Filled:
+		return "Filled";
+	case ApplicationViewState::Snapped:
+		return "Snapped";
+	case ApplicationViewState::FullScreenPortrait:
+		return "FullScreenPortrait";
+	case ApplicationViewState::FullScreenLandscape:
+	default:
+		return "FullScreenLandscape";
+	}
 }
 
 /// <summary>
@@ -215,30 +338,95 @@ Platform::String^ LayoutAwarePage::DetermineVisualState(ApplicationViewState vie
 /// </remarks>
 void LayoutAwarePage::InvalidateVisualState()
 {
-    InvalidateVisualState(ApplicationView::Value);
+	if (_layoutAwareControls != nullptr)
+	{
+		String^ visualState = DetermineVisualState(ApplicationView::Value);
+		auto controlIterator = _layoutAwareControls->First();
+		while (controlIterator->HasCurrent)
+		{
+			auto control = controlIterator->Current;
+			VisualStateManager::GoToState(control, visualState, false);
+			controlIterator->MoveNext();
+		}
+	}
+}
+
+#pragma endregion
+
+#pragma region Process lifetime management
+
+/// <summary>
+/// Invoked when this page is about to be displayed in a Frame.
+/// </summary>
+/// <param name="e">Event data that describes how this page was reached.  The Parameter
+/// property provides the group to be displayed.</param>
+void LayoutAwarePage::OnNavigatedTo(NavigationEventArgs^ e)
+{
+	// Returning to a cached page through navigation shouldn't trigger state loading
+	if (_pageKey != nullptr) return;
+
+	auto frameState = SuspensionManager::SessionStateForFrame(Frame);
+	_pageKey = "Page-" + Frame->BackStackDepth;
+
+	if (e->NavigationMode == NavigationMode::New)
+	{
+		// Clear existing state for forward navigation when adding a new page to the
+		// navigation stack
+		auto nextPageKey = _pageKey;
+		int nextPageIndex = Frame->BackStackDepth;
+		while (frameState->HasKey(nextPageKey))
+		{
+			frameState->Remove(nextPageKey);
+			nextPageIndex++;
+			nextPageKey = "Page-" + nextPageIndex;
+		}
+
+		// Pass the navigation parameter to the new page
+		LoadState(e->Parameter, nullptr);
+	}
+	else
+	{
+		// Pass the navigation parameter and preserved page state to the page, using
+		// the same strategy for loading suspended state and recreating pages discarded
+		// from cache
+		LoadState(e->Parameter, safe_cast<IMap<String^, Object^>^>(frameState->Lookup(_pageKey)));
+	}
 }
 
 /// <summary>
-/// Updates all controls that are listening for visual state changes with the correct visual
-/// state.
+/// Invoked when this page will no longer be displayed in a Frame.
 /// </summary>
-/// <remarks>
-/// Typically used in conjunction with overriding <see cref="DetermineVisualState"/> to
-/// signal that a different value may be returned even though the view state has not changed.
-/// </remarks>
-/// <param name="viewState">The desired view state, or null if the current view state should be
-/// used.</param>
-void LayoutAwarePage::InvalidateVisualState(ApplicationViewState viewState)
+/// <param name="e">Event data that describes how this page was reached.  The Parameter
+/// property provides the group to be displayed.</param>
+void LayoutAwarePage::OnNavigatedFrom(NavigationEventArgs^ e)
 {
-    if (_layoutAwareControls != nullptr)
-    {
-        String^ visualState = DetermineVisualState(viewState);
-        auto controlIterator = _layoutAwareControls->First();
-        while (controlIterator->HasCurrent)
-        {
-            auto control = controlIterator->Current;
-            VisualStateManager::GoToState(control, visualState, false);
-            controlIterator->MoveNext();
-        }
-    }
+	auto frameState = SuspensionManager::SessionStateForFrame(Frame);
+	auto pageState = ref new Map<String^, Object^>();
+	SaveState(pageState);
+	frameState->Insert(_pageKey, pageState);
 }
+
+/// <summary>
+/// Populates the page with content passed during navigation.  Any saved state is also
+/// provided when recreating a page from a prior session.
+/// </summary>
+/// <param name="navigationParameter">The parameter value passed to
+/// <see cref="Frame.Navigate(Type, Object)"/> when this page was initially requested.
+/// </param>
+/// <param name="pageState">A map of state preserved by this page during an earlier
+/// session.  This will be null the first time a page is visited.</param>
+void LayoutAwarePage::LoadState(Object^ navigationParameter, IMap<String^, Object^>^ pageState)
+{
+}
+
+/// <summary>
+/// Preserves state associated with this page in case the application is suspended or the
+/// page is discarded from the navigation cache.  Values must conform to the serialization
+/// requirements of <see cref="SuspensionManager.SessionState"/>.
+/// </summary>
+/// <param name="pageState">An empty map to be populated with serializable state.</param>
+void LayoutAwarePage::SaveState(IMap<String^, Object^>^ pageState)
+{
+}
+
+#pragma endregion

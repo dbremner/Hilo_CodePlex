@@ -8,7 +8,7 @@
 //===============================================================================
 #include "pch.h"
 #include "ImageBrowserViewModel.h"
-#include "ImageViewData.h"
+#include "ImageNavigationData.h"
 #include "ImageBrowserView.xaml.h"
 
 using namespace Hilo;
@@ -30,23 +30,13 @@ ImageBrowserView::ImageBrowserView()
     InitializeComponent();
 }
 
-void ImageBrowserView::OnNavigatedTo(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedTo(e);
-}
-
-void ImageBrowserView::OnNavigatedFrom(NavigationEventArgs^ e)
-{
-    HiloPage::OnNavigatedFrom(e);
-}
-
 void ImageBrowserView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
 {
     auto photo = dynamic_cast<Photo^>(e->ClickedItem);
     if (nullptr !=  photo)
     {
-        auto imageData = ref new ImageViewData(photo);
-        HiloPage::NavigateToPage(PageType::Image, imageData);
+        auto imageData = ref new ImageNavigationData(photo);
+        HiloPage::NavigateToPage(PageType::Image, imageData->SerializeToString());
     }
 }
 
@@ -63,18 +53,6 @@ void ImageBrowserView::OnViewChangeCompleted(Object^ sender, SemanticZoomViewCha
             {
                 MonthPhotosGridView->ScrollIntoView(photo);
             }
-        }
-    }
-}
-
-void ImageBrowserView::OnZoomedOutGridItemTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e)
-{
-    auto grid = safe_cast<Grid^>(sender);
-    if (grid != nullptr)
-    {
-        if (!grid->IsTapEnabled)
-        {
-            e->Handled = true;
         }
     }
 }

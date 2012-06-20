@@ -8,11 +8,14 @@
 //===============================================================================
 #pragma once
 
+#include "PhotoReaderResult.h"
+
 namespace Hilo
 {
     class PhotoReader
     {
     public:
+        PhotoReaderResult<Windows::Storage::BulkAccess::FileInformation^> GetPhotosAsyncNew(Platform::String^ query, unsigned int maxNumberOfItems = 10);
         concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> GetPhotosAsync(Platform::String^ query, unsigned int maxNumberOfItems = 10);
         concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> GetPhotosAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folder, Platform::String^ query, unsigned int maxNumberOfItems = 10);
         concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^> GetAllPhotosAsync(Platform::String^ query);

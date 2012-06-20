@@ -10,7 +10,7 @@
 
 namespace Hilo
 {
-    public ref class BooleanToBrushConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+    public ref class BooleanToBrushConverter sealed : public Windows::UI::Xaml::Data::IValueConverter
     {
     public:
         virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^);

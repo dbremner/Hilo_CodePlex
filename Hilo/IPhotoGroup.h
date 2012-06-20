@@ -10,18 +10,18 @@
 
 namespace Hilo
 {
+    interface class IPhoto;
+
     public interface class IPhotoGroup
     {
-        operator Windows::Storage::IStorageFolder^ ();
-
         property Platform::String^ Title 
         { 
             Platform::String^ get();
         }
 
-        property Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ Items
+        property Windows::Foundation::Collections::IObservableVector<IPhoto^>^ Items
         {
-            Windows::Foundation::Collections::IObservableVector<Platform::Object^>^ get();
+            Windows::Foundation::Collections::IObservableVector<IPhoto^>^ get();
         }
     };
 }

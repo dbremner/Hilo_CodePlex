@@ -12,6 +12,7 @@
 using namespace Hilo;
 
 using namespace Platform;
+using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Navigation;
 
 ViewModelBase::ViewModelBase(IExceptionPolicy^ exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
@@ -32,6 +33,21 @@ void ViewModelBase::IsAppBarSticky::set(bool value)
     }
 }
 
+bool ViewModelBase::IsAppBarOpen::get()
+{
+    return m_isAppBarOpen;
+}
+
+void ViewModelBase::IsAppBarOpen::set(bool value)
+{
+    if (m_isAppBarOpen != value)
+    {
+        m_isAppBarOpen = value;
+        OnPropertyChanged("IsAppBarOpen");
+    }
+}
+
+
 void ViewModelBase::OnNavigatedTo(NavigationEventArgs^ e)
 {
 }
@@ -40,18 +56,26 @@ void ViewModelBase::OnNavigatedFrom(NavigationEventArgs^ e)
 {
 }
 
+void ViewModelBase::LoadState(IMap<String^, Object^>^ stateMap)
+{
+}
+
+void ViewModelBase::SaveState(IMap<String^, Object^>^ stateMap)
+{
+}
+
 void ViewModelBase::GoBack()
 {
-     NavigateBack();
+    NavigateBack();
 }
 
 void ViewModelBase::GoHome()
 {
-     NavigateHome();
+    NavigateHome();
 }
 
 
 void ViewModelBase::GoToPage(PageType page, Object^ parameter)
 {
-     NavigateToPage(page, parameter);
+    NavigateToPage(page, parameter);
 }

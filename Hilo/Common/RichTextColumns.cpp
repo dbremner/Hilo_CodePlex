@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "RichTextColumns.h"
 
-using namespace Hilo;
+using namespace Hilo::Common;
 
 using namespace Platform;
 using namespace Platform::Collections;
@@ -18,48 +18,38 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Interop;
 
-static Windows::UI::Xaml::DependencyProperty^ _richTextContentProperty;
-static Windows::UI::Xaml::DependencyProperty^ _columnTemplateProperty;
-
 /// <summary>
 /// Initializes a new instance of the <see cref="RichTextColumns"/> class.
 /// </summary>
 RichTextColumns::RichTextColumns()
 {
-    HorizontalAlignment = ::HorizontalAlignment::Left;
+	HorizontalAlignment = Windows::UI::Xaml::HorizontalAlignment::Left;
 }
 
+static DependencyProperty^ _columnTemplateProperty =
+	DependencyProperty::Register("ColumnTemplate", TypeName(DataTemplate::typeid), TypeName(RichTextColumns::typeid),
+	ref new PropertyMetadata(nullptr, ref new PropertyChangedCallback(
+	&RichTextColumns::ResetOverflowLayout)));
+
 /// <summary>
-/// Gets the initial rich text content to be used as the first column.
+/// Identifies the <see cref="ColumnTemplate"/> dependency property.
 /// </summary>
 DependencyProperty^ RichTextColumns::ColumnTemplateProperty::get()
 {
-    if (_columnTemplateProperty == nullptr)
-    {
-        TypeName thisType = { RichTextColumns::typeid->FullName, TypeKind::Custom };
-        TypeName dataTemplateType = { DataTemplate::typeid->FullName, TypeKind::Metadata };
-        _columnTemplateProperty = DependencyProperty::Register("ColumnTemplate",
-            dataTemplateType, thisType, ref new PropertyMetadata(nullptr,
-            ref new PropertyChangedCallback(&RichTextColumns::ResetOverflowLayout)));
-    }
-    return _columnTemplateProperty;
+	return _columnTemplateProperty;
 }
 
+static DependencyProperty^ _richTextContentProperty =
+	DependencyProperty::Register("RichTextContent", TypeName(RichTextBlock::typeid), TypeName(RichTextColumns::typeid),
+	ref new PropertyMetadata(nullptr, ref new PropertyChangedCallback(
+	&RichTextColumns::ResetOverflowLayout)));
+
 /// <summary>
-/// Gets the template used to create additional
-/// <see cref="RichTextBlockOverflow"/> instances.
+/// Identifies the <see cref="RichTextContent"/> dependency property.
 /// </summary>
 DependencyProperty^ RichTextColumns::RichTextContentProperty::get()
 {
-    if (_richTextContentProperty == nullptr)
-    {
-        TypeName thisType = { RichTextColumns::typeid->FullName, TypeKind::Custom };
-        TypeName richTextBlockType = { RichTextBlock::typeid->FullName, TypeKind::Metadata };
-        _richTextContentProperty = DependencyProperty::Register("RichTextContent",
-            richTextBlockType, thisType, ref new PropertyMetadata(nullptr,
-            ref new PropertyChangedCallback(&RichTextColumns::ResetOverflowLayout)));
-    }
-    return _richTextContentProperty;
+	return _richTextContentProperty;
 }
 
 /// <summary>
@@ -70,14 +60,16 @@ DependencyProperty^ RichTextColumns::RichTextContentProperty::get()
 /// <param name="e">Event data describing the specific change.</param>
 void RichTextColumns::ResetOverflowLayout(DependencyObject^ d, DependencyPropertyChangedEventArgs^ e)
 {
-    auto target = dynamic_cast<RichTextColumns^>(d);
-    if (target != nullptr)
-    {
-        // When dramatic changes occur, rebuild layout from scratch
-        target->_overflowColumns = nullptr;
-        target->Children->Clear();
-        target->InvalidateMeasure();
-    }
+	(void) e;	// Unused parameter
+
+	auto target = dynamic_cast<RichTextColumns^>(d);
+	if (target != nullptr)
+	{
+		// When dramatic changes occur, rebuild layout from scratch
+		target->_overflowColumns = nullptr;
+		target->Children->Clear();
+		target->InvalidateMeasure();
+	}
 }
 
 /// <summary>
@@ -89,88 +81,84 @@ void RichTextColumns::ResetOverflowLayout(DependencyObject^ d, DependencyPropert
 /// <returns>The resulting size of the original content plus any extra columns.</returns>
 Size RichTextColumns::MeasureOverride(Size availableSize)
 {
-    if (RichTextContent == nullptr)
-    {
-        Size emptySize(0, 0);
-        return emptySize;
-    }
+	if (RichTextContent == nullptr)
+	{
+		Size emptySize(0, 0);
+		return emptySize;
+	}
 
-    // Make sure the RichTextBlock is a child, using the lack of
-    // a list of additional columns as a sign that this hasn't been
-    // done yet
-    if (_overflowColumns == nullptr)
-    {
-        // Appending to the child collection currently returns S_FALSE on success,
-        // which results in an exception when called from C++
-        try { Children->Append(RichTextContent); } catch (COMException^ ex) { if (ex->HResult != 1) throw ex; }
-        _overflowColumns = ref new Vector<RichTextBlockOverflow^>();
-    }
+	// Make sure the RichTextBlock is a child, using the lack of
+	// a list of additional columns as a sign that this hasn't been
+	// done yet
+	if (_overflowColumns == nullptr)
+	{
+		Children->Append(RichTextContent);
+		_overflowColumns = ref new Vector<RichTextBlockOverflow^>();
+	}
 
-    // Start by measuring the original RichTextBlock content
-    RichTextContent->Measure(availableSize);
-    auto maxWidth = RichTextContent->DesiredSize.Width;
-    auto maxHeight = RichTextContent->DesiredSize.Height;
-    auto hasOverflow = RichTextContent->HasOverflowContent;
+	// Start by measuring the original RichTextBlock content
+	RichTextContent->Measure(availableSize);
+	auto maxWidth = RichTextContent->DesiredSize.Width;
+	auto maxHeight = RichTextContent->DesiredSize.Height;
+	auto hasOverflow = RichTextContent->HasOverflowContent;
 
-    // Make sure there are enough overflow columns
-    unsigned int overflowIndex = 0;
-    while (hasOverflow && maxWidth < availableSize.Width && ColumnTemplate != nullptr)
-    {
-        // Use existing overflow columns until we run out, then create
-        // more from the supplied template
-        RichTextBlockOverflow^ overflow;
-        if (_overflowColumns->Size > overflowIndex)
-        {
-            overflow = _overflowColumns->GetAt(overflowIndex);
-        }
-        else
-        {
-            overflow = safe_cast<RichTextBlockOverflow^>(ColumnTemplate->LoadContent());
-            _overflowColumns->Append(overflow);
-            // Appending to the child collection currently returns S_FALSE on success,
-            // which results in an exception when called from C++
-            try { Children->Append(overflow); } catch (COMException^ ex) { if (ex->HResult != 1) throw ex; }
-            if (overflowIndex == 0)
-            {
-                RichTextContent->OverflowContentTarget = overflow;
-            }
-            else
-            {
-                _overflowColumns->GetAt(overflowIndex - 1)->OverflowContentTarget = overflow;
-            }
-        }
+	// Make sure there are enough overflow columns
+	unsigned int overflowIndex = 0;
+	while (hasOverflow && maxWidth < availableSize.Width && ColumnTemplate != nullptr)
+	{
+		// Use existing overflow columns until we run out, then create
+		// more from the supplied template
+		RichTextBlockOverflow^ overflow;
+		if (_overflowColumns->Size > overflowIndex)
+		{
+			overflow = _overflowColumns->GetAt(overflowIndex);
+		}
+		else
+		{
+			overflow = safe_cast<RichTextBlockOverflow^>(ColumnTemplate->LoadContent());
+			_overflowColumns->Append(overflow);
+			Children->Append(overflow);
+			if (overflowIndex == 0)
+			{
+				RichTextContent->OverflowContentTarget = overflow;
+			}
+			else
+			{
+				_overflowColumns->GetAt(overflowIndex - 1)->OverflowContentTarget = overflow;
+			}
+		}
 
-        // Measure the new column and prepare to repeat as necessary
-        Size remainingSize(availableSize.Width - maxWidth, availableSize.Height);
-        overflow->Measure(remainingSize);
-        maxWidth += overflow->DesiredSize.Width;
-        maxHeight = __max(maxHeight, overflow->DesiredSize.Height);
-        hasOverflow = overflow->HasOverflowContent;
-        overflowIndex++;
-    }
+		// Measure the new column and prepare to repeat as necessary
+		Size remainingSize(availableSize.Width - maxWidth, availableSize.Height);
+		overflow->Measure(remainingSize);
+		maxWidth += overflow->DesiredSize.Width;
+		maxHeight = __max(maxHeight, overflow->DesiredSize.Height);
+		hasOverflow = overflow->HasOverflowContent;
+		overflowIndex++;
+	}
 
-    // Disconnect extra columns from the overflow chain, remove them from our private list
-    // of columns, and remove them as children
-    if (_overflowColumns->Size > overflowIndex)
-    {
-        if (overflowIndex == 0)
-        {
-            RichTextContent->OverflowContentTarget = nullptr;
-        }
-        else
-        {
-            _overflowColumns->GetAt(overflowIndex - 1)->OverflowContentTarget = nullptr;
-        }
-        while (_overflowColumns->Size > overflowIndex)
-        {
-            _overflowColumns->RemoveAt(overflowIndex);
-            Children->RemoveAt(overflowIndex + 1);
-        }
-    }
+	// Disconnect extra columns from the overflow chain, remove them from our private list
+	// of columns, and remove them as children
+	if (_overflowColumns->Size > overflowIndex)
+	{
+		if (overflowIndex == 0)
+		{
+			RichTextContent->OverflowContentTarget = nullptr;
+		}
+		else
+		{
+			_overflowColumns->GetAt(overflowIndex - 1)->OverflowContentTarget = nullptr;
+		}
+		while (_overflowColumns->Size > overflowIndex)
+		{
+			_overflowColumns->RemoveAt(overflowIndex);
+			Children->RemoveAt(overflowIndex + 1);
+		}
+	}
 
-    // Report final determined size
-    Size resultingSize(maxWidth, maxHeight);
-    return resultingSize;
+	// Report final determined size
+	Size resultingSize(maxWidth, maxHeight);
+	return resultingSize;
 }
 
 /// <summary>
@@ -181,18 +169,18 @@ Size RichTextColumns::MeasureOverride(Size availableSize)
 /// <returns>The size of the area the children actually required.</returns>
 Size RichTextColumns::ArrangeOverride(Size finalSize)
 {
-    float maxWidth = 0;
-    float maxHeight = 0;
-    auto childrenIterator = Children->First();
-    while (childrenIterator->HasCurrent)
-    {
-        auto child = childrenIterator->Current;
-        Rect childRect(maxWidth, 0, child->DesiredSize.Width, finalSize.Height);
-        child->Arrange(childRect);
-        maxWidth += child->DesiredSize.Width;
-        maxHeight = __max(maxHeight, child->DesiredSize.Height);
-        childrenIterator->MoveNext();
-    }
-    Size resultingSize(maxWidth, maxHeight);
-    return resultingSize;
+	float maxWidth = 0;
+	float maxHeight = 0;
+	auto childrenIterator = Children->First();
+	while (childrenIterator->HasCurrent)
+	{
+		auto child = childrenIterator->Current;
+		Rect childRect(maxWidth, 0, child->DesiredSize.Width, finalSize.Height);
+		child->Arrange(childRect);
+		maxWidth += child->DesiredSize.Width;
+		maxHeight = __max(maxHeight, child->DesiredSize.Height);
+		childrenIterator->MoveNext();
+	}
+	Size resultingSize(maxWidth, maxHeight);
+	return resultingSize;
 }

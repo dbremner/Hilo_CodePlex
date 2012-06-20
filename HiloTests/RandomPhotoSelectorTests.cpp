@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\RandomPhotoSelector.h"
-#include "..\Hilo\PhotoReader.h"
+#include "..\Hilo\PhotoQueryBuilder.h"
 #include <memory>
 
 using namespace Hilo;
@@ -50,7 +50,8 @@ namespace HiloTests
 
             Assert::AreEqual(5U, selectedPhotos->Size);
 
-            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+            //todo: Deleting images appears to fail currently
+            //TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
         TEST_METHOD(RandomPhotoSelectorUsesSizeOfProvidedFilesIfLessThanRequestedCount)
@@ -78,7 +79,8 @@ namespace HiloTests
 
             Assert::AreEqual(10U, selectedPhotos->Size);
 
-            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+            //todo: Cleanup images
+            // TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
     };
 }
