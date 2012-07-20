@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -219,6 +219,7 @@ task<void> SuspensionManager::SaveAsync(void)
 		return sessionDataWriter->FlushAsync();
 	}).then([=](bool flushSucceeded)
 	{
+        (void)flushSucceeded; // Unused parameter
 		return ApplicationData::Current->LocalFolder->CreateFileAsync(sessionStateFilename,
 			CreationCollisionOption::ReplaceExisting);
 	}).then([=](StorageFile^ createdFile)
@@ -230,6 +231,7 @@ task<void> SuspensionManager::SaveAsync(void)
 			sessionData->GetInputStreamAt(0), newStream->GetOutputStreamAt(0));
 	}).then([=](UINT64 copiedBytes)
 	{
+        (void)copiedBytes; // Unused parameter
 		return;
 	});
 }
@@ -265,6 +267,7 @@ task<void> SuspensionManager::RestoreAsync(void)
 				auto stateReader = ref new DataReader(stateFileStream);
 				return create_task(stateReader->LoadAsync(size)).then([=](unsigned int bytesRead)
 				{
+                    (void)bytesRead; // Unused parameter
 					// Deserialize the Session State
 					Object^ content = ReadObject(stateReader);
 					_sessionState = (Map<String^, Object^>^)content;
@@ -371,17 +374,17 @@ namespace
 		}
 	}
 
-	void WriteStringToObjectMap(DataWriter^ writer, IMap<String^, Object^>^ map)
-	{
-		writer->WriteByte(StringToObjectMapType);
-		writer->WriteUInt32(map->Size);
-		for (auto&& pair : map)
-		{
-			WriteObject(writer, pair->Key);
-			WriteObject(writer, pair->Value);
-		}
-		writer->WriteByte(MapEndMarker);
-	}
+    void WriteStringToObjectMap(DataWriter^ writer, IMap<String^, Object^>^ map)
+    {
+        writer->WriteByte(StringToObjectMapType);
+        writer->WriteUInt32(map->Size);
+        for (auto&& pair : map)
+        {
+            WriteObject(writer, pair->Key);
+            WriteObject(writer, pair->Value);
+        }
+        writer->WriteByte(MapEndMarker);
+    }
 
 	void WriteObject(DataWriter^ writer, Object^ object)
 	{

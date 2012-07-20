@@ -49,9 +49,6 @@
     <ClInclude Include="Common\SuspensionManager.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <Image Include="Assets\StoreLogo.png">
-      <Filter>Assets</Filter>
-    </Image>
     <Filter Include="en-US">
       <UniqueIdentifier>{3c81cdbc-ab58-4d8d-b1a9-ce0795ed117a}</UniqueIdentifier>
     </Filter>
@@ -110,9 +107,6 @@
     <ClCompile Include="CropImageViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="HubPhotoGroup.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="ImageBase.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
@@ -125,18 +119,6 @@
     <ClCompile Include="MainHubViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="MonthBlock.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="MonthGroup.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="Photo.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include="PhotoCache.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="RotateImageViewModel.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
@@ -146,13 +128,7 @@
     <ClCompile Include="ViewModelLocator.cpp">
       <Filter>ViewModels</Filter>
     </ClCompile>
-    <ClCompile Include="YearGroup.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
     <ClCompile Include="VariableGridView.cpp">
-      <Filter>Views</Filter>
-    </ClCompile>
-    <ClCompile Include="VariableListView.cpp">
       <Filter>Views</Filter>
     </ClCompile>
     <ClCompile Include="HiloPage.cpp">
@@ -163,12 +139,6 @@
     <ClCompile Include="CropImageView.xaml.cpp" />
     <ClCompile Include="ImageView.xaml.cpp" />
     <ClCompile Include="RotateImageView.xaml.cpp" />
-    <ClCompile Include="PhotoPathComparer.cpp">
-      <Filter>ViewModels</Filter>
-    </ClCompile>
-    <ClCompile Include=".\FileRepository.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
     <ClCompile Include=".\PhotoQueryBuilder.cpp">
       <Filter>Models</Filter>
     </ClCompile>
@@ -178,23 +148,60 @@
     <ClCompile Include="FileSizeConverter.cpp">
       <Filter>XamlExtensions</Filter>
     </ClCompile>
-    <ClCompile Include="FolderQueryOperation.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
     <ClCompile Include="LocalResourceLoader.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="FileQueryOperation.cpp">
-      <Filter>Models</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleQueryOperation.cpp">
       <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="PhotoGroupData.cpp">
       <Filter>Models</Filter>
     </ClCompile>
-    <ClCompile Include="HasPhotosConverter.cpp">
+    <ClCompile Include="TaskExtensions.cpp" />
+    <ClCompile Include=".\FilePictureHubGroupQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="FileMonthGroupQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include=".\FileMonthBlockQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoPathComparer.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoCache.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSinglePhotoQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include=".\FileAllPhotosQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="FileVirtualMonthFoldersQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="FileVirtualYearFoldersQuery.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="YearGroup.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Photo.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthBlock.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthGroup.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhotoGroup.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include=".\InverterConverter.cpp">
       <Filter>XamlExtensions</Filter>
+    </ClCompile>
+    <ClCompile Include="ExifExtensions.cpp">
+      <Filter>ViewModels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -219,9 +226,6 @@
     <ClInclude Include="ExceptionPolicyFactory.h">
       <Filter>ExceptionHandling</Filter>
     </ClInclude>
-    <ClInclude Include="IExceptionPolicy.h">
-      <Filter>ExceptionHandling</Filter>
-    </ClInclude>
     <ClInclude Include="WideFiveImageTile.h">
       <Filter>Models</Filter>
     </ClInclude>
@@ -235,12 +239,6 @@
       <Filter>Tile</Filter>
     </ClInclude>
     <ClInclude Include="CropImageViewModel.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="HubGroupType.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="HubPhotoGroup.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="ImageBase.h">
@@ -258,19 +256,7 @@
     <ClInclude Include="MainHubViewModel.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="MonthBlock.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="MonthGroup.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="PageType.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="Photo.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
-    <ClInclude Include="PhotoCache.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="RotateImageViewModel.h">
@@ -282,13 +268,7 @@
     <ClInclude Include="ViewModelLocator.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="YearGroup.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="VariableGridView.h">
-      <Filter>Views</Filter>
-    </ClInclude>
-    <ClInclude Include="VariableListView.h">
       <Filter>Views</Filter>
     </ClInclude>
     <ClInclude Include="HiloPage.h">
@@ -299,19 +279,10 @@
     <ClInclude Include="CropImageView.xaml.h" />
     <ClInclude Include="ImageView.xaml.h" />
     <ClInclude Include="RotateImageView.xaml.h" />
-    <ClInclude Include="PhotoPathComparer.h">
-      <Filter>ViewModels</Filter>
-    </ClInclude>
     <ClInclude Include="IPhotoGroup.h">
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="IPhoto.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include=".\IRepository.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include=".\FileRepository.h">
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include=".\PhotoQueryBuilder.h">
@@ -323,26 +294,14 @@
     <ClInclude Include=".\ImageNavigationData.h">
       <Filter>ViewModels</Filter>
     </ClInclude>
-    <ClInclude Include="IPhotoCache.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="IYearGroup.h">
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="IMonthBlock.h">
       <Filter>Models</Filter>
     </ClInclude>
-    <ClInclude Include=".\IQueryOperation.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="FolderQueryOperation.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="FileSizeConverter.h">
       <Filter>XamlExtensions</Filter>
-    </ClInclude>
-    <ClInclude Include="NullPhotoGroup.h">
-      <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="IResourceLoader.h">
       <Filter>Models</Filter>
@@ -350,17 +309,93 @@
     <ClInclude Include="LocalResourceLoader.h">
       <Filter>Models</Filter>
     </ClInclude>
-    <ClInclude Include="FileQueryOperation.h">
-      <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleQueryOperation.h">
-      <Filter>Models</Filter>
-    </ClInclude>
     <ClInclude Include="PhotoGroupData.h">
       <Filter>Models</Filter>
     </ClInclude>
-    <ClInclude Include="HasPhotosConverter.h">
+    <ClInclude Include=".\ObservableQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryChange.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include=".\FilePictureHubGroupQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PictureHubGroupQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthGroupQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthBlockQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="FileMonthGroupQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include=".\FileMonthBlockQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoPathComparer.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoCache.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="SinglePhotoQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSinglePhotoQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="AllPhotosQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include=".\FileAllPhotosQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="VirtualMonthFoldersQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="FileVirtualMonthFoldersQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="VirtualYearFoldersQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="FileVirtualYearFoldersQuery.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ExceptionPolicy.h">
+      <Filter>ExceptionHandling</Filter>
+    </ClInclude>
+    <ClInclude Include="YearGroup.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Photo.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="NullPhotoGroup.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthBlock.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthGroup.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="HubPhotoGroup.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="HubGroupType.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include=".\InverterConverter.h">
       <Filter>XamlExtensions</Filter>
+    </ClInclude>
+    <ClInclude Include="HiloCommonDefinitions.h" />
+    <ClInclude Include="ExifExtensions.h">
+      <Filter>ViewModels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -370,19 +405,19 @@
     <None Include="Hilo_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Hilo30.png">
+    <Image Include="Assets\HiloSplash.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\Hilo150b.png">
+    <Image Include="Assets\HiloLogo.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\Hilo310b.png">
+    <Image Include="Assets\HiloSmallLogo.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\MSDN_Hilo_bgoverlay_v2_022712.png">
+    <Image Include="Assets\HiloWideLogo.png">
       <Filter>Assets</Filter>
     </Image>
-    <Image Include="Assets\MSDN_Hilo_Splash_v2_022712.png">
+    <Image Include="Assets\HiloStoreLogo.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>

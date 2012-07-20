@@ -10,10 +10,7 @@
 #include "BooleanToBrushConverter.h"
 
 using namespace Hilo;
-
 using namespace Platform;
-using namespace Windows::Foundation;
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Interop;
 
 Object^ BooleanToBrushConverter::Convert(Object^ value, TypeName targetType, Object^ parameter, String^)

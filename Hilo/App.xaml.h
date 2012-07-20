@@ -18,7 +18,7 @@
 
 namespace Hilo
 {
-    interface class IExcptionPolicy;
+    class ExceptionPolicy;
 
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -31,6 +31,6 @@ namespace Hilo
 
     private:
         void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
-        IExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
     };
 }

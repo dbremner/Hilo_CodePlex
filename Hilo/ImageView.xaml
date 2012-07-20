@@ -34,7 +34,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <!-- Todo: Re-add relative frame binding for IsEnabled at RTM. -->
                 <Button x:Name="FilmStripBackButton" 
                         AutomationProperties.AutomationId="FilmStripBackButton" 
                         Click="GoBack" 
@@ -83,7 +82,6 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!-- Todo: Re-add relative frame binding for IsEnabled at RTM. -->
             <Button x:Name="BackButton"
                     AutomationProperties.AutomationId="BackButton"
                     Click="GoBack"
@@ -142,7 +140,7 @@
             </Popup>
             <Border Margin="0,-3,0,0">
                 <Image AutomationProperties.AutomationId="ImageControl"
-                       HorizontalAlignment="Center"                  
+                       HorizontalAlignment="Center"
                        PointerPressed="OnImagePointerPressed"
                        PointerReleased="OnImagePointerReleased"
                        PointerMoved="OnImagePointerMoved"
@@ -167,16 +165,16 @@
                 </FlipView.ItemTemplate>
             </FlipView>-->
         </Grid>
-        
+
         <ListView x:Name="SnappedPhotosFilmStripListView"
                   Grid.Row="1"
                   AutomationProperties.AutomationId="SnappedPhotosFilmStripListView"
                   Margin="0,-10,0,0"
                   Padding="10,0,0,60"
                   ItemsSource="{Binding Photos}" 
-                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                   IsItemClickEnabled="False"
                   ItemContainerStyle="{StaticResource HiloListViewItemStyle}"
+                  SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                   SelectionMode="Single"
                   Visibility="Collapsed">
             <ListView.ItemsPanel>
@@ -208,6 +206,26 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="{StaticResource PortraitBackButtonStyle}"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
 
@@ -238,10 +256,25 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="Collapsed"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ImageViewBottomAppBar" 
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
                                                        Storyboard.TargetProperty="Visibility">
-                            <DiscreteObjectKeyFrame KeyTime="0" 
+                            <DiscreteObjectKeyFrame KeyTime="0"
                                                     Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
                         </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
@@ -256,12 +289,26 @@
             <Grid>
                 <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">
-                    <Button Command="{Binding RotateImageCommand}" 
+                    <Button x:Name="RotateButton"
+                            Command="{Binding RotateImageCommand}" 
                             Style="{StaticResource RotateAppBarButtonStyle}" 
                             Tag="Rotate" />
-                    <Button Command="{Binding CropImageCommand}"
+                    <Button x:Name="CropButton"
+                            Command="{Binding CropImageCommand}"
                             Style="{StaticResource CropAppBarButtonStyle}"
                             Tag="Crop" />
+                    <Button x:Name="RotateButtonNoLabel"
+                            Command="{Binding RotateImageCommand}" 
+                            Style="{StaticResource RotateAppBarButtonNoLabelStyle}" 
+                            Tag="Rotate"
+                            ToolTipService.ToolTip="Rotate Picture"
+                            Visibility="Collapsed"/>
+                    <Button x:Name="CropButtonNoLabel"
+                            Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonNoLabelStyle}" 
+                            ToolTipService.ToolTip="Crop Picture"
+                            Tag="Crop"
+                            Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
         </AppBar>

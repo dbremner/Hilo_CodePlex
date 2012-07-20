@@ -7,7 +7,6 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "TaskExtensions.h"
 #include "TileUpdateScheduler.h"
 #include "ThumbnailGenerator.h"
 #include "PhotoQueryBuilder.h"
@@ -16,21 +15,12 @@
 #include "TaskExceptionsExtensions.h"
 #include "ExceptionPolicyFactory.h"
 
-
 using namespace concurrency;
 using namespace std;
 using namespace Platform;
-using namespace Windows::ApplicationModel::Background;
-using namespace Windows::Data::Xml::Dom;
 using namespace Platform::Collections;
-using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Graphics::Imaging;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::FileProperties;
-using namespace Windows::Storage::Search;
-using namespace Windows::Storage::Streams;
 using namespace Windows::UI::Notifications;
 
 using namespace Hilo;
@@ -49,21 +39,20 @@ TileUpdateScheduler::TileUpdateScheduler()
 {
 }
 
-task<void> TileUpdateScheduler::ScheduleUpdateAsync(IExceptionPolicy^ policy)
+task<void> TileUpdateScheduler::ScheduleUpdateAsync(std::shared_ptr<ExceptionPolicy> policy)
 {
-    // We create a new task to ensure this has the opportunity to run
-    // on a different thread than the one it's invoked upon.
-    return create_task([this, policy]()
-    {
-        // Select random pictures from the Pictures library and copy them 
-        // to a local app folder and then update the tile.
-        InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder, policy);
-    }).then(ObserveException<void>(policy));
+    assert(IsBackgroundThread());
+
+    // Select random pictures from the Pictures library and copy them 
+    // to a local app folder and then update the tile.
+    return InternalUpdateTileFromPicturesLibrary(ApplicationData::Current->LocalFolder, policy)
+        .then(ObserveException<void>(policy));
 }
 
 task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
-    StorageFolder^ thumbnailsFolder, IExceptionPolicy^ exceptionPolicy)
+    StorageFolder^ thumbnailsFolder, std::shared_ptr<ExceptionPolicy> exceptionPolicy)
 {
+    assert(IsBackgroundThread());
     // Create a folder to hold the thumbnails.
     // The ReplaceExisting option specifies to replace the contents of 
     // any existing folder with a new, empty folder.
@@ -76,17 +65,16 @@ task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
 
     return createFolder.then([thumbnailStorageFolder](StorageFolder^ createdFolder) 
     {
+        assert(IsBackgroundThread());
         (*thumbnailStorageFolder) = createdFolder;
 
-        // until we get around the threading issue that forces us to copy the 
-        // vector in the next step.
-
-        // Retrieve the most recent photos from the library. We later 
-        // select random photos from this collection.
+        // Collect a multiple of the batch and set size of the most recent photos from the library. 
+        // Later a random set is selected from this collection for thumbnail image generation.
         PhotoQueryBuilder query;
-        return query.GetPhotoStorageFilesAsync("", 2 * BatchSize * SetSize);
+        return query.GetPhotoStorageFilesAsync("", cancellation_token::none(), 2 * BatchSize * SetSize);
     }).then([](IVectorView<StorageFile^>^ files) 
     {
+        assert(IsBackgroundThread());
         // If we received fewer than the number in one batch,
         // return the empty collection. 
         if (files->Size < BatchSize)
@@ -99,17 +87,19 @@ task<void> TileUpdateScheduler::InternalUpdateTileFromPicturesLibrary(
         return RandomPhotoSelector::SelectFilesAsync(copiedFileInfos->GetView(), SetSize * BatchSize);
     }).then([this, thumbnailsFolder, thumbnailStorageFolder, exceptionPolicy](IVector<StorageFile^>^ selectedFiles)
     {
+        assert(IsBackgroundThread());
         // Return the empty collection if the previous step did not
         // produce enough photos.
         if (selectedFiles->Size == 0)
         {
             return task_from_result(ref new Vector<StorageFile^>());
         }
-        
+
         ThumbnailGenerator thumbnailGenerator(exceptionPolicy);
         return thumbnailGenerator.Generate(selectedFiles, *thumbnailStorageFolder);
     }).then([this](Vector<StorageFile^>^ files)
     {
+        assert(IsBackgroundThread());
         // Update the tile.
         UpdateTile(files);
     });
@@ -124,7 +114,7 @@ void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
     unsigned int imagesCount = files->Size;
     unsigned int imageBatches = imagesCount / BatchSize;
 
-    tileUpdater->EnableNotificationQueue(imagesCount > 0);
+    tileUpdater->EnableNotificationQueue(imageBatches > 0);
 
     for(unsigned int batch = 0; batch < imageBatches; batch++)
     {

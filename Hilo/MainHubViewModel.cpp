@@ -7,22 +7,22 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
+#include "MainHubViewModel.h"
 #include "HubPhotoGroup.h"
 #include "DelegateCommand.h"
 #include "PageType.h"
-#include "MainHubViewModel.h"
 #include "HubGroupType.h"
 #include "ImageNavigationData.h"
 #include "IPhoto.h"
 
 using namespace Hilo;
 using namespace Platform;
+using namespace std;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 
-MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroups, IExceptionPolicy^ exceptionPolicy) 
+MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroups, shared_ptr<ExceptionPolicy> exceptionPolicy) 
     : m_photoGroups(photoGroups), m_isAppBarEnabled(false), m_photo(nullptr), ViewModelBase(exceptionPolicy)
 {
     m_navigateToPicturesCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &MainHubViewModel::NavigateToPictures), ref new CanExecuteDelegate(this, &MainHubViewModel::CanNavigateToPictures));
@@ -31,13 +31,15 @@ MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroup
 
     m_pictureGroup = static_cast<HubPhotoGroup^>(m_photoGroups->GetAt(static_cast<unsigned int>(HubGroupType::Pictures)));
     assert(m_pictureGroup != nullptr);
-    m_pictureGroup->PropertyChanged += ref new PropertyChangedEventHandler([this](Object^ sender, PropertyChangedEventArgs^ e) 
+    m_pictureGroupPropertyChangedToken = m_pictureGroup->PropertyChanged += ref new PropertyChangedEventHandler(this, &MainHubViewModel::OnPictureGroupPropertyChanged);
+}
+
+MainHubViewModel::~MainHubViewModel()
+{
+    if (nullptr != m_pictureGroup)
     {
-        if (e->PropertyName == "Items")
-        {
-            m_navigateToPicturesCommand->CanExecute(nullptr);
-        }
-    });
+        m_pictureGroup->PropertyChanged -= m_pictureGroupPropertyChangedToken;
+    }
 }
 
 IObservableVector<HubPhotoGroup^>^ MainHubViewModel::PhotoGroups::get()
@@ -88,17 +90,25 @@ bool MainHubViewModel::CanNavigateToPictures(Object^ parameter)
 
 void MainHubViewModel::CropImage(Object^ parameter)
 {
-    auto data = ref new ImageNavigationData(m_photo);
-    ViewModelBase::GoToPage(PageType::Crop, data->SerializeToString());
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
 }
 
 void MainHubViewModel::RotateImage(Object^ parameter)
 {
-    auto data = ref new ImageNavigationData(m_photo);
-    ViewModelBase::GoToPage(PageType::Rotate, data->SerializeToString());
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
 }
 
 bool MainHubViewModel::CanCropOrRotateImage(Object^ paratmer)
 {
     return (nullptr != m_photo);
+}
+
+void MainHubViewModel::OnPictureGroupPropertyChanged(Object^ sender, PropertyChangedEventArgs^ e)
+{
+    if (e->PropertyName == "Items")
+    {
+        m_navigateToPicturesCommand->CanExecute(nullptr);
+    }
 }

@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -83,7 +83,6 @@ namespace Hilo
             Windows::UI::Core::PointerEventArgs^ args);
 
         // Hilo Page
-        std::map<PageType, Windows::UI::Xaml::Interop::TypeName> m_pages;
         Windows::Foundation::EventRegistrationToken m_navigateBackEventToken;
         Windows::Foundation::EventRegistrationToken m_navigateHomeEventToken;
         Windows::Foundation::EventRegistrationToken m_navigateToPageEventToken;

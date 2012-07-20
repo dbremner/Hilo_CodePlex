@@ -8,7 +8,6 @@
 //===============================================================================
 #include "pch.h"
 #include "PhotoQueryBuilder.h"
-#include "TaskExtensions.h"
 
 using namespace Hilo;
 
@@ -23,71 +22,66 @@ using namespace Windows::Storage::Search;
 
 const std::array<String^, 6> items = { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tif" };
 
-PhotoQueryBuilderResult<Windows::Storage::BulkAccess::FileInformation^> PhotoQueryBuilder::GetAllPhotosAsync(Platform::String^ query)
+PhotoQueryBuilderResult<Windows::Storage::BulkAccess::FileInformation^> PhotoQueryBuilder::GetAllPhotosAsync(Platform::String^ query, cancellation_token token)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync()), fileQuery);
+    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(), token), fileQuery);
 }
 
-PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetAllPhotosAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folder, Platform::String^ query)
+PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetAllPhotosAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folder, Platform::String^ query, cancellation_token token)
 {
     auto fileQuery = CreateFileQuery(folder, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync()), fileQuery);
+    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(), token), fileQuery);
 }
 
-PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetPhotosAsync(String^ query, unsigned int maxNumberOfItems)
+PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetPhotosAsync(String^ query, cancellation_token token, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)), fileQuery);
+    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems), token), fileQuery);
 }
 
-PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query, unsigned int maxNumberOfItems)
+PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetPhotoAsync(String^ photoQuery, cancellation_token token)
+{
+    String^ query = "System.ParsingPath:=\"" + photoQuery + "\"";
+    
+    auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query, IndexerOption::DoNotUseIndexer);
+    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
+    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, 1), token), fileQuery);
+}
+
+PhotoQueryBuilderResult<FileInformation^> PhotoQueryBuilder::GetPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query, cancellation_token token, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(folder, query);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)), fileQuery);
+    return PhotoQueryBuilderResult<FileInformation^>(create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems), token), fileQuery);
 }
 
-//task<IVectorView<FileInformation^>^> PhotoQueryBuilder::GetPhotosAsync(String^ query, unsigned int maxNumberOfItems)
-//{
-//    auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
-//    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-//    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
-//}
-//
-//task<IVectorView<FileInformation^>^> PhotoQueryBuilder::GetPhotosAsync(IStorageFolderQueryOperations^ folder, String^ query, unsigned int maxNumberOfItems)
-//{
-//    auto fileQuery = CreateFileQuery(folder, query);
-//    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-//    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems));
-//}
-
-task<IVectorView<StorageFile^>^> PhotoQueryBuilder::GetPhotoStorageFilesAsync(String^ query, unsigned int maxNumberOfItems)
+task<IVectorView<StorageFile^>^> PhotoQueryBuilder::GetPhotoStorageFilesAsync(String^ query, cancellation_token token, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query);
-    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems));
+    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems), token);
 }
 
-task<IVectorView<FolderInformation^>^> PhotoQueryBuilder::GetVirtualPhotoFoldersByMonth()
+PhotoQueryBuilderResult<FolderInformation^> PhotoQueryBuilder::GetVirtualPhotoFoldersByMonth(cancellation_token token)
 {
-    return GetVirtualPhotoFoldersByMonth(KnownFolders::PicturesLibrary);
+    return GetVirtualPhotoFoldersByMonth(KnownFolders::PicturesLibrary, token);
 }
 
-task<IVectorView<FolderInformation^>^> PhotoQueryBuilder::GetVirtualPhotoFoldersByMonth(IStorageFolderQueryOperations^ folder)
+PhotoQueryBuilderResult<FolderInformation^> PhotoQueryBuilder::GetVirtualPhotoFoldersByMonth(IStorageFolderQueryOperations^ folder, cancellation_token token)
 {
     auto fileQuery = CreateVirtualFolderQueryByMonth(folder);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return create_task(fileInformationFactory->GetFoldersAsync());
+    return PhotoQueryBuilderResult<FolderInformation^>(create_task(fileInformationFactory->GetFoldersAsync(), token), fileQuery);
 }
 
-task<IVectorView<FolderInformation^>^> PhotoQueryBuilder::GetVirtualPhotoFoldersByYear()
+task<IVectorView<FolderInformation^>^> PhotoQueryBuilder::GetVirtualPhotoFoldersByYear(cancellation_token token)
 {
     auto fileQuery = CreateVirtualFolderQueryByYear(KnownFolders::PicturesLibrary);
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return create_task(fileInformationFactory->GetFoldersAsync());
+    return create_task(fileInformationFactory->GetFoldersAsync(), token);
 }
 
 StorageFolderQueryResult^ PhotoQueryBuilder::CreateVirtualFolderQueryByYear(IStorageFolderQueryOperations^ folder)
@@ -106,14 +100,14 @@ StorageFolderQueryResult^ PhotoQueryBuilder::CreateVirtualFolderQueryByMonth(ISt
     return folder->CreateFolderQueryWithOptions(queryOptions);
 }
 
-StorageFileQueryResult^ PhotoQueryBuilder::CreateFileQuery(IStorageFolderQueryOperations^ folder, String^ query)
+StorageFileQueryResult^ PhotoQueryBuilder::CreateFileQuery(IStorageFolderQueryOperations^ folder, String^ query, IndexerOption indexerOption)
 {
     auto fileTypeFilter = ref new Vector<String^>(items);
 
     //auto picturesFolder = KnownFolders::PicturesLibrary;
     auto queryOptions = ref new QueryOptions(CommonFileQuery::OrderByDate, fileTypeFilter);
     queryOptions->FolderDepth = FolderDepth::Deep;
-    queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
+    queryOptions->IndexerOption = indexerOption;
     queryOptions->ApplicationSearchFilter = query;
     queryOptions->SetThumbnailPrefetch(ThumbnailMode::PicturesView, 190, ThumbnailOptions::UseCurrentScale);
     return folder->CreateFileQueryWithOptions(queryOptions);

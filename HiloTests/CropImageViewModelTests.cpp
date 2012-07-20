@@ -10,7 +10,7 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\CropImageViewModel.h"
 #include "StubExceptionPolicy.h"
-#include "StubRepository.h"
+#include "StubSinglePhotoQuery.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -18,7 +18,6 @@ using namespace Platform;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Data;
-using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 
 namespace HiloTests
@@ -28,33 +27,37 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_query = std::make_shared<StubSinglePhotoQuery>();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
         }
 
-        TEST_METHOD(CropImageViewModelIsNotNull)
+        TEST_METHOD(CropImageViewModelShouldSetupSaveCommandWhenConstructed)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
-            Assert::IsNotNull(vm, "CropImageViewModel should not be null");
+            CropImageViewModel model(m_query, m_exceptionPolicy);
+            Assert::IsNotNull(model.SaveCommand);
         }
 
-        TEST_METHOD(CropImageViewModelSaveCommandIsNotNull)
+        TEST_METHOD(CropImageViewModelShouldSetupCancelCommandWhenConstructed)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
-            ICommand^ saveCommand = vm->SaveCommand;
-            Assert::IsNotNull(saveCommand, "Save command should not be null");
+            CropImageViewModel model(m_query, m_exceptionPolicy);
+            Assert::IsNotNull(model.CancelCommand);
         }
 
-        TEST_METHOD(CropImageViewModelCancelCommandIsNotNull)
+        TEST_METHOD(CropImageViewModelShouldSetupResumeCropCommandWhenConstructed)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
-            ICommand^ cancelCommand = vm->CancelCommand;
-            Assert::IsNotNull(cancelCommand, "Cancel command should not be null");
+            CropImageViewModel model(m_query, m_exceptionPolicy);
+            Assert::IsNotNull(model.ResumeCropCommand);
+        }
+
+        TEST_METHOD(CropImageViewModelShouldSetIsAppBarStickyWhenConstructed)
+        {
+            CropImageViewModel model(m_query, m_exceptionPolicy);
+            Assert::IsTrue(model.IsAppBarSticky);
         }
 
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsIsCropOverlayVisibleToTrue)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -71,7 +74,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayWidthAndHeight)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -89,7 +92,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelCalculateCropOverlayPositionSetsCorrectCropOverlayLeftAndTop)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -107,7 +110,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeight)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -127,7 +130,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayHeightAndTop)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -148,7 +151,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayWidth)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -168,7 +171,7 @@ namespace HiloTests
 
         TEST_METHOD(CropImageViewModelUpdateCropOverlayPositionUpdatesCropOverlayLeftAndWidth)
         {
-            auto vm = ref new CropImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new CropImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -188,7 +191,7 @@ namespace HiloTests
         }
 
     private:
-        StubRepository^ m_repository;
-        StubExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<StubSinglePhotoQuery> m_query;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
     };
 }

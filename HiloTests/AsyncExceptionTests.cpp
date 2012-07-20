@@ -10,7 +10,6 @@
 #include "CppUnitTest.h"
 #include "StubExceptionPolicy.h"
 #include "..\Hilo\AsyncException.h"
-#include "..\Hilo\IExceptionPolicy.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
@@ -23,7 +22,7 @@ namespace HiloTests
         TEST_METHOD(AsyncExceptionTestsPolicyInvokedOnHandledException)
         {
 
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([policy]
@@ -35,13 +34,13 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            auto exception = dynamic_cast<Platform::NotImplementedException^>(policy->SuppliedException);
+            auto exception = dynamic_cast<Platform::NotImplementedException^>(policy->GetSuppliedException());
             Assert::IsNotNull(exception);
         }
 
         TEST_METHOD(AsyncExceptionTestsPolicyNotInvokedWithNoException)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([policy]
@@ -53,7 +52,7 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::completed, status);
 
-            Assert::IsNull(policy->SuppliedException);
+            Assert::IsNull(policy->GetSuppliedException());
         }
     };
 }

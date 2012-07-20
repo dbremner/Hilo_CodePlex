@@ -8,8 +8,8 @@
 //===============================================================================
 #pragma once
 
-namespace HiloTests {
-
+namespace HiloTests 
+{
     class TestImageGenerator
     {
     public:

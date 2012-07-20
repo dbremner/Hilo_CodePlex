@@ -7,16 +7,16 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
+
 namespace Hilo
 {
-    interface class IExceptionPolicy;
+    class ExceptionPolicy;
 
     class ExceptionPolicyFactory
     {
     public:
-        static IExceptionPolicy^ GetCurrentPolicy();
+        static std::shared_ptr<ExceptionPolicy> GetCurrentPolicy();
 
-        static IExceptionPolicy^ m_policy;
+        static std::shared_ptr<ExceptionPolicy> m_policy;
     };
-
 }

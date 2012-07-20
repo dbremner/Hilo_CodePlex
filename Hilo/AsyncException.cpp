@@ -12,9 +12,10 @@
 
 using namespace concurrency;
 using namespace Hilo;
+using namespace std;
 using namespace Windows::Foundation;
 
-IAsyncAction^ AsyncException::ObserveWithPolicy(IExceptionPolicy^ policy, IAsyncAction^ antecedent)
+IAsyncAction^ AsyncException::ObserveWithPolicy(shared_ptr<ExceptionPolicy> policy, IAsyncAction^ antecedent)
 {
     return create_async([antecedent, policy]
     {
@@ -22,5 +23,3 @@ IAsyncAction^ AsyncException::ObserveWithPolicy(IExceptionPolicy^ policy, IAsync
             .then(ObserveException<void>(policy));
     });
 }
-
-

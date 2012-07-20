@@ -12,19 +12,30 @@
 
 namespace Hilo
 {
-    class concurrency::cancellation_token_source;
-    interface class IExceptionPolicy;
-    interface class IRepository;
     interface class IPhoto;
     interface class IPhotoGroup;
-    interface class IPhotoCache;
     interface class IYearGroup;
+    class concurrency::cancellation_token_source;
+    class ExceptionPolicy;
+    class PhotoCache;
+    class VirtualMonthFoldersQuery;
+    class VirtualYearFoldersQuery;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class ImageBrowserViewModel sealed : public ViewModelBase
     {
+    internal:
+        ImageBrowserViewModel(std::shared_ptr<VirtualMonthFoldersQuery> monthFoldersQuery, std::shared_ptr<VirtualYearFoldersQuery> yearFoldersQuery, std::shared_ptr<ExceptionPolicy> exceptionPolicy);  
+
+        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
+        IPhoto^ GetPhotoForYearAndMonth(unsigned int year, unsigned int month);
+        concurrency::task<void> QueryMonthGroupsAsync();
+        concurrency::task<void> QueryYearGroupsAsync();
+
     public:
-        ImageBrowserViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
+        virtual ~ImageBrowserViewModel();
 
         property Windows::Foundation::Collections::IObservableVector<IPhotoGroup^>^ MonthGroups
         {
@@ -65,13 +76,6 @@ namespace Hilo
             void set(Platform::Object^ value);
         }
 
-        IPhoto^ GetPhotoForYearAndMonth(unsigned int year, unsigned int month);
-        virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;        
-
-    internal:
-        concurrency::task<void> QueryMonthGroupsAsync();
-        concurrency::task<void> QueryYearGroupsAsync();
-
     private:
         Platform::Collections::Vector<IPhotoGroup^>^ m_monthGroups;
         Platform::Collections::Vector<IYearGroup^>^ m_yearGroups;
@@ -80,16 +84,26 @@ namespace Hilo
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
         bool m_inProgress;
         bool m_isAppBarEnabled;
+        bool m_receivedChangeWhileRunning;
+        bool m_runningMonthQuery;
+        bool m_runningYearQuery;
+        bool m_active;
+        bool m_receivedChangeWhileNotActive;
 
         concurrency::cancellation_token_source m_monthCancelTokenSource;
         concurrency::cancellation_token_source m_yearCancelTokenSource;
-        IPhotoCache^ m_photoCache;
+        std::shared_ptr<PhotoCache> m_photoCache;
         IPhoto^ m_photo;
-        IRepository^ m_repository;
+        std::shared_ptr<VirtualMonthFoldersQuery> m_monthFoldersQuery;
+        std::shared_ptr<VirtualYearFoldersQuery> m_yearFoldersQuery;
 
         void NavigateToGroup(Platform::Object^ parameter);
         void CropImage(Platform::Object^ parameter);
         void RotateImage(Platform::Object^ parameter);
         bool CanCropOrRotateImage(Platform::Object^ parameter);
+        void OnDataChanged();
+        void ShowProgress(bool showProgress);
+        void RunMonthQuery();
+        void RunYearQuery();
     };
 }

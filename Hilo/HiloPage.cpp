@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,16 +12,15 @@
 
 using namespace Hilo;
 using namespace Hilo::Common;
-
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace std;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::System;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::ViewManagement;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Navigation;
@@ -29,6 +28,23 @@ using namespace Windows::UI::Xaml::Navigation;
 static TypeName hiloPageTypeName = { Hilo::HiloPage::typeid->FullName, TypeKind::Metadata };
 static TypeName objectTypeName = { "Object", TypeKind::Primitive };
 static Platform::String^ viewModelStateKey = "ViewModelState";
+
+static TypeName rotateImageViewType = { "Hilo.RotateImageView", TypeKind::Metadata };
+static TypeName cropImageViewType = { "Hilo.CropImageView", TypeKind::Metadata };
+static TypeName imageViewType = { "Hilo.ImageView", TypeKind::Metadata };
+static TypeName imageBrowserType =  { "Hilo.ImageBrowserView", TypeKind::Metadata };
+static TypeName mainHubType = { "Hilo.MainHubView", TypeKind::Metadata };
+map<PageType, TypeName> create_map()
+{
+    std::map<PageType, TypeName> pages;
+    pages.insert(std::make_pair(PageType::Crop, cropImageViewType));
+    pages.insert(std::make_pair(PageType::Rotate, rotateImageViewType));
+    pages.insert(std::make_pair(PageType::Image, imageViewType));
+    pages.insert(std::make_pair(PageType::Browse, imageBrowserType));   
+    pages.insert(std::make_pair(PageType::Hub, mainHubType));
+    return pages;
+}
+static map<PageType, TypeName> m_pages(create_map()); 
 
 static DependencyProperty^ _hiloDataContextProperty =
     DependencyProperty::Register(
@@ -105,22 +121,7 @@ HiloPage::HiloPage()
     //        _navigationShortcutsRegistered = false;
     //    }
     //});
-
-    // HiloPage
-    // Map of pages to PageType enumeration
-    // todo: this should be static
-    TypeName cropImageViewType = { "Hilo.CropImageView", TypeKind::Metadata };
-    //TypeName cropImageViewType = { "Hilo.BlankPage", TypeKind::Metadata };
-    m_pages.insert(std::make_pair(PageType::Crop, cropImageViewType));
-    TypeName rotateImageViewType = { "Hilo.RotateImageView", TypeKind::Metadata };
-    m_pages.insert(std::make_pair(PageType::Rotate, rotateImageViewType));
-    TypeName imageViewType = { "Hilo.ImageView", TypeKind::Metadata };
-    m_pages.insert(std::make_pair(PageType::Image, imageViewType));
-    TypeName imageBrowserType =  { "Hilo.ImageBrowserView", TypeKind::Metadata };;
-    m_pages.insert(std::make_pair(PageType::Browse, imageBrowserType));
-    TypeName mainHubType = { "Hilo.MainHubView", TypeKind::Metadata };
-    m_pages.insert(std::make_pair(PageType::Hub, mainHubType));
-
+    
     // binding for data context changed
     SetBinding(HiloPage::HiloDataContextProperty, ref new Binding());
 }

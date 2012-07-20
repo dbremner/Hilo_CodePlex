@@ -1,4 +1,4 @@
-﻿<!--
+<!--
 ===============================================================================
  Microsoft patterns & practices
  Hilo Guidance
@@ -170,6 +170,26 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="96,0,10,56"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
 
@@ -200,27 +220,61 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="Collapsed"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
-    
-    <Page.BottomAppBar>
+
+    <local:HiloPage.BottomAppBar>
         <AppBar x:Name="MainHubViewBottomAppBar"
                 AutomationProperties.AutomationId="MainHubViewBottomAppBar"
                 Padding="10,0,10,0">
             <Grid>
                 <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">
-                    <Button Command="{Binding RotateImageCommand}" 
+                    <Button x:Name="RotateButton"
+                            Command="{Binding RotateImageCommand}" 
                             Style="{StaticResource RotateAppBarButtonStyle}" 
                             Tag="Rotate" />
-                    <Button Command="{Binding CropImageCommand}"
-                            Style="{StaticResource CropAppBarButtonStyle}"            
+                    <Button x:Name="CropButton"
+                            Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonStyle}"
                             Tag="Crop" />
+                    <Button x:Name="RotateButtonNoLabel"
+                            Command="{Binding RotateImageCommand}" 
+                            Style="{StaticResource RotateAppBarButtonNoLabelStyle}" 
+                            Tag="Rotate"
+                            ToolTipService.ToolTip="Rotate Picture"
+                            Visibility="Collapsed"/>
+                    <Button x:Name="CropButtonNoLabel"
+                            Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonNoLabelStyle}" 
+                            ToolTipService.ToolTip="Crop Picture"
+                            Tag="Crop"
+                            Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
         </AppBar>
-    </Page.BottomAppBar>
+    </local:HiloPage.BottomAppBar>
 </local:HiloPage>

@@ -10,8 +10,14 @@
 #include "StubExceptionPolicy.h"
 
 using namespace HiloTests;
+using namespace Platform;
 
-void StubExceptionPolicy::HandleException(Platform::Exception^ exception)
+void StubExceptionPolicy::HandleException(Exception^ exception)
 {
-    SuppliedException = exception;
+    m_exception = exception;
+}
+
+Exception^ StubExceptionPolicy::GetSuppliedException()
+{
+    return m_exception;
 }

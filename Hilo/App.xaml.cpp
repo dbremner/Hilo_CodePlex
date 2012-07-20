@@ -44,6 +44,10 @@ using namespace Windows::UI::Xaml::Navigation;
 /// </summary>
 App::App()
 {
+#ifndef NDEBUG
+    // remember thread ID of main thread for assertion checking of runtime context
+    RecordMainThread();
+#endif
     InitializeComponent();
     Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
 }
@@ -56,6 +60,7 @@ App::App()
 /// <param name="pArgs">Details about the launch request and process.</param>
 void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
 {
+    assert(IsMainThread());
     m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
 
     // Do not repeat app initialization when already running, just ensure that
@@ -83,7 +88,7 @@ void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
         TileUpdateScheduler scheduler;
         scheduler.ScheduleUpdateAsync(m_exceptionPolicy);
 
-    }).then([=]()
+    }, task_continuation_context::use_arbitrary()).then([=]()
     {
         // When the navigation stack isn't restored navigate to the first page,
         // configuring the new page by passing required information as a navigation
@@ -112,13 +117,15 @@ void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
     (void) sender;	// Unused parameter
+    assert(IsMainThread());
 
     auto deferral = e->SuspendingOperation->GetDeferral();
-    
+
     HiloPage::IsSuspending = true;
-    SuspensionManager::SaveAsync().then([=]()
+    SuspensionManager::SaveAsync().then([=](task<void> antecedent)
     {
         HiloPage::IsSuspending = false;
+        antecedent.get();
         deferral->Complete();
     });
 }

@@ -8,7 +8,6 @@
 //===============================================================================
 #include "pch.h"
 #include "DispatchedEvent.h"
-#include <concrt.h>
 
 using namespace HiloTests;
 using namespace concurrency;
@@ -25,7 +24,7 @@ void DispatchedEvent::set()
 void DispatchedEvent::wait()
 {
     // Spin wait and exercise message pump
-    DWORD waitResult = COOPERATIVE_WAIT_TIMEOUT;
+    auto waitResult = COOPERATIVE_WAIT_TIMEOUT;
     Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
     Windows::UI::Core::CoreDispatcher^ dispatcher = wnd->Dispatcher;
 

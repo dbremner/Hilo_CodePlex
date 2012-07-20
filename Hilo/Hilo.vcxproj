@@ -100,16 +100,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,9 +124,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AllPhotosQuery.h" />
     <ClInclude Include="AsyncException.h" />
     <ClInclude Include="BooleanToBrushConverter.h" />
     <ClInclude Include="CropImageView.xaml.h">
@@ -131,15 +137,21 @@
     <ClInclude Include="CropImageViewModel.h" />
     <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="DelegateCommand.h" />
+    <ClInclude Include="ExceptionPolicy.h" />
     <ClInclude Include="ExceptionPolicyFactory.h" />
-    <ClInclude Include="FileQueryOperation.h" />
-    <ClInclude Include="FolderQueryOperation.h" />
+    <ClInclude Include="ExifExtensions.h" />
+    <ClInclude Include="FileMonthGroupQuery.h" />
+    <ClInclude Include=".\FilePictureHubGroupQuery.h" />
+    <ClInclude Include="FileSinglePhotoQuery.h" />
+    <ClInclude Include=".\FileAllPhotosQuery.h" />
+    <ClInclude Include="FileVirtualMonthFoldersQuery.h" />
+    <ClInclude Include="FileVirtualYearFoldersQuery.h" />
     <ClInclude Include="FileSizeConverter.h" />
-    <ClInclude Include="HasPhotosConverter.h" />
+    <ClInclude Include=".\InverterConverter.h" />
+    <ClInclude Include="HiloCommonDefinitions.h" />
     <ClInclude Include="HiloPage.h" />
     <ClInclude Include="HubGroupType.h" />
     <ClInclude Include="HubPhotoGroup.h" />
-    <ClInclude Include="IExceptionPolicy.h" />
     <ClInclude Include="ImageBase.h" />
     <ClInclude Include="ImageBrowserView.xaml.h">
       <DependentUpon>ImageBrowserView.xaml</DependentUpon>
@@ -152,9 +164,7 @@
     <ClInclude Include="ImageViewModel.h" />
     <ClInclude Include="IMonthBlock.h" />
     <ClInclude Include="IPhoto.h" />
-    <ClInclude Include="IPhotoCache.h" />
     <ClInclude Include="IPhotoGroup.h" />
-    <ClInclude Include=".\IQueryOperation.h" />
     <ClInclude Include="IResizable.h" />
     <ClInclude Include="IResourceLoader.h" />
     <ClInclude Include="IYearGroup.h" />
@@ -164,7 +174,10 @@
     </ClInclude>
     <ClInclude Include="MainHubViewModel.h" />
     <ClInclude Include="MonthBlock.h" />
+    <ClInclude Include=".\FileMonthBlockQuery.h" />
+    <ClInclude Include="MonthBlockQuery.h" />
     <ClInclude Include="MonthGroup.h" />
+    <ClInclude Include="MonthGroupQuery.h" />
     <ClInclude Include="NullPhotoGroup.h" />
     <ClInclude Include="PageType.h" />
     <ClInclude Include="pch.h" />
@@ -179,26 +192,28 @@
     </ClInclude>
     <ClInclude Include="Photo.h" />
     <ClInclude Include="PhotoCache.h" />
-    <ClInclude Include=".\IRepository.h" />
-    <ClInclude Include=".\FileRepository.h" />
     <ClInclude Include="PhotoGroupData.h" />
     <ClInclude Include="PhotoPathComparer.h" />
     <ClInclude Include=".\PhotoQueryBuilder.h" />
     <ClInclude Include=".\PhotoQueryBuilderResult.h" />
+    <ClInclude Include="PictureHubGroupQuery.h" />
+    <ClInclude Include="QueryChange.h" />
     <ClInclude Include="RandomPhotoSelector.h" />
+    <ClInclude Include=".\ObservableQuery.h" />
     <ClInclude Include="RotateImageView.xaml.h">
       <DependentUpon>RotateImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="RotateImageViewModel.h" />
-    <ClInclude Include="SimpleQueryOperation.h" />
+    <ClInclude Include="SinglePhotoQuery.h" />
     <ClInclude Include="TaskExceptionsExtensions.h" />
     <ClInclude Include="TaskExtensions.h" />
     <ClInclude Include="ThumbnailGenerator.h" />
     <ClInclude Include="TileUpdateScheduler.h" />
     <ClInclude Include="VariableGridView.h" />
-    <ClInclude Include="VariableListView.h" />
     <ClInclude Include="ViewModelBase.h" />
     <ClInclude Include="ViewModelLocator.h" />
+    <ClInclude Include="VirtualMonthFoldersQuery.h" />
+    <ClInclude Include="VirtualYearFoldersQuery.h" />
     <ClInclude Include="WideFiveImageTile.h" />
     <ClInclude Include="YearGroup.h" />
   </ItemGroup>
@@ -224,12 +239,11 @@
     <None Include="Hilo_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Hilo150b.png" />
-    <Image Include="Assets\Hilo30.png" />
-    <Image Include="Assets\Hilo310b.png" />
-    <Image Include="Assets\MSDN_Hilo_bgoverlay_v2_022712.png" />
-    <Image Include="Assets\MSDN_Hilo_Splash_v2_022712.png" />
-    <Image Include="Assets\StoreLogo.png" />
+    <Image Include="Assets\HiloLogo.png" />
+    <Image Include="Assets\HiloSmallLogo.png" />
+    <Image Include="Assets\HiloWideLogo.png" />
+    <Image Include="Assets\HiloSplash.png" />
+    <Image Include="Assets\HiloStoreLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">
@@ -250,10 +264,15 @@
     <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="DelegateCommand.cpp" />
     <ClCompile Include="ExceptionPolicyFactory.cpp" />
-    <ClCompile Include="FileQueryOperation.cpp" />
-    <ClCompile Include="FolderQueryOperation.cpp" />
+    <ClCompile Include="ExifExtensions.cpp" />
+    <ClCompile Include="FileMonthGroupQuery.cpp" />
+    <ClCompile Include=".\FilePictureHubGroupQuery.cpp" />
+    <ClCompile Include="FileSinglePhotoQuery.cpp" />
+    <ClCompile Include=".\FileAllPhotosQuery.cpp" />
+    <ClCompile Include="FileVirtualMonthFoldersQuery.cpp" />
+    <ClCompile Include="FileVirtualYearFoldersQuery.cpp" />
     <ClCompile Include="FileSizeConverter.cpp" />
-    <ClCompile Include="HasPhotosConverter.cpp" />
+    <ClCompile Include=".\InverterConverter.cpp" />
     <ClCompile Include="HiloPage.cpp" />
     <ClCompile Include="HubPhotoGroup.cpp" />
     <ClCompile Include="ImageBase.cpp" />
@@ -272,6 +291,7 @@
     </ClCompile>
     <ClCompile Include="MainHubViewModel.cpp" />
     <ClCompile Include="MonthBlock.cpp" />
+    <ClCompile Include=".\FileMonthBlockQuery.cpp" />
     <ClCompile Include="MonthGroup.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -283,7 +303,6 @@
     </ClCompile>
     <ClCompile Include="Photo.cpp" />
     <ClCompile Include="PhotoCache.cpp" />
-    <ClCompile Include=".\FileRepository.cpp" />
     <ClCompile Include="PhotoGroupData.cpp" />
     <ClCompile Include="PhotoPathComparer.cpp" />
     <ClCompile Include=".\PhotoQueryBuilder.cpp" />
@@ -292,11 +311,10 @@
       <DependentUpon>RotateImageView.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="RotateImageViewModel.cpp" />
-    <ClCompile Include="SimpleQueryOperation.cpp" />
+    <ClCompile Include="TaskExtensions.cpp" />
     <ClCompile Include="ThumbnailGenerator.cpp" />
     <ClCompile Include="TileUpdateScheduler.cpp" />
     <ClCompile Include="VariableGridView.cpp" />
-    <ClCompile Include="VariableListView.cpp" />
     <ClCompile Include="ViewModelBase.cpp" />
     <ClCompile Include="ViewModelLocator.cpp" />
     <ClCompile Include="WideFiveImageTile.cpp" />

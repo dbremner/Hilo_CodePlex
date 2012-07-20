@@ -14,7 +14,6 @@ using namespace HiloTests;
 using namespace concurrency;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
-using namespace Windows::Foundation;
 
 void TestHelper::RunUISynced(std::function<void ()>&& action)
 {

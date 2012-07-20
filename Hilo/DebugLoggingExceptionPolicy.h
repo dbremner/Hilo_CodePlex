@@ -7,14 +7,13 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
-#include "IExceptionPolicy.h"
+#include "ExceptionPolicy.h"
 
 namespace Hilo 
 {
-    public ref class DebugLoggingExceptionPolicy sealed : public IExceptionPolicy
+    class DebugLoggingExceptionPolicy: public ExceptionPolicy
     {
     public:
         virtual void HandleException(Platform::Exception^ exception);
     };
-
 }

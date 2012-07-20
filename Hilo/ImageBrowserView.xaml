@@ -21,7 +21,7 @@
     <Page.Resources>
         <x:String x:Key="PageTitle">Pictures</x:String>
         <local:BooleanToBrushConverter x:Key="BrushConverter" />
-        <local:HasPhotosConverter x:Key="HasPhotosConverter" />
+        <local:InverterConverter x:Key="InverterConverter" />
         <CollectionViewSource
             x:Name="MonthGroupedItemsViewSource"
             Source="{Binding MonthGroups}"
@@ -46,7 +46,6 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!-- Todo: Re-add relative frame binding for IsEnabled at RTM. -->
             <Button x:Name="BackButton"
                     AutomationProperties.AutomationId="BackButton"
                     Click="GoBack"
@@ -63,14 +62,11 @@
         <!--Margin="50" -->
         <Grid Grid.Row="1">
             <!-- Grouped Photos Hub -->
-            <ProgressRing x:Name="ProgressRing" 
-                          IsActive="{Binding InProgress}" 
-                          Height="60"
-                          Width="60"
-                          Foreground="{StaticResource HiloHighlightBrush}"/>
             <SemanticZoom x:Name="SemanticZoom" 
                           VerticalAlignment="Bottom"
-                          ViewChangeCompleted="OnViewChangeCompleted">
+                          ViewChangeCompleted="OnViewChangeCompleted" 
+                          IsTabStop="True" 
+                          TabIndex="0">
                 <SemanticZoom.ZoomedOutView>
                     <GridView x:Name="YearPhotosGridView" 
                               AutomationProperties.AutomationId="YearPhotosGridView"
@@ -166,7 +162,7 @@
                                                     Style="{StaticResource HiloTextButtonStyle}" />
                                             <ProgressRing AutomationProperties.AutomationId="MonthGroupProgressRing"
                                                           Foreground="{StaticResource HiloHighlightBrush}"
-                                                          IsActive="{Binding HasPhotos, Converter={StaticResource HasPhotosConverter}}"
+                                                          IsActive="{Binding HasPhotos, Converter={StaticResource InverterConverter}}"
                                                           Margin="5, 0, 0, 7"/>
                                         </StackPanel>
                                     </DataTemplate>
@@ -184,7 +180,12 @@
                     </GridView>
                 </SemanticZoom.ZoomedInView>
             </SemanticZoom>
-            
+            <ProgressRing x:Name="ProgressRing" 
+                          IsActive="{Binding InProgress}" 
+                          Height="60"
+                          Width="60"
+                          Foreground="{StaticResource HiloHighlightBrush}"/>
+ 
             <ListView x:Name="MonthPhotosListView" 
                       AutomationProperties.AutomationId="MonthPhotosListView"
                       AutomationProperties.Name="Month Grouped Photos"
@@ -242,7 +243,30 @@
             <VisualStateGroup x:Name="OrientationStates">
                 <VisualState x:Name="FullScreenLandscape" />
                 <VisualState x:Name="Filled" />
-                <VisualState x:Name="FullScreenPortrait" />
+                <VisualState x:Name="FullScreenPortrait">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
                 <VisualState x:Name="Snapped">
                     <Storyboard>
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackButton" 
@@ -265,6 +289,26 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="Collapsed"/>
                         </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButton"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RotateButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="CropButtonNoLabel"
+                                                       Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0"
+                                                    Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
                     </Storyboard>
                 </VisualState>
             </VisualStateGroup>
@@ -278,14 +322,28 @@
             <Grid>
                 <StackPanel HorizontalAlignment="Left" 
                             Orientation="Horizontal">
-                    <Button AutomationProperties.AutomationId="RotateCommand"
+                    <Button x:Name="RotateButton"
+                            AutomationProperties.AutomationId="RotateCommand"
                             Command="{Binding RotateImageCommand}"
-                            Style="{StaticResource RotateAppBarButtonStyle}"         
+                            Style="{StaticResource RotateAppBarButtonStyle}"
                             Tag="Rotate" />
-                    <Button AutomationProperties.AutomationId="CropCommand" 
+                    <Button x:Name="CropButton"
+                            AutomationProperties.AutomationId="CropCommand" 
                             Command="{Binding CropImageCommand}"
-                            Style="{StaticResource CropAppBarButtonStyle}"        
+                            Style="{StaticResource CropAppBarButtonStyle}"
                             Tag="Crop" />
+                    <Button x:Name="RotateButtonNoLabel"
+                            Command="{Binding RotateImageCommand}" 
+                            Style="{StaticResource RotateAppBarButtonNoLabelStyle}" 
+                            Tag="Rotate"
+                            ToolTipService.ToolTip="Rotate Picture"
+                            Visibility="Collapsed"/>
+                    <Button x:Name="CropButtonNoLabel"
+                            Command="{Binding CropImageCommand}"
+                            Style="{StaticResource CropAppBarButtonNoLabelStyle}" 
+                            ToolTipService.ToolTip="Crop Picture"
+                            Tag="Crop"
+                            Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
         </AppBar>

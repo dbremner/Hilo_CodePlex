@@ -26,4 +26,5 @@
 #include <algorithm>
 #include "TestHelper.h"
 #include "TestImageGenerator.h"
+#include "..\Hilo\TaskExtensions.h"
 

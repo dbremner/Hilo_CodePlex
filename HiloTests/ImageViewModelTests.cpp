@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,13 +8,12 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\Photo.h"
-#include "..\Hilo\ImageNavigationData.h"
 #include "..\Hilo\ImageViewModel.h"
-#include "DispatchedEvent.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhotoGroup.h"
-#include "StubRepository.h"
+#include "StubAllPhotosQuery.h"
+#include "StubSinglePhotoQuery.h"
+#include "StubPhoto.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -22,12 +21,8 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
-using namespace Windows::Storage::BulkAccess;
-using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::Globalization;
 using namespace Windows::UI::Xaml::Data;
-using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Interop;
-using namespace Windows::UI::Xaml::Navigation;
 
 namespace HiloTests
 {
@@ -36,14 +31,15 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_exceptionPolicy = ref new StubExceptionPolicy();
             m_photoGroup = ref new StubPhotoGroup("");
-            m_repository = ref new StubRepository();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
+            m_allPhotosQuery = std::make_shared<StubAllPhotosQuery>();
+            m_singlePhotoQuery = std::make_shared<StubSinglePhotoQuery>();
         }
 
         TEST_METHOD(ImageViewModelShouldFireOnPropertyChangedWhenSettingAppBarIsSticky)
         {
-            auto vm = ref new ImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
             bool propertyChangedFired = false;
             vm->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) {
                 propertyChangedFired = true;
@@ -57,27 +53,34 @@ namespace HiloTests
             Assert::IsTrue(vm->IsAppBarSticky);
         }
 
-        TEST_METHOD(ImageViewModelRotateImageCommandShouldNotBeNull)
+        TEST_METHOD(ImageViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            auto vm = ref new ImageViewModel(m_repository, m_exceptionPolicy);
-
-            ICommand^ rotateCommand = vm->RotateImageCommand;
-
-            Assert::IsNotNull(rotateCommand, "Rotate image command should not be null");        
+            ImageViewModel model(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            Assert::IsNotNull(model.RotateImageCommand);       
         }
 
-        TEST_METHOD(ImageViewModelCropImageCommandShouldNotBeNull)
+        TEST_METHOD(ImageViewModelShouldSetupCropCommandWhenConstructed)
         {
-            auto vm = ref new ImageViewModel(m_repository, m_exceptionPolicy);
+            ImageViewModel model(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            Assert::IsNotNull(model.CropImageCommand); 
+        }
 
-            ICommand^ cropCommand = vm->CropImageCommand;
+        TEST_METHOD(ImageViewModelCanGetMonthAndYear)
+        {
+            ImageViewModel model(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            auto monthAndYear = model.MonthAndYear;
 
-            Assert::IsNotNull(cropCommand, "Crop image command should not be null");        
+            DateTime dt = model.GetStateFileDate();
+            Calendar cal;
+            cal.SetDateTime(dt);           
+            String^ result = cal.MonthAsString() + " " + cal.YearAsString();
+
+            Assert::AreEqual(monthAndYear, result);
         }
 
         TEST_METHOD(ImageViewModelShouldCallRepositoryToGetPhotos)
         {
-            auto vm = ref new ImageViewModel(m_repository, m_exceptionPolicy);
+            auto vm = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
             task_status status;
 
             TestHelper::RunUISynced([vm, &status]() {
@@ -85,115 +88,72 @@ namespace HiloTests
             });
 
             Assert::AreEqual(completed, status);
-            Assert::IsTrue(m_repository->GetPhotosForGroupWithQueryOperationAsyncCalled);
+            Assert::IsTrue(m_allPhotosQuery->GetHasBeenCalled());
         }
 
-        /*TEST_METHOD(ImageViewModelShouldCallRepositoryToGetPhoto)
+        TEST_METHOD(ImageViewModelShouldCallRepositoryToGetPhoto)
         {
-        auto vm = ref new ImageViewModel(m_repository, m_exceptionPolicy);
-        task_status status;
+            auto vm = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            task_status status;
 
-        TestHelper::RunSynced(vm->QueryPhotoAsync(), status);
+            TestHelper::RunSynced(vm->QueryPhotosAsync(), status);
 
-        Assert::AreEqual(completed, status);
-        Assert::IsTrue(m_repository->GetPhotoForGroupWithQueryOperationAsyncCalled);
-        }*/
+            Assert::AreEqual(completed, status);
+            Assert::IsTrue(m_singlePhotoQuery->GetHasBeenCalled());
+        }
 
-        // todo: re-add when the bewildering file load failure is fixed, otherwise these fail to intermittently.
-        /*
         TEST_METHOD(ImageViewModelRecoversFromState)
         {
-        auto vm = ref new ImageViewModel(ref new StubExceptionPolicy());
+            auto vm = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            auto state = ref new Map<String^, Object^>();
+            std::wstringstream dateStream;
+            Calendar cal;
+            cal.SetToNow();
+            auto dt = cal.GetDateTime();
+            dateStream << dt.UniversalTime;
+            state->Insert("query","");
+            state->Insert("filePath", "path");
+            state->Insert("fileDate",ref new String(dateStream.str().c_str()));
 
-        TestImageGenerator imageGenerator;
-        auto photo = GetTestPhoto(imageGenerator);
+            vm->LoadState(state);
 
-        auto state = ref new Platform::Collections::Map<String^, Object^>();
-
-        std::wstringstream dateStream;
-        dateStream << photo->DateTaken.UniversalTime;
-
-        state->Insert("query","");
-        state->Insert("filePath",photo->Path);
-        state->Insert("fileDate",ref new String(dateStream.str().c_str()));
-
-        vm->LoadState(state);
-
-        // Forces load of item so we can verify it loads properly from state.
-        concurrency::task_status status;
-        TestHelper::RunSynced(vm->GetPhotoAsync(), status);
-        Assert::AreEqual(concurrency::task_status::completed, status);
-
-        auto item = vm->SelectedItem;
-        Assert::IsNotNull(item);
-        Assert::AreEqual(photo->Path, item->Path);
+            Assert::AreEqual("path", vm->GetStateFilePath());
+            Assert::AreEqual(dt.UniversalTime, vm->GetStateFileDate().UniversalTime);
         }
 
         TEST_METHOD(ImageViewModelSavesToState)
         {
-        auto vm = ref new ImageViewModel(ref new StubExceptionPolicy());
-        auto state = ref new Platform::Collections::Map<String^, Object^>();
+            auto vm = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
+            auto state = ref new Platform::Collections::Map<String^, Object^>();
+            Calendar cal;
+            cal.SetToNow();
+            auto dt = cal.GetDateTime();
+            auto photo = ref new StubPhoto();
+            photo->Path = "path";
+            photo->DateTaken = dt;
+            vm->Initialize("path", dt, "query");
+            TestHelper::RunUISynced([vm, photo]() {
+                vm->SelectedItem = photo;
+            });
 
-        TestImageGenerator imageGenerator;
-        auto photo = GetTestPhoto(imageGenerator);
+            vm->SaveState(state);
 
-        auto imageViewData = ref new ImageNavigationData(photo);
-
-        vm->Initialize(imageViewData);
-        concurrency::task_status status;
-        TestHelper::RunSynced(vm->GetPhotoAsync(), status);
-        Assert::AreEqual(concurrency::task_status::completed, status);
-
-        vm->SaveState(state);
-
-        Assert::IsTrue(state->HasKey("query"));
-        Assert::IsTrue(state->HasKey("fileDate"));
-        Assert::IsTrue(state->HasKey("filePath"));
-        }
-        */
-
-        /*TEST_METHOD(ImageViewModelShouldSetValuesFromNavigationParameterThatIsImageNavigationData)
-        {
-        auto vm = ref new ImageViewModel();
-        TypeName pageType;
-        auto photos = ref new Vector<Object^>();
-        concurrency::task_status status;
-        FileInformation^ file = TestHelper::RunAsync<FileInformation^>(TestHelper::CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
-        auto imageData = ref new ImageNavigationData(file, photos);
-        try
-        {
-        auto navArgs = ref new NavigationEventArgs(ref new Page(), imageData, pageType, ref new Uri("Test"), NavigationMode::New);
-        }
-        catch(Platform::Exception^ e)
-        {
-        auto i = e->Message;
+            Assert::IsTrue(state->HasKey("query"));
+            Assert::IsTrue(state->HasKey("fileDate"));
+            Assert::IsTrue(state->HasKey("filePath"));
         }
 
-        vm->OnNavigatedTo(nullptr);
-
-        Assert::AreSame(static_cast<Object^>(photos), vm->Photos);
-        Assert::AreSame(file, vm->SelectedItem);
-        }
-
-        TEST_METHOD(ImageViewModelShouldNotThrowWhenPassedInvalidParameterForNavigation)
+        TEST_METHOD(ImageViewModelShouldAddItselfAsObserverOfQuery)
         {
-        auto vm = ref new ImageViewModel();
-        TypeName pageType;
-        auto photos = ref new Vector<Object^>();
-        concurrency::task_status status;
-        FileInformation^ file = TestHelper::RunAsync<FileInformation^>(TestHelper::CreateTestImageFileFromLocalFolder("UnitTestLogo.png"), status);
-        auto imageData = ref new ImageNavigationData(file, photos);
-        auto navArgs = ref new NavigationEventArgs(nullptr, imageData, pageType, nullptr, NavigationMode::New);
+            auto model = ref new ImageViewModel(m_singlePhotoQuery, m_allPhotosQuery, m_exceptionPolicy);
 
-        vm->OnNavigatedTo(navArgs);
-
-        Assert::IsNull(vm->Photos);
-        Assert::IsNull(vm->SelectedItem);
-        }*/
+            Assert::IsTrue(m_allPhotosQuery->GetObserved());
+        }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
         StubPhotoGroup^ m_photoGroup;
-        StubRepository^ m_repository;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<StubAllPhotosQuery> m_allPhotosQuery;
+        std::shared_ptr<StubSinglePhotoQuery> m_singlePhotoQuery;
     };
 }

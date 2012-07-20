@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -11,7 +11,6 @@
 #include "pch.h"
 #include "HiloPage.h" // Required by generated header
 #include "VariableGridView.h" // Required by generated header
-#include "VariableListView.h" // Required by generated header
 #include "MainHubView.g.h"
 
 namespace Hilo

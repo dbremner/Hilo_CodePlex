@@ -9,16 +9,11 @@
 #include "pch.h"
 #include "ExceptionPolicyFactory.h"
 #include "DebugLoggingExceptionPolicy.h"
-#include "windows.h"
 
 using namespace Hilo;
+using namespace std;
 
-IExceptionPolicy^ ExceptionPolicyFactory::GetCurrentPolicy()
+shared_ptr<ExceptionPolicy> ExceptionPolicyFactory::GetCurrentPolicy()
 {
-   
-    // todo:  Fix in RP.  Need to wait until RP to make sure
-    //        these marshall across boundaries correctly.  For
-    //          now we return a new logging policy.
-
-    return ref new DebugLoggingExceptionPolicy();
+    return std::make_shared<DebugLoggingExceptionPolicy>();
 }

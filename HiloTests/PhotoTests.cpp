@@ -15,14 +15,8 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
 using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::FileProperties;
-using namespace Windows::Storage::Search;
-using namespace Windows::Storage;
 
 namespace HiloTests
 {
@@ -31,72 +25,90 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
             m_photoGroup = ref new StubPhotoGroup("");
         }
 
-        TEST_METHOD(PhotoTestsCanRetrievePhotoPath)
+        TEST_METHOD(PhotoTestsCanRetrieveName)
         {
             TestImageGenerator imageGenerator;
-
             concurrency::task_status status;
             auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
                 .then([this](FileInformation^ file) 
             {
                 return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
             });
+            auto photo = TestHelper::RunSynced<Photo^>(t2, status);
 
-            auto f = TestHelper::RunSynced<Photo^>(t2, status);
+            auto name = photo->Name;
 
             Assert::AreEqual(concurrency::completed, status);
-            Assert::AreEqual("TestFile.png", f->Name);
-
+            Assert::AreEqual("TestFile.png", name);
             TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
 
-        //todo: f->Thumbnail is now set only on OnPropertyChanged
+        TEST_METHOD(PhotoTestsCanRetrievePath)
+        {
+            TestImageGenerator imageGenerator;
+            concurrency::task_status status;
+            String^ expectedPath;
+            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
+                .then([this, &expectedPath](FileInformation^ file) 
+            {
+                expectedPath = file->Path;
+                return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
+            });
+            auto photo = TestHelper::RunSynced<Photo^>(t2, status);
 
-        //TEST_METHOD(PhotoTestsCanRetrieveThumbnailAsBitmapImage)
-        //{
-        //    TestImageGenerator imageGenerator;
+            auto path = photo->Path;
 
-        //    BitmapImage^ bitmap = nullptr;
+            Assert::AreEqual(concurrency::completed, status);
+            Assert::AreEqual(expectedPath, path);
+            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+        }
 
-        //    TestHelper::RunUISynced([this, &bitmap, &imageGenerator]()
-        //    {
-        //        auto finalFile = std::make_shared<FileInformation^>(nullptr);
+        TEST_METHOD(PhotoTestsCanRetrieveFileType)
+        {
+            TestImageGenerator imageGenerator;
+            concurrency::task_status status;
+            String^ expectedFileType = ".png";
+            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
+                .then([this](FileInformation^ file) 
+            {
+                return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
+            });
+            auto photo = TestHelper::RunSynced<Photo^>(t2, status);
 
-        //        concurrency::task_status status;
-        //        auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
-        //            .then([finalFile](FileInformation^ file)
-        //        {
-        //            (*finalFile) = file;
-        //            // Ensure generation of thumbnail for test.
-        //            return file->GetThumbnailAsync(Windows::Storage::FileProperties::ThumbnailMode::PicturesView);
-        //        }).then([finalFile]( StorageItemThumbnail^ thumbnail)
-        //        {
-        //            return (*finalFile);
-        //        }).then([this](FileInformation^ file) 
-        //        {
-        //            return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
-        //        });
+            auto fileType = photo->FileType;
 
-        //        auto f = TestHelper::RunSynced<Photo^>(t2, status);
+            Assert::AreEqual(concurrency::completed, status);
+            Assert::AreEqual(expectedFileType, fileType);
+            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+        }
 
-        //        bitmap = f->Thumbnail;
-        //    });
+        TEST_METHOD(PhotoTestsCanRetrieveThumbnail)
+        {
+            TestImageGenerator imageGenerator;
+            concurrency::task_status status;
+            auto t2 = imageGenerator.CreateTestImageFileFromLocalFolder("UnitTestLogo.png", "TestFile.png")
+                .then([this](FileInformation^ file) 
+            {
+                return ref new Photo(file, m_photoGroup, m_exceptionPolicy);
+            });
+            auto photo = TestHelper::RunSynced<Photo^>(t2, status);
 
-        //    Assert::IsNotNull(bitmap);
+            BitmapImage^ image;
+            TestHelper::RunUISynced([photo, &image] {
+                image = photo->Thumbnail;
+            });
 
-        //    TestHelper::RunUISynced([&imageGenerator]() 
-        //    {
-        //        concurrency::task_status status;
-        //        TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
-        //    });
-        //}
+            Assert::AreEqual(concurrency::completed, status);
+            Assert::IsNotNull(image);
+            TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+        }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
         StubPhotoGroup^ m_photoGroup;
     };
 }

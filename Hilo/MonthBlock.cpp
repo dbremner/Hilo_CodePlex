@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,26 +8,21 @@
 //===============================================================================
 #include "pch.h"
 #include "MonthBlock.h"
-#include "IExceptionPolicy.h"
-#include "IMonthBlock.h"
+#include "ExceptionPolicy.h"
 #include "IYearGroup.h"
-#include "IQueryOperation.h"
-#include "IRepository.h"
 #include "IResourceLoader.h"
 #include "TaskExceptionsExtensions.h"
+#include "MonthBlockQuery.h"
 
 using namespace concurrency;
+using namespace std;
 using namespace Hilo;
 using namespace Platform;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::System::UserProfile;
-using namespace Windows::UI::Xaml::Media::Imaging;
 
-
-MonthBlock::MonthBlock(IYearGroup^ yearGroup, unsigned int month, IResourceLoader^ resourceLoader, IRepository^ repository, IQueryOperation^ queryOperation, IExceptionPolicy^ exceptionPolicy) : m_weakYearGroup(yearGroup), m_month(month), m_resourceLoader(resourceLoader), m_repository(repository), m_queryOperation(queryOperation), m_exceptionPolicy(exceptionPolicy), m_runOperation(false)
+MonthBlock::MonthBlock(IYearGroup^ yearGroup, unsigned int month, IResourceLoader^ resourceLoader, shared_ptr<MonthBlockQuery> query, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_weakYearGroup(yearGroup), m_month(month), m_resourceLoader(resourceLoader), m_query(query), m_exceptionPolicy(exceptionPolicy), m_runOperation(false)
 {
 }
 
@@ -38,7 +33,7 @@ unsigned int MonthBlock::Month::get()
 
 String^ MonthBlock::Name::get()
 {
-    std::wstringstream dateRange;
+    wstringstream dateRange;
     dateRange << m_month;
     return m_resourceLoader->GetString(ref new String(dateRange.str().c_str()));
 }
@@ -63,15 +58,14 @@ bool MonthBlock::HasPhotos::get()
 task<void> MonthBlock::QueryPhotoCount()
 {
     m_runningOperation = true;
-    m_queryOperation->Query = BuildDateQuery();
-    auto t = create_task(m_repository->GetPhotoCountForQueryOperationAsync(m_queryOperation));
+    auto dateRangeQuery = BuildDateQuery();
+    auto t = m_query->GetPhotoCountWithDateRangeQueryAsync(dateRangeQuery, cancellation_token::none());
     return t.then([this](unsigned int count)
     {
-        auto s = BuildDateQuery();
         m_count = count;
         m_runOperation = true;
         m_runningOperation = true;
-    }, task_continuation_context::use_arbitrary());
+    });
 }
 
 String^ MonthBlock::BuildDateQuery()
@@ -86,7 +80,10 @@ String^ MonthBlock::BuildDateQuery()
     String^ firstDate = dtf.Format(cal.GetDateTime());
     cal.Day = lastDay;
     String^ lastDate = dtf.Format(cal.GetDateTime());
-    std::wstringstream dateRange;
-    dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
+    wstringstream dateRange;
+    dateRange << L"System.ItemDate:" 
+              << firstDate->Data() 
+              << L".." 
+              << lastDate->Data();
     return ref new String(dateRange.str().c_str());
 }

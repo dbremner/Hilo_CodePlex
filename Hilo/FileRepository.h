@@ -14,7 +14,6 @@
 namespace Hilo
 {
     interface class IExceptionPolicy;
-    ref class PhotoGroupData;
 
     ref class FileRepository sealed : public IRepository
     {
@@ -23,10 +22,8 @@ namespace Hilo
         virtual ~FileRepository();
 
         virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IPhoto^>^>^ GetPhotosForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
-        virtual Windows::Foundation::IAsyncOperation<PhotoGroupData^>^ GetPhotoGroupDataForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
         virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IPhotoGroup^>^>^ GetMonthGroupedPhotosWithCacheAsync(IPhotoCache^ photoCache);
         virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IYearGroup^>^>^ GetYearGroupedMonthsAsync();
-        virtual Windows::Foundation::IAsyncOperation<unsigned int>^ GetPhotoCountForQueryOperationAsync(IQueryOperation^ operation);
         virtual Windows::Foundation::IAsyncOperation<IPhoto^>^ GetPhotoForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
 
         event DataChangedEventHandler^ DataChanged
@@ -44,9 +41,6 @@ namespace Hilo
         Windows::Foundation::EventRegistrationToken m_watchToken;
 
         void OnFileQueryContentsChanged(Windows::Storage::Search::IStorageQueryResultBase^ sender, Platform::Object^ e);
-
-        /*template <typename T>
-        void AddObserver<T>(PhotoQueryBuilderResult<T> result);*/
         void RemoveObserver();
     };
 }

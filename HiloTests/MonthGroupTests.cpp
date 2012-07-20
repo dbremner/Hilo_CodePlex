@@ -9,15 +9,10 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\MonthGroup.h"
-#include "..\Hilo\IExceptionPolicy.h"
-#include "..\Hilo\IQueryOperation.h"
-#include "..\Hilo\IRepository.h"
-#include "..\Hilo\IPhotoCache.h"
-#include "StubRepository.h"
-#include "StubQueryOperation.h"
+#include "..\Hilo\PhotoCache.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhoto.h"
-#include "StubPhotoCache.h"
+#include "StubMonthGroupQuery.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -31,26 +26,15 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
-            m_queryOperation = ref new StubQueryOperation(nullptr);
-            m_photoCache = ref new StubPhotoCache();
-        }
-
-        TEST_METHOD(MonthGroupSubscibesToDataChangeEventOnConstruction)
-        {
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-
-            auto group = ref new MonthGroup("Title", m_photoCache, m_repository, m_queryOperation, m_exceptionPolicy);
-
-            Assert::IsTrue(repository->DataChangedEventObserved);
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
+            m_query = std::make_shared<StubMonthGroupQuery>();
+            m_photoCache = std::make_shared<PhotoCache>();
         }
 
         TEST_METHOD(MonthGroupReturnsTitleAsNamePlusCount)
         {
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-            repository->PhotoToReturn = ref new StubPhoto();
-            auto group = ref new MonthGroup("Title", m_photoCache, m_repository, m_queryOperation, m_exceptionPolicy);
+            m_query->SetPhotoToReturn(ref new StubPhoto());
+            auto group = ref new MonthGroup("Title", m_photoCache, m_query, m_exceptionPolicy);
             String^ expected = "Title (1)";
             task_status status;
             TestHelper::RunSynced(group->QueryPhotosAsync(), status);
@@ -62,19 +46,17 @@ namespace HiloTests
 
         TEST_METHOD(MonthGroupCallsGetPhotosForQueryOnRepositoryWhenQueryPhotoAsyncCalled)
         {
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-            auto group = ref new MonthGroup("Title", m_photoCache, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto group = ref new MonthGroup("Title", m_photoCache, m_query, m_exceptionPolicy);
             task_status status;
             
             TestHelper::RunSynced(group->QueryPhotosAsync(), status);
 
-            Assert::IsTrue(repository->GetPhotoGroupDataForGroupWithQueryOperationAsyncCalled);
+            Assert::IsTrue(m_query->GetHasBeenCalled());
         }
 
     private:
-        IExceptionPolicy^ m_exceptionPolicy;
-        IRepository^ m_repository;
-        IQueryOperation^ m_queryOperation;
-        IPhotoCache^ m_photoCache;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<PhotoCache> m_photoCache;
+        std::shared_ptr<StubMonthGroupQuery> m_query;
     };
 }

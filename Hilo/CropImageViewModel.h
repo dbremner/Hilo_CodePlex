@@ -12,17 +12,25 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
     interface class IPhoto;
-    interface class IRepository;
-    ref class ImageNavigationData;
+    class ImageNavigationData;
+    class SinglePhotoQuery;
+    class ExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class CropImageViewModel sealed : public ImageBase
     {
-    public:
-        CropImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
+    internal:
+        CropImageViewModel(std::shared_ptr<SinglePhotoQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
 
+        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
+        void Initialize(Platform::String^ photoPath);
+        void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
+        void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
+        concurrency::task<void> CropImageAsync(double actualWidth);
+
+    public:
         property Windows::UI::Xaml::Media::ImageSource^ Image
         {
             Windows::UI::Xaml::Media::ImageSource^ get();
@@ -38,6 +46,11 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
+        property Windows::UI::Xaml::Input::ICommand^ ResumeCropCommand
+        {
+            Windows::UI::Xaml::Input::ICommand^ get();
+        }
+
         property bool InProgress { bool get(); }
         property double CropOverlayLeft { double get(); }
         property double CropOverlayTop { double get(); }
@@ -45,25 +58,16 @@ namespace Hilo
         property double CropOverlayWidth { double get();} 
         property bool IsCropOverlayVisible { bool get(); }
 
-        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-
-        void CalculateInitialCropOverlayPosition(Windows::UI::Xaml::Media::GeneralTransform^ transform, float width, float height);
-        void UpdateCropOverlayPostion(Windows::UI::Xaml::Controls::Primitives::Thumb^ thumb, double verticalChange, double horizontalChange, double minWidth, double minHeight);
-        Windows::Foundation::IAsyncAction^ CropImageAsync(double actualWidth);
-
-    internal:
-        void Initialize(ImageNavigationData^ navigationData);
-
     private:
-        IRepository^ m_repository;
-        IPhoto^ m_photo;
+        std::shared_ptr<SinglePhotoQuery> m_query;
         Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ m_image;
-        Windows::Storage::Streams::IRandomAccessStream^ m_imageStream;
+        Windows::UI::Xaml::Input::ICommand^ m_resumeCropCommand;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
         bool m_inProgress;
         bool m_isCropOverlayVisible;
         bool m_isSaving;
+        Platform::String^ m_photoPath;
 
         double m_left;
         double m_top;
@@ -81,14 +85,14 @@ namespace Hilo
         unsigned int m_cropY;
 
         void ChangeInProgress(bool value);
-        concurrency::task<void> GetImageAsync();
-        concurrency::task<void> EncodeImageAsync();
+        concurrency::task<IPhoto^> GetImagePhotoAsync();
+        concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> EncodeImageAsync(Windows::Storage::Streams::IRandomAccessStream^ sourceStream);
         byte* GetPointerToPixelData(Windows::Storage::Streams::IBuffer^ buffer);
+        void DoCrop(uint32_t xOffset, uint32_t yOffset, uint32_t newHeight, uint32_t newWidth, uint32_t oldWidth, byte *pSrcPixels, byte *pDestPixels);
 
         // Member functions that implement Commands
         void SaveImage(Platform::Object^ parameter);
         void CancelCrop(Platform::Object^ parameter);
-        concurrency::task<void> CropImageAsyncImpl(double actualWidth);
+        void Unsnap(Platform::Object^ parameter);
     };
 }
-

@@ -12,12 +12,7 @@
 
 using namespace Hilo;
 using namespace Platform;
-using namespace Windows::Foundation;
 using namespace Windows::Globalization;
-
-PhotoCache::PhotoCache()
-{
-}
 
 void PhotoCache::InsertPhoto(IPhoto^ photo)
 {

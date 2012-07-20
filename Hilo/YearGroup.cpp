@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -7,34 +7,24 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "Photo.h"
 #include "YearGroup.h"
 #include "MonthBlock.h"
-#include "IExceptionPolicy.h"
-#include "IRepository.h"
-#include "IQueryOperation.h"
+#include "ExceptionPolicy.h"
 #include "LocalResourceLoader.h"
+#include "MonthBlockQuery.h"
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
-using namespace Windows::Foundation;
+using namespace std;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Globalization;
-using namespace Windows::Globalization::DateTimeFormatting;
-using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::Search;
-using namespace Windows::System::UserProfile;
-using namespace Windows::UI::Core;
 
-const std::array<int, 12> items = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+const std::array<int, 12> months = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
-
-YearGroup::YearGroup(Platform::String^ name, IRepository^ repository, IQueryOperation^ operation, IExceptionPolicy^ exceptionPolicy) : m_name(name), m_repository(repository), m_operation(operation), m_exceptionPolicy(exceptionPolicy)
+YearGroup::YearGroup(String^ name, shared_ptr<MonthBlockQuery> query, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_name(name), m_query(query), m_exceptionPolicy(exceptionPolicy)
 {
-    std::wstring wname = name->Data() + 1;
+    wstring wname = name->Data() + 1;
     m_year = std::stoi(wname);
 }
 
@@ -42,13 +32,13 @@ IObservableVector<IMonthBlock^>^ YearGroup::Items::get()
 {
     if (nullptr == m_months)
     {
-        std::vector<IMonthBlock^> months;
-        for (auto month : items)
+        vector<IMonthBlock^> monthBlocks;
+        for (auto month : months)
         {
-            auto monthBlock = ref new MonthBlock(this, month, ref new LocalResourceLoader(), m_repository, m_operation, m_exceptionPolicy);
-            months.push_back(monthBlock);
+            auto monthBlock = ref new MonthBlock(this, month, ref new LocalResourceLoader(), m_query, m_exceptionPolicy);
+            monthBlocks.push_back(monthBlock);
         }
-        m_months = ref new Vector<IMonthBlock^>(months);
+        m_months = ref new Vector<IMonthBlock^>(monthBlocks);
     }
     return m_months;
 }

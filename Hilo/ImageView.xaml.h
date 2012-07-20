@@ -18,7 +18,7 @@ namespace Hilo
     {
     public:
         ImageView();
-
+        virtual ~ImageView();
 
     private:
         void OnFilmStripLoaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);

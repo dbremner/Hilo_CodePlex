@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -12,15 +12,9 @@
 
 using namespace Hilo;
 using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Navigation;
 
 ImageView::ImageView()
 {
@@ -29,7 +23,15 @@ ImageView::ImageView()
     m_filmStripLoadedToken = PhotosFilmStripGridView->Loaded += ref new RoutedEventHandler(this, &ImageView::OnFilmStripLoaded);
 }
 
-// Scrolls selected item into view after collection is likely to have loaded
+ImageView::~ImageView()
+{
+    if (nullptr != PhotosFilmStripGridView)
+    {
+        PhotosFilmStripGridView->Loaded -= m_filmStripLoadedToken;
+    }
+}
+
+// Scrolls the selected item into view after the collection is likely to have loaded.
 void ImageView::OnFilmStripLoaded(Object^ sender, RoutedEventArgs^ e)
 {
     auto vm = dynamic_cast<ImageViewModel^>(DataContext);

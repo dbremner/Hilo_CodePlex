@@ -7,14 +7,17 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
-#include "..\Hilo\IExceptionPolicy.h"
+#include "..\Hilo\ExceptionPolicy.h"
 
 namespace HiloTests 
 {
-    ref class StubExceptionPolicy sealed : public Hilo::IExceptionPolicy
+    class StubExceptionPolicy : public Hilo::ExceptionPolicy
     {
     public:
-        property Platform::Exception^ SuppliedException;
+        Platform::Exception^ GetSuppliedException();
         virtual void HandleException(Platform::Exception^ exception);
+
+    private:
+        Platform::Exception^ m_exception;
     };
 }

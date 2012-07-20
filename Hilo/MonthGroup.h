@@ -13,20 +13,18 @@
 
 namespace Hilo
 {
-    interface class IPhotoCache;
-    interface class IExceptionPolicy;
-    interface class IPhoto;
-    interface class IRepository;
-    interface class IQueryOperation;
-    interface class IResourceLoader;
+    class ExceptionPolicy;
+    class PhotoCache;
+    class MonthGroupQuery;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MonthGroup sealed : public Common::BindableBase, public IPhotoGroup
     {
+    internal:
+        MonthGroup(Platform::String^ title, std::shared_ptr<PhotoCache> photoCache, std::shared_ptr<MonthGroupQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);     
+        concurrency::task<void> QueryPhotosAsync();
+
     public:
-        MonthGroup(Platform::String^ title, IPhotoCache^ photoCache, IRepository^ repository, IQueryOperation^ queryOperation, IExceptionPolicy^ exceptionPolicy);
-        ~MonthGroup();
-        
         property Platform::String^ Title 
         { 
             virtual Platform::String^ get();
@@ -42,19 +40,13 @@ namespace Hilo
             bool get();
         }
 
-    internal:
-        concurrency::task<void> QueryPhotosAsync();
-
     private:
         Platform::String^ m_title;
-        Platform::WeakReference m_weakPhotoCache;
-        IRepository^ m_repository;
-        IQueryOperation^ m_queryOperation;
-        IExceptionPolicy^ m_exceptionPolicy;
+        std::weak_ptr<PhotoCache> m_weakPhotoCache;
+        std::shared_ptr<MonthGroupQuery> m_query;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Platform::Collections::Vector<IPhoto^>^ m_photos;
         unsigned int m_count;
-        Windows::Foundation::EventRegistrationToken m_dataToken;
-
-        void OnDataChanged();
+        bool m_runningQuery;
     };
 }

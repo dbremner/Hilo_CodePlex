@@ -7,24 +7,32 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "DelegateCommand.h"
+
+#include <robuffer.h>
+#include <wrl.h>
+
 #include "CropImageViewModel.h"
+#include "DelegateCommand.h"
 #include "TaskExceptionsExtensions.h"
 #include "AsyncException.h"
 #include "IPhoto.h"
-#include "IRepository.h"
 #include "ImageNavigationData.h"
 #include "NullPhotoGroup.h"
-#include "SimpleQueryOperation.h"
-#include <robuffer.h>
+#include "SinglePhotoQuery.h"
+#include "ExifExtensions.h"
+
+#define MINIMUMBMPSIZE 10
+#define EXIFOrientationPropertyName "System.Photo.Orientation"
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace Platform;
+using namespace Platform::Collections;
 using namespace std;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Imaging;
+using namespace Windows::UI::ViewManagement;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Input;
@@ -33,13 +41,29 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
+using namespace Microsoft::WRL;
 
-CropImageViewModel::CropImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy) : ImageBase(exceptionPolicy), m_repository(repository)
+
+inline void ThrowIfFailed(HRESULT hr)
+{
+    if (FAILED(hr))
+    {
+        throw Exception::CreateException(hr);
+    }
+}
+
+CropImageViewModel::CropImageViewModel(shared_ptr<SinglePhotoQuery> query, shared_ptr<ExceptionPolicy> exceptionPolicy) : ImageBase(exceptionPolicy), m_query(query)
 {
     m_saveCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::SaveImage), nullptr);
     m_cancelCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::CancelCrop), nullptr);
+    m_resumeCropCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &CropImageViewModel::Unsnap), nullptr);
 
     ViewModelBase::m_isAppBarSticky = true;
+}
+
+ICommand^ CropImageViewModel::ResumeCropCommand::get()
+{
+    return m_resumeCropCommand;
 }
 
 ICommand^ CropImageViewModel::SaveCommand::get()
@@ -90,78 +114,162 @@ ImageSource^ CropImageViewModel::Image::get()
 void CropImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 {
     String^ data = dynamic_cast<String^>(e->Parameter); 
-    ImageNavigationData^ navigationData = ref new ImageNavigationData(data);
+    ImageNavigationData navigationData(data);
 
-    Initialize(navigationData);
+    Initialize(navigationData.GetFilePath());
 }
 
-task<void> CropImageViewModel::GetImageAsync()
+void CropImageViewModel::Initialize(String^ photoPath)
 {
-    return create_task(m_photo->OpenReadAsync())
-        .then([this](IRandomAccessStreamWithContentType^ imageData)
-    {
-        m_imageStream = imageData;
-        return BitmapDecoder::CreateAsync(m_imageStream);
-    }).then([this](BitmapDecoder^ decoder)
-    {
-        m_image = ref new WriteableBitmap(decoder->PixelWidth, decoder->PixelHeight);
-        m_imageStream->Seek(0);
-        m_image->SetSource(m_imageStream);
-        OnPropertyChanged("Image");
-    });
-}
+    assert(IsMainThread());
+    m_photo = nullptr;
+    m_image = nullptr;
+    m_photoPath = photoPath;
+    auto photoStream = make_shared<IRandomAccessStreamWithContentType^>(nullptr);
 
-void CropImageViewModel::Initialize(ImageNavigationData^ navigationData)
-{
-    auto t = create_task(m_repository->GetPhotoForGroupWithQueryOperationAsync(ref new NullPhotoGroup(), ref new SimpleQueryOperation(navigationData->FilePath)));
-    t.then([this](IPhoto^ photo)
+    GetImagePhotoAsync().then([this](IPhoto^ photo)
     {
-        m_photo = nullptr;
-        m_image = nullptr;
-
+        assert(IsMainThread());
+        // Return to the hub page if the photo is no longer present
+        if (photo == nullptr)
+        {
+            GoHome();
+            cancel_current_task();
+        }
         m_photo = photo;
-        return GetImageAsync();
+        return m_photo->OpenReadAsync();
+    }).then([this, photoStream](IRandomAccessStreamWithContentType^ imageData)
+    {
+        assert(IsMainThread());
+        *photoStream = imageData;
+        return BitmapDecoder::CreateAsync(imageData);
+    }).then([this, photoStream](BitmapDecoder^ decoder)
+    {
+        assert(IsMainThread());
+        m_image = ref new WriteableBitmap(decoder->PixelWidth, decoder->PixelHeight);
+        (*photoStream)->Seek(0);
+        m_image->SetSource(*photoStream);
+        OnPropertyChanged("Image");
     }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
-byte* CropImageViewModel::GetPointerToPixelData(IBuffer^ buffer)
+task<IPhoto^> CropImageViewModel::GetImagePhotoAsync()
 {
-    IUnknown* pUnknown = reinterpret_cast<IUnknown*>(buffer);
-    IBufferByteAccess* pBufferByteAccess = nullptr;
-    HRESULT hr = pUnknown->QueryInterface(IID_PPV_ARGS(&pBufferByteAccess));
-    pUnknown->Release();
-    byte *pPixels = nullptr;
-    hr = pBufferByteAccess->Buffer(&pPixels);
-    return pPixels;
+    assert(IsMainThread());
+    return m_query->GetPhotoAsync(m_photoPath, cancellation_token::none());
 }
 
-task<void> CropImageViewModel::EncodeImageAsync()
+// Query the IBufferByteAccess interface from the provided IBuffer object
+// and then retrieve the pixel buffer.
+byte* CropImageViewModel::GetPointerToPixelData(IBuffer^ buffer)
 {
-    auto continuationContext = task_continuation_context::use_arbitrary();
-    auto ras = ref new InMemoryRandomAccessStream();
-    auto bitmapEncoder = std::make_shared<BitmapEncoder^>(nullptr);
-    unsigned int width = m_image->PixelWidth;
-    unsigned int height = m_image->PixelHeight;
+    // Cast to Object^, then to its underlying IInspectable interface.
+    Object^ obj = buffer;
+    ComPtr<IInspectable> insp(reinterpret_cast<IInspectable*>(obj));
 
-    return task<BitmapDecoder^>(BitmapDecoder::CreateAsync(m_imageStream))
-        .then([ras](BitmapDecoder^ decoder)
+    // Query the IBufferByteAccess interface.
+    ComPtr<IBufferByteAccess> bufferByteAccess;
+    ThrowIfFailed(insp.As(&bufferByteAccess));
+
+    // Retrieve the buffer data.
+    byte* pixels = nullptr;
+    ThrowIfFailed(bufferByteAccess->Buffer(&pixels));
+    return pixels;
+}
+
+task<IRandomAccessStream^> CropImageViewModel::EncodeImageAsync(IRandomAccessStream^ sourceStream)
+{
+    assert(IsMainThread());
+    auto backgroundContext = task_continuation_context::use_arbitrary();
+    auto ras = ref new InMemoryRandomAccessStream();
+    auto bitmapEncoder = make_shared<BitmapEncoder^>(nullptr);
+    auto bitmapDecoder = make_shared<BitmapDecoder^>(nullptr);
+    auto cropRect = make_shared<Rect>(
+        static_cast<float>(m_cropX), 
+        static_cast<float>(m_cropY),
+        static_cast<float>(m_image->PixelWidth),
+        static_cast<float>(m_image->PixelHeight));
+
+    return create_task(BitmapDecoder::CreateAsync(sourceStream))
+        .then([bitmapDecoder](BitmapDecoder^ decoder)
     {
-        return BitmapEncoder::CreateForTranscodingAsync(ras, decoder);
-    }, continuationContext).then([this, width, height, bitmapEncoder](BitmapEncoder^ encoder)
+        assert(IsBackgroundThread());
+        auto requestedProperty = ref new Vector<String^>();
+        requestedProperty->Append(EXIFOrientationPropertyName);
+        (*bitmapDecoder) = decoder;
+        return decoder->BitmapProperties->GetPropertiesAsync(requestedProperty);
+    }, backgroundContext).then([cropRect, bitmapDecoder](task<BitmapPropertySet^> propertiesTask)
     {
+        assert(IsBackgroundThread());
+        BitmapPropertySet^ properties;
+        unsigned short exifOrientation = ExifRotations::NotRotated;
+        try {
+            properties = propertiesTask.get();
+            if (properties->HasKey(EXIFOrientationPropertyName))
+            {
+                exifOrientation = safe_cast<unsigned short>(properties->Lookup(EXIFOrientationPropertyName)->Value);
+            }
+        }
+        catch(Exception^ ex)
+        {
+            // If the file format doesn't support properties, continue without
+            // using EXIF orientation
+            switch (ex->HResult)
+            {
+            case WINCODEC_ERR_UNSUPPORTEDOPERATION:
+            case WINCODEC_ERR_PROPERTYNOTSUPPORTED:
+            case E_INVALIDARG:
+                exifOrientation = ExifRotations::NotRotated;
+                break;
+
+            default:
+                throw;
+            }
+        }
+
+        Rect originalDimensions(0.f, 0.f, static_cast<float>((*bitmapDecoder)->PixelWidth), static_cast<float>((*bitmapDecoder)->PixelHeight));
+        Rect unrotatedDimensions = originalDimensions;
+        if (exifOrientation == ExifRotations::RotatedLeft || exifOrientation == ExifRotations::RotatedRight)
+        {
+            unrotatedDimensions.Width = static_cast<float>((*bitmapDecoder)->PixelHeight);
+            unrotatedDimensions.Height = static_cast<float>((*bitmapDecoder)->PixelWidth);
+        }
+
+        int exifAppliedRotation = static_cast<int>(ExifExtensions::ConvertExifOrientationToDegreesRotation(exifOrientation));
+
+        if (exifAppliedRotation != 0)
+        {
+            assert(exifAppliedRotation > 0);
+
+            // adjust crop back to original;
+            auto adjustedCrop = ExifExtensions::RotateClockwise((*cropRect), unrotatedDimensions, -exifAppliedRotation);
+            (*cropRect) = adjustedCrop;
+
+            assert(adjustedCrop.X >= 0 && adjustedCrop.X <= originalDimensions.Right);
+            assert(adjustedCrop.Y >= 0 && adjustedCrop.X <= originalDimensions.Bottom);
+            assert(adjustedCrop.Right >= 0 && adjustedCrop.Right <= originalDimensions.Right);
+            assert(adjustedCrop.Bottom >= 0 && adjustedCrop.Bottom <= originalDimensions.Bottom);
+        }
+    }, backgroundContext).then([ras, bitmapDecoder]
+    {
+        return BitmapEncoder::CreateForTranscodingAsync(ras, (*bitmapDecoder));
+    }, backgroundContext).then([this, cropRect, bitmapEncoder](BitmapEncoder^ encoder)
+    {
+        assert(IsBackgroundThread());
         BitmapBounds bounds;
-        bounds.X = m_cropX;
-        bounds.Y = m_cropY;
-        bounds.Width = width;
-        bounds.Height = height;
+        bounds.X = static_cast<unsigned int>((*cropRect).X);
+        bounds.Y = static_cast<unsigned int>((*cropRect).Y);
+        bounds.Width = static_cast<unsigned int>((*cropRect).Width);
+        bounds.Height = static_cast<unsigned int>((*cropRect).Height);
         encoder->BitmapTransform->Bounds = bounds;
 
         // Force a new thumbnail to reflect any rotation operation
         encoder->IsThumbnailGenerated = true;
         (*bitmapEncoder) = encoder;
         return encoder->FlushAsync();
-    }, continuationContext).then([this, ras, bitmapEncoder](task<void> encodeTask)
+    }, backgroundContext).then([this, ras, bitmapEncoder](task<void> encodeTask)
     {
+        assert(IsBackgroundThread());
         try
         {
             encodeTask.get();
@@ -179,16 +287,12 @@ task<void> CropImageViewModel::EncodeImageAsync()
                 throw ex;
             }
         }
-        if ((*bitmapEncoder)->IsThumbnailGenerated == false)
-        {
-            return (*bitmapEncoder)->FlushAsync();
-        }
-        IAsyncAction^ action = create_async([]{});
-        return action;
-    }, continuationContext).then([this, ras]()
+        return ((*bitmapEncoder)->IsThumbnailGenerated == false) ? (*bitmapEncoder)->FlushAsync() : create_async([]{});
+    }, backgroundContext).then([ras]
     {
-        m_imageStream = ras;
-    });
+        assert(IsBackgroundThread());
+        return dynamic_cast<IRandomAccessStream^>(ras);
+    }, backgroundContext);
 }
 
 void CropImageViewModel::ChangeInProgress(bool value)
@@ -202,26 +306,34 @@ void CropImageViewModel::SaveImage(Object^ parameter)
     if (m_isSaving) return;
 
     m_isSaving = true;
-    auto file = std::make_shared<StorageFile^>(nullptr);
+    auto sourceStream = make_shared<IRandomAccessStreamWithContentType^>(nullptr);
+    auto encodedStream = make_shared<IRandomAccessStream^>(nullptr);
 
-    task<StorageFile^> saveTask = create_task(ImageBase::GetFileNameFromFileSavePickerAsync(m_photo->FileType));
-    saveTask.then([this, file](StorageFile^ f)
+    GetStreamWithFailCheck().then([this, sourceStream](IRandomAccessStreamWithContentType^ stream)
     {
+        assert(IsMainThread());
+        (*sourceStream) = stream;
         ChangeInProgress(true);
-        (*file) = f;
-        return EncodeImageAsync();
-    }).then([this, file]()
+        return EncodeImageAsync(stream);
+    }).then([this, encodedStream](IRandomAccessStream^ stream)
+    {	
+        (*encodedStream) = stream;
+        assert(IsMainThread());
+        return ImageBase::GetFileNameFromFileSavePickerAsync(m_photo->FileType);
+    }).then([this, encodedStream](StorageFile^ f)
     {
-        return ImageBase::SaveImageAsync((*file), m_imageStream);
+        assert(IsMainThread());
+        return ImageBase::SaveImageAsync(f, (*encodedStream));
     }).then([this](task<void> priorTask)
     {
+        assert(IsMainThread());
         m_isSaving = false;
         ChangeInProgress(false);
         try
         {
             priorTask.get();
         }
-        catch(const Concurrency::task_canceled&)
+        catch(const concurrency::task_canceled&)
         {
         }
     }).then(ObserveException<void>(m_exceptionPolicy));
@@ -230,6 +342,14 @@ void CropImageViewModel::SaveImage(Object^ parameter)
 void CropImageViewModel::CancelCrop(Object^ parameter)
 {
     ViewModelBase::GoBack();
+}
+
+void CropImageViewModel::Unsnap(Object^ parameter)
+{
+    if (ApplicationView::Value == ApplicationViewState::Snapped)
+    {
+        ApplicationView::TryUnsnap();
+    }
 }
 
 void CropImageViewModel::CalculateInitialCropOverlayPosition(GeneralTransform^ transform, float width, float height)
@@ -331,67 +451,66 @@ void CropImageViewModel::UpdateCropOverlayPostion(Thumb ^thumb, double verticalC
     }
 }
 
-IAsyncAction^ CropImageViewModel::CropImageAsync(double actualWidth)
-{
-    return concurrency::create_async([this, actualWidth]
-    { 
-        return CropImageAsyncImpl(actualWidth).then(ObserveException<void>(m_exceptionPolicy)); 
-    });
+void CropImageViewModel::DoCrop(uint32_t xOffset, uint32_t yOffset, uint32_t newHeight, uint32_t newWidth, uint32_t oldWidth, byte *pSrcPixels, byte *pDestPixels)
+{    
+    assert(IsBackgroundThread());
+    parallel_for (0u, newHeight, [xOffset, yOffset, newHeight, newWidth, oldWidth, pDestPixels, pSrcPixels](unsigned int y)
+    {
+        for (unsigned int x = 0; x < newWidth; x++)
+        {
+            pDestPixels[(x + y * newWidth) * 4] = 
+                pSrcPixels[(x +  xOffset + (y + yOffset) * oldWidth) * 4];     // B
+            pDestPixels[(x + y * newWidth) * 4 + 1] = 
+                pSrcPixels[(x +  xOffset + (y + yOffset) * oldWidth) * 4 + 1]; // G
+            pDestPixels[(x + y * newWidth) * 4 + 2] = 
+                pSrcPixels[(x +  xOffset + (y + yOffset) * oldWidth) * 4 + 2]; // R
+            pDestPixels[(x + y * newWidth) * 4 + 3] =
+                pSrcPixels[(x +  xOffset + (y + yOffset) * oldWidth) * 4 + 3]; // A
+        }
+    });        
 }
 
-task<void> CropImageViewModel::CropImageAsyncImpl(double actualWidth)
+task<void> CropImageViewModel::CropImageAsync(double actualWidth)
 {
-    m_inProgress = true;
-    OnPropertyChanged("InProgress");
+    assert(IsMainThread());
+    ChangeInProgress(true);
 
-    auto cropTask = create_task([]{});
-    return cropTask.then([this, actualWidth]()
+    // Calculate crop values
+    double scaleFactor = m_image->PixelWidth / actualWidth;
+    unsigned int xOffset = safe_cast<unsigned int>((m_cropOverlayLeft - m_left) * scaleFactor);
+    unsigned int yOffset = safe_cast<unsigned int>((m_cropOverlayTop - m_top) * scaleFactor);
+    unsigned int newWidth = safe_cast<unsigned int>(m_cropOverlayWidth * scaleFactor); 
+    unsigned int newHeight = safe_cast<unsigned int>(m_cropOverlayHeight * scaleFactor);
+
+    if (newHeight < MINIMUMBMPSIZE || newWidth < MINIMUMBMPSIZE)
     {
-        // Calculate crop values
-        double scaleFactor = m_image->PixelWidth / actualWidth;
-        unsigned int scaledXStart = safe_cast<int>((m_cropOverlayLeft - m_left) * scaleFactor);
-        unsigned int scaledYStart = safe_cast<int>((m_cropOverlayTop - m_top) * scaleFactor);
-        unsigned int j = scaledYStart;
-        unsigned int i = scaledXStart;
-        unsigned int newWidth = safe_cast<unsigned int>(m_cropOverlayWidth * scaleFactor); 
-        unsigned int newHeight = safe_cast<unsigned int>(m_cropOverlayHeight * scaleFactor);
+        ChangeInProgress(false);
+        m_isCropOverlayVisible = false;
+        OnPropertyChanged("IsCropOverlayVisible");
+        return create_task([](){});
+    }
 
-        m_cropX += scaledXStart;
-        m_cropY += scaledYStart;
+    m_cropX += xOffset;
+    m_cropY += yOffset;
 
-        // Create destination bitmap
-        WriteableBitmap^ destImage = ref new WriteableBitmap(newWidth, newHeight);
+    // Create destination bitmap
+    WriteableBitmap^ destImage = ref new WriteableBitmap(newWidth, newHeight);
 
-        // Get pointers to the source and destination pixel data
-        byte* pSrcPixels = GetPointerToPixelData(m_image->PixelBuffer);
-        byte* pDestPixels = GetPointerToPixelData(destImage->PixelBuffer);        
+    // Get pointers to the source and destination pixel data
+    byte* pSrcPixels = GetPointerToPixelData(m_image->PixelBuffer);
+    byte* pDestPixels = GetPointerToPixelData(destImage->PixelBuffer);   
+    auto oldWidth = m_image->PixelWidth;
 
-        // Crop the image
-        for (unsigned int y = 0; y < newHeight; y++)
-        {
-            for (unsigned int x = 0; x < newWidth; x++)
-            {
-                pDestPixels[(x + y * newWidth) * 4] = 
-                    pSrcPixels[(i + j * m_image->PixelWidth) * 4];     // B
-                pDestPixels[(x + y * newWidth) * 4 + 1] = 
-                    pSrcPixels[(i + j * m_image->PixelWidth) * 4 + 1]; // G
-                pDestPixels[(x + y * newWidth) * 4 + 2] = 
-                    pSrcPixels[(i + j * m_image->PixelWidth) * 4 + 2]; // R
-                pDestPixels[(x + y * newWidth) * 4 + 3] =
-                    pSrcPixels[(i + j * m_image->PixelWidth) * 4 + 3]; // A
-                i++;
-                if (i >= (newWidth + scaledXStart))
-                {
-                    i = scaledXStart;
-                }
-            }
-            j++;
-        }
+    return create_task([this, xOffset, yOffset, newHeight, newWidth, oldWidth, pSrcPixels, pDestPixels] () {
+        assert(IsBackgroundThread());
+        DoCrop(xOffset, yOffset, newHeight, newWidth, oldWidth, pSrcPixels, pDestPixels);
+    }).then([this, destImage](){
+        assert(IsMainThread());
 
         // Update image on screen
         m_image = destImage;
-        m_inProgress = false;
-        OnPropertyChanged("InProgress");
         OnPropertyChanged("Image");
-    }, task_continuation_context::use_current());
+        ChangeInProgress(false);
+    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
 }
+

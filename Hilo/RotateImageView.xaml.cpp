@@ -10,21 +10,14 @@
 #include "RotateImageView.xaml.h"
 #include "ImageBrowserViewModel.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 using namespace Hilo;
-
 using namespace Windows::Foundation;
 using namespace Windows::UI::Input;
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Navigation;
-using namespace Platform;
 
 // This works around an issue with compiling for ARM.
 // This function does not need to be called but needs to be
-// seen by the compiler beforet the gesture manipulation events.
+// seen by the compiler before the gesture manipulation events.
 void gestureRecognizerWorkaroundForARM()
 {
     Point pt;

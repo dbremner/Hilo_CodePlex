@@ -21,7 +21,7 @@ namespace HiloTests
     public:
         TEST_METHOD(TaskExceptionTestsPolicyInvokedOnHandledException)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([]
@@ -31,13 +31,13 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            auto exception = dynamic_cast<Platform::NotImplementedException^>(policy->SuppliedException);
+            auto exception = dynamic_cast<Platform::NotImplementedException^>(policy->GetSuppliedException());
             Assert::IsNotNull(exception);
         }
 
         TEST_METHOD(TaskExceptionTestsPolicyNotInvokedOnCancelledTask)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([]
@@ -48,12 +48,12 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            Assert::IsNull(policy->SuppliedException);
+            Assert::IsNull(policy->GetSuppliedException());
         }
 
         TEST_METHOD(TaskExceptionTestsPolicyInvokedWhenStandardExceptionRaised)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([]
@@ -64,13 +64,13 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            auto exception = dynamic_cast<Platform::FailureException^>(policy->SuppliedException);
+            auto exception = dynamic_cast<Platform::FailureException^>(policy->GetSuppliedException());
             Assert::IsNotNull(exception);
         }
 
         TEST_METHOD(TaskExceptionTestsPolicyNotInvokedWithNoException)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([]
@@ -80,12 +80,12 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::completed, status);
 
-            Assert::IsNull(policy->SuppliedException);
+            Assert::IsNull(policy->GetSuppliedException());
         }
 
         TEST_METHOD(TaskExceptionTestsPolicyNotInvokedWhenTaskCancelled)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
 
             TestHelper::RunSynced(concurrency::task<void>([]
@@ -95,12 +95,12 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            Assert::IsNull(policy->SuppliedException);
+            Assert::IsNull(policy->GetSuppliedException());
         }
 
         TEST_METHOD(TaskExceptionTestsPolicyNotInvokedWhenNonVoidTaskCancelled)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
             TestHelper::RunSynced(concurrency::task<int>([]
             {
@@ -110,12 +110,12 @@ namespace HiloTests
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
 
-            Assert::IsNull(policy->SuppliedException);
+            Assert::IsNull(policy->GetSuppliedException());
         }
 
         TEST_METHOD(TaskExceptionTestsValueBasedContinuationsNotExecutedAfterTaskCanceledAndObserved)
         {
-            auto policy = ref new StubExceptionPolicy();
+            auto policy = std::make_shared<StubExceptionPolicy>();
             concurrency::task_status status;
             bool reachedContinuation = false;
 

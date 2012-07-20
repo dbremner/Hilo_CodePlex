@@ -12,27 +12,15 @@ namespace Hilo
 {
     interface class IPhoto;
 
-    public ref class ImageNavigationData sealed
+    class ImageNavigationData
     {
     public:
         ImageNavigationData(IPhoto^ photo);
         ImageNavigationData(Platform::String^ serializationString);
 
-        property Platform::String^ FilePath
-        {
-            Platform::String^ get();
-        }
-
-        property Windows::Foundation::DateTime FileDate
-        {
-            Windows::Foundation::DateTime get();
-        }
-
-        property Platform::String^ DateQuery
-        {
-            Platform::String^ get();
-        }
-
+        Platform::String^ GetFilePath() const;
+        Windows::Foundation::DateTime GetFileDate() const;
+        Platform::String^ GetDateQuery();
         Platform::String^ SerializeToString();
 
     private:

@@ -16,7 +16,6 @@ using namespace Hilo;
 using namespace HiloTests;
 using namespace Platform;
 using namespace Windows::Foundation;
-using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Streams;
@@ -113,10 +112,7 @@ IAsyncOperation<ImageProperties^>^ StubPhoto::GetImagePropertiesAsync()
 {
     return create_async([this]
     {
-        return create_task([this] 
-        {
-            return m_imageProperties;
-        });
+        return m_imageProperties;
     });
 }
 
@@ -124,9 +120,6 @@ IAsyncOperation<IRandomAccessStreamWithContentType^>^ StubPhoto::OpenReadAsync()
 {
     return create_async([this]
     {
-        return create_task([this] 
-        {
-            return m_randomAccessStream;
-        });
+       return m_randomAccessStream;
     });
 }

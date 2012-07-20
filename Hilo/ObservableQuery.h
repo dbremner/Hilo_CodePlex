@@ -1,0 +1,19 @@
+﻿//===============================================================================
+// Microsoft patterns & practices
+// Hilo Guidance
+//===============================================================================
+// Copyright © Microsoft Corporation.  All rights reserved.
+// This code released under the terms of the 
+// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
+//===============================================================================
+#pragma once
+
+namespace Hilo
+{
+    class ObservableQuery
+    {
+    public:
+        virtual void AddObserver(const std::function<void()> callback) = 0;
+        virtual void RemoveObserver() = 0;
+    };
+}

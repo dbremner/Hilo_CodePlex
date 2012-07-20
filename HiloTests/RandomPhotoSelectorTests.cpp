@@ -24,63 +24,50 @@ namespace HiloTests
     TEST_CLASS(RandomPhotoSelectorTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_imageGenerator = TestImageGenerator();
+        }
+
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+            concurrency::task_status status;
+            TestHelper::RunSynced(m_imageGenerator.DeleteFilesAsync(), status);
+        }
 
         TEST_METHOD(RandomPhotoSelectorTestsSelectsFivePhotos)
         {
-            TestImageGenerator imageGenerator;
-
             concurrency::task_status status;
-            auto photos = TestHelper::RunSynced(
-                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"),
-                status);
-
-            Assert::AreEqual(concurrency::completed, status);   
 
             auto selectedPhotos = TestHelper::RunSynced(
-                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
-                .then([](IVectorView<StorageFile^>^ photos)
-                { 
-                    // workaround for threading issue
-                    
-                    auto copied = ref new Vector<StorageFile^>(begin(photos), end(photos));
-                    return RandomPhotoSelector::SelectFilesAsync(copied->GetView(), 5);
-                }), status);
+                m_imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
+                .then([this](IVectorView<StorageFile^>^ photos)
+            { 
+                auto copied = ref new Vector<StorageFile^>(begin(photos), end(photos));
+                return RandomPhotoSelector::SelectFilesAsync(copied->GetView(), 5);
+            }), status);
 
             Assert::AreEqual(concurrency::completed, status);
-
-            Assert::AreEqual(5U, selectedPhotos->Size);
-
-            //todo: Deleting images appears to fail currently
-            //TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
+            Assert::AreEqual(5U, selectedPhotos->Size);		
         }
 
         TEST_METHOD(RandomPhotoSelectorUsesSizeOfProvidedFilesIfLessThanRequestedCount)
         {
-            TestImageGenerator imageGenerator;
-
             concurrency::task_status status;
-            auto photos = TestHelper::RunSynced(
-                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test"),
-                status);
-
-            Assert::AreEqual(concurrency::completed, status);   
 
             auto selectedPhotos = TestHelper::RunSynced(
-                imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
+                m_imageGenerator.CreateTestImagesFromLocalFolder("UnitTestLogo.png", 10, "random_test")
                 .then([](IVectorView<StorageFile^>^ photos)
             { 
-                // workaround for threading issue
-
                 auto copied = ref new Vector<StorageFile^>(begin(photos), end(photos));
                 return RandomPhotoSelector::SelectFilesAsync(copied->GetView(), 15);
             }), status);
 
             Assert::AreEqual(concurrency::completed, status);
-
             Assert::AreEqual(10U, selectedPhotos->Size);
-
-            //todo: Cleanup images
-            // TestHelper::RunSynced(imageGenerator.DeleteFilesAsync(), status);
         }
+
+    private:
+        TestImageGenerator m_imageGenerator;
     };
 }

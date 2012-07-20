@@ -13,16 +13,26 @@
 using namespace Hilo;
 using namespace Windows::Foundation::Collections;
 
-PhotoGroupData::PhotoGroupData(Windows::Foundation::Collections::IVectorView<IPhoto^>^ photos, unsigned int size) : m_photos(photos), m_size(size)
+PhotoGroupData::PhotoGroupData()
 {
 }
 
-IVectorView<IPhoto^>^ PhotoGroupData::Photos::get()
+PhotoGroupData::PhotoGroupData(IVectorView<IPhoto^>^ photos, unsigned int size) : m_photos(photos), m_size(size)
+{
+}
+
+PhotoGroupData::PhotoGroupData(const PhotoGroupData& data)
+{
+    m_photos = data.m_photos;
+    m_size = data.m_size;
+}
+
+IVectorView<IPhoto^>^ PhotoGroupData::GetPhotos() const
 {
     return m_photos;
 }
 
-unsigned int PhotoGroupData::Size::get()
+unsigned int PhotoGroupData::GetSize() const
 {
     return m_size;
 }

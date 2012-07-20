@@ -9,14 +9,9 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\YearGroup.h"
-#include "..\Hilo\IExceptionPolicy.h"
-#include "..\Hilo\IQueryOperation.h"
-#include "..\Hilo\IRepository.h"
 #include "..\Hilo\IMonthBlock.h"
-#include "StubRepository.h"
-#include "StubQueryOperation.h"
 #include "StubExceptionPolicy.h"
-
+#include "StubMonthBlockQuery.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -29,16 +24,15 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
-            m_queryOperation = ref new StubQueryOperation(nullptr);
+            m_query = std::make_shared<StubMonthBlockQuery>();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
         }
 
         TEST_METHOD(YearGroupShouldSetTitleForNamePassedIntoConstructor)
         {
             String^ expected = "1999";
 
-            auto group = ref new YearGroup(expected, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto group = ref new YearGroup(expected, m_query, m_exceptionPolicy);
 
             Assert::AreEqual(expected, group->Title);
         }
@@ -49,7 +43,7 @@ namespace HiloTests
             String^ name = " 1999";
             unsigned int expected = 1999U;
 
-            auto group = ref new YearGroup(name, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto group = ref new YearGroup(name, m_query, m_exceptionPolicy);
 
             Assert::AreEqual(expected, group->Year);
         }
@@ -57,7 +51,7 @@ namespace HiloTests
         TEST_METHOD(YearGroupShouldCreateTwelveMonthBlocksForYear)
         {
             String^ name = " 1999";
-            auto group = ref new YearGroup(name, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto group = ref new YearGroup(name, m_query, m_exceptionPolicy);
 
             unsigned int months = group->Items->Size;
 
@@ -67,7 +61,7 @@ namespace HiloTests
         TEST_METHOD(YearGroupShouldPassSelfToMonth)
         {
             String^ name = " 1999";
-            IYearGroup^ group = ref new YearGroup(name, m_repository, m_queryOperation, m_exceptionPolicy);
+            IYearGroup^ group = ref new YearGroup(name, m_query, m_exceptionPolicy);
 
             auto monthBlock = group->Items->GetAt(0);
 
@@ -75,8 +69,7 @@ namespace HiloTests
         }
 
     private:
-        IExceptionPolicy^ m_exceptionPolicy;
-        IRepository^ m_repository;
-        IQueryOperation^ m_queryOperation;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<StubMonthBlockQuery> m_query;
     };
 }

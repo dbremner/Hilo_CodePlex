@@ -7,6 +7,7 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
+
 #include "..\Hilo\IPhoto.h"
 
 namespace HiloTests

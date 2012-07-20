@@ -12,20 +12,15 @@ namespace Hilo
 {
     interface class IPhoto;
 
-    public ref class PhotoGroupData sealed
+    class PhotoGroupData
     {
     public:
+        PhotoGroupData();
         PhotoGroupData(Windows::Foundation::Collections::IVectorView<IPhoto^>^ photos, unsigned int size);
+        PhotoGroupData(const PhotoGroupData& data);
 
-        property Windows::Foundation::Collections::IVectorView<IPhoto^>^ Photos
-        {
-            Windows::Foundation::Collections::IVectorView<IPhoto^>^ get();
-        }
-        
-        property unsigned int Size
-        {
-            unsigned int get();
-        }
+        Windows::Foundation::Collections::IVectorView<IPhoto^>^ GetPhotos() const;
+        unsigned int GetSize() const;
 
     private:
         Windows::Foundation::Collections::IVectorView<IPhoto^>^ m_photos;

@@ -12,15 +12,13 @@
 
 using namespace Hilo;
 using namespace Platform;
+using namespace std;
 using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
 using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
-using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::System::UserProfile;
 
-ImageNavigationData::ImageNavigationData(Hilo::IPhoto^ photo)
+ImageNavigationData::ImageNavigationData(IPhoto^ photo)
 {
     m_fileDate = photo->DateTaken;
     m_filePath = photo->Path;
@@ -28,14 +26,12 @@ ImageNavigationData::ImageNavigationData(Hilo::IPhoto^ photo)
 
 ImageNavigationData::ImageNavigationData(String^ serializedData)
 {
-    std::wstring data(serializedData->Data());
-
+    wstring data(serializedData->Data());
     auto index = data.find('|');
     assert(index > 0);
 
     auto path = data.substr(0, index);
     auto date = data.substr(index+1, data.length());
-
     DateTime fileDate;
     fileDate.UniversalTime = _wtoi64(date.c_str());
 
@@ -43,17 +39,17 @@ ImageNavigationData::ImageNavigationData(String^ serializedData)
     m_fileDate = fileDate;
 }
 
-DateTime ImageNavigationData::FileDate::get()
+DateTime ImageNavigationData::GetFileDate() const
 {
     return m_fileDate;
 }
 
-String^ ImageNavigationData::FilePath::get()
+String^ ImageNavigationData::GetFilePath() const
 {
     return m_filePath;
 }
 
-String^ ImageNavigationData::DateQuery::get()
+String^ ImageNavigationData::GetDateQuery()
 {
     if (nullptr == m_dateQuery)
     {
@@ -78,9 +74,7 @@ String^ ImageNavigationData::DateQuery::get()
 
 String^ ImageNavigationData::SerializeToString()
 {
-    std::wstringstream stringStream;
-
+    wstringstream stringStream;
     stringStream << m_filePath->Data() << L"|" << m_fileDate.UniversalTime ;
-    
     return ref new String(stringStream.str().c_str());
 }

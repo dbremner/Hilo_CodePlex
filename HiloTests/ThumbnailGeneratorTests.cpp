@@ -11,9 +11,9 @@
 #include "..\Hilo\ThumbnailGenerator.h"
 #include "StubExceptionPolicy.h"
 
+using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Windows::Storage;
-using namespace Hilo;
 
 namespace HiloTests
 {		
@@ -23,64 +23,61 @@ namespace HiloTests
         TEST_METHOD_INITIALIZE(Initialize)
         {
             m_imageGenerator = TestImageGenerator();
+            m_thumbnailFolder = CreateThumbnailFolder();
         }
 
         TEST_METHOD_CLEANUP(Cleanup)
         {
             concurrency::task_status status;
             TestHelper::RunSynced(m_imageGenerator.DeleteFilesAsync(), status);
+            DeleteThumbnailFolder(m_thumbnailFolder);
         }
 
         TEST_METHOD(ThumbnailGeneratorTestsGivenValidImagesThenGeneratesCorrectNumberOfThumbnailFiles)
         {
-            auto sourceImages = GenerateSourceImages();
-            auto thumbnailFolder = CreateThumbnailFolder();
-
-            ThumbnailGenerator generator(ref new StubExceptionPolicy());
-
             concurrency::task_status status;
-            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);
-            Assert::AreEqual(concurrency::task_status::completed, status);
 
+            auto sourceImages = GenerateSourceImages();
+            ThumbnailGenerator generator(std::make_shared<StubExceptionPolicy>());
+            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, m_thumbnailFolder), status);
+
+            Assert::AreEqual(concurrency::task_status::completed, status);
             Assert::AreEqual(3U, generatedImages->Size);
         }
 
         TEST_METHOD(ThumbnailGeneratorTestsGivenValidImagesThenGeneratesIntoCorrectFolder)
         {
-            auto sourceImages = GenerateSourceImages();
-            auto thumbnailFolder = CreateThumbnailFolder();
-
-            ThumbnailGenerator generator(ref new StubExceptionPolicy());
-
             concurrency::task_status status;
-            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);
+
+            auto sourceImages = GenerateSourceImages();
+            ThumbnailGenerator generator(std::make_shared<StubExceptionPolicy>());
+            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, m_thumbnailFolder), status);
             Assert::AreEqual(concurrency::task_status::completed, status);
 
             auto imagePath = generatedImages->GetAt(0)->Path;
-            auto folderPath = thumbnailFolder->Path;
-
+            auto folderPath = m_thumbnailFolder->Path;
             std::wstring imagePathString(imagePath->Data());
             std::wstring folderPathString(folderPath->Data());
-
             auto substring = imagePathString.substr(0, folderPathString.size());
+
             Assert::AreEqual(substring, folderPathString);
         }
 
         TEST_METHOD(ThumbnailGeneratorTestsGivenAnInvalidDoesNotReturnFile)
         {
-            auto sourceImages = GenerateInvalidSourceImage();
-            auto thumbnailFolder = CreateThumbnailFolder();
-
-            ThumbnailGenerator generator(ref new StubExceptionPolicy());
-
             concurrency::task_status status;
-            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, thumbnailFolder), status);
-            Assert::AreEqual(concurrency::task_status::completed, status);
 
+            auto sourceImages = GenerateInvalidSourceImage();
+            ThumbnailGenerator generator(std::make_shared<StubExceptionPolicy>());
+            auto generatedImages = TestHelper::RunSynced(generator.Generate(sourceImages, m_thumbnailFolder), status);
+
+            Assert::AreEqual(concurrency::task_status::completed, status);
             Assert::AreEqual(0U, generatedImages->Size);
         }
 
     private:
+        TestImageGenerator m_imageGenerator;
+        StorageFolder^ m_thumbnailFolder;
 
         Platform::Collections::Vector<StorageFile^>^ GenerateInvalidSourceImage()
         {
@@ -114,22 +111,25 @@ namespace HiloTests
             concurrency::task_status status;
             // Windows::Storage::StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
             auto installStorageFolder = Windows::Storage::KnownFolders::PicturesLibrary;
-                        
+
             auto createFolderTask = concurrency::create_task(installStorageFolder->CreateFolderAsync(
                 "ThumbnailTestGeneratorTestFolder", 
                 Windows::Storage::CreationCollisionOption::ReplaceExisting));
 
-            auto folder = TestHelper::RunSynced(
-               createFolderTask, 
-               status);
+            auto folder = TestHelper::RunSynced(createFolderTask, status);
 
             Assert::AreEqual(concurrency::task_status::completed, status);
 
             return folder;
         }
 
+        void DeleteThumbnailFolder(IStorageFolder^ folder)
+        {
+            concurrency::task_status status;
 
-        TestImageGenerator m_imageGenerator;
-
+            auto deleteFolderTask = concurrency::create_task(folder->DeleteAsync());
+            TestHelper::RunSynced(deleteFolderTask, status);
+            Assert::AreEqual(concurrency::task_status::completed, status);
+        }
     };
 }

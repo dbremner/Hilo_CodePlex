@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -10,7 +10,7 @@
 
 #include "HiloPage.h" // Required by generated header
 #include "BooleanToBrushConverter.h" // Required by generated header
-#include "HasPhotosConverter.h" // Required by generated header
+#include "InverterConverter.h" // Required by generated header
 #include "ImageBrowserView.g.h"
 
 namespace Hilo

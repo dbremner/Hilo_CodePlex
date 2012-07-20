@@ -12,23 +12,35 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
-    interface class IRepository;
     interface class IPhoto;
-    ref class ImageNavigationData;
+    class SinglePhotoQuery;
+    class ExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class RotateImageViewModel sealed : public ImageBase
     {
-    public:
-        RotateImageViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
+    internal:
+        RotateImageViewModel(std::shared_ptr<SinglePhotoQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
 
-        property Windows::UI::Xaml::Media::ImageSource^ Image
+        virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
+        virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
+        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
+
+        void Initialize(Platform::String^ photoPath);
+        void EndRotation();
+
+    public:
+        property IPhoto^ Photo
         {
-            Windows::UI::Xaml::Media::ImageSource^ get();
+            IPhoto^ get();
         }
 
         property Windows::UI::Xaml::Input::ICommand^ RotateCommand
+        {
+            Windows::UI::Xaml::Input::ICommand^ get();
+        }
+
+        property Windows::UI::Xaml::Input::ICommand^ ResumeRotateCommand
         {
             Windows::UI::Xaml::Input::ICommand^ get();
         }
@@ -47,7 +59,7 @@ namespace Hilo
         {
             Windows::UI::Xaml::Thickness get();
         }
-        
+
         property bool InProgress { bool get(); }
 
         ///<summary>Returns the rotation angle for image display.</summary>
@@ -57,39 +69,49 @@ namespace Hilo
             void set(double value);
         }
 
-        virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
-        virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
-        virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;
-
-        void EndRotation();
-
-    internal:
-        void Initialize(ImageNavigationData^ navigationData);
-
     private:
-        IRepository^ m_repository;
-        IPhoto^ m_photo;
-        Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
-        Windows::Storage::Streams::IRandomAccessStream^ m_randomAccessStream;
+
+        struct ImageEncodingInformation
+        {
+            ImageEncodingInformation() : usesExifOrientation(false), exifOrientation(0){}
+
+            Windows::Graphics::Imaging::BitmapDecoder^ decoder;    
+            bool usesExifOrientation;
+            unsigned short exifOrientation;
+        };
+
+        std::shared_ptr<SinglePhotoQuery> m_query;
+        bool m_getPhotoAsyncIsRunning;
+
         Windows::UI::Xaml::Input::ICommand^ m_rotateCommand;
+        Windows::UI::Xaml::Input::ICommand^ m_resumeRotateCommand;
         Windows::UI::Xaml::Input::ICommand^ m_saveCommand;
         Windows::UI::Xaml::Input::ICommand^ m_cancelCommand;
         Windows::UI::Xaml::Thickness m_imageMargin;
         bool m_inProgress;
         bool m_isSaving;
         double m_rotationAngle;
-        bool m_isExifOrientation;
-        unsigned int m_exifOrientation;
-        ImageNavigationData^ m_navigationData;
-        
+        Platform::String^ m_photoPath;
+
         void ChangeInProgress(bool value);
         concurrency::task<IPhoto^> GetImagePhotoAsync();
-        concurrency::task<void> RotateImageViewModel::RotateImageAsync(double angle);
-        unsigned int ConvertExifOrientationToDegreesRotation(unsigned int exifOrientationFlag);
-        unsigned int ConvertDegreesRotationToExifOrientation(unsigned int angle);
-
+        concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> RotateImageViewModel::RotateImageAsync(Windows::Storage::Streams::IRandomAccessStream^ sourceStream, double angle);       
+        unsigned int CheckRotationAngle(unsigned int angle);
         void Rotate90(Platform::Object^ parameter);
+        void Unsnap(Platform::Object^ parameter);
         void SaveImage(Platform::Object^ parameter);
         void CancelRotate(Platform::Object^ parameter);
+
+
+        concurrency::task<ImageEncodingInformation> GetDecoderInfo(Windows::Storage::Streams::IRandomAccessStream^ source, concurrency::task_continuation_context backgroundContext);
+        concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> EncodeRotateImageToStream(
+            ImageEncodingInformation decoderInfo, 
+            double rotationAngle, 
+            concurrency::task_continuation_context backgroundContext);
+        concurrency::task<Windows::Graphics::Imaging::BitmapEncoder^> RotateImageViewModel::SetEncodingRotation(
+            Windows::Graphics::Imaging::BitmapEncoder^ encoder, 
+            std::shared_ptr<ImageEncodingInformation> decoderInfo, 
+            double rotationAngle, 
+            concurrency::task_continuation_context backgroundContext);
     };
 }

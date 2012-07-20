@@ -9,11 +9,9 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\WideFiveImageTile.h"
-#include <array>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
-using namespace Windows::Data::Xml;
 using namespace Windows::Data::Xml::Dom;
 using namespace Windows::UI::Notifications;
 

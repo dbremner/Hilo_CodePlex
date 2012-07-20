@@ -9,13 +9,11 @@
 #include "pch.h"
 #include "WideFiveImageTile.h"
 
+using namespace Hilo;
 using namespace std;
 using namespace Platform;
 using namespace Windows::UI::Notifications;
-using namespace Windows::Data::Xml;
 using namespace Windows::Data::Xml::Dom;
-
-using namespace Hilo;
 
 const unsigned int MaxTemplateImages = 5;
 

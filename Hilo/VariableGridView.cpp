@@ -11,9 +11,7 @@
 #include "IResizable.h"
 
 using namespace Hilo;
-
 using namespace Platform;
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 
 void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element, Object^ item)

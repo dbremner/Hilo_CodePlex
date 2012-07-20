@@ -9,18 +9,11 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\MonthBlock.h"
-#include "..\Hilo\IExceptionPolicy.h"
-#include "..\Hilo\IQueryOperation.h"
-#include "..\Hilo\IRepository.h"
-#include "..\Hilo\IMonthBlock.h"
-#include "..\Hilo\IYearGroup.h"
-#include "..\Hilo\IResourceLoader.h"
-#include "StubRepository.h"
-#include "StubQueryOperation.h"
 #include "StubExceptionPolicy.h"
 #include "StubYearGroup.h"
 #include "StubResourceLoader.h"
 #include "StubPhoto.h"
+#include "StubMonthBlockQuery.h"
 
 using namespace concurrency;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -34,18 +27,17 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
-            m_queryOperation = ref new StubQueryOperation(nullptr);
             m_yearGroup = ref new StubYearGroup("2000", 2000);
             m_resourceLoader = ref new StubResourceLoader();
+            m_query = std::make_shared<StubMonthBlockQuery>();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
         }
 
         TEST_METHOD(MonthBlockShouldGetTitleForMonthFromResourceLoader)
         {
             StubResourceLoader^ loader = dynamic_cast<StubResourceLoader^>(m_resourceLoader);
             loader->StringToReturn = "Dec";
-            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_query, m_exceptionPolicy);
 
             auto name = model->Name;
 
@@ -55,7 +47,7 @@ namespace HiloTests
         TEST_METHOD(MonthBlockShouldSetMonthFromConstructor)
         {
             unsigned int expected = 12U;
-            auto model = ref new MonthBlock(m_yearGroup, expected, m_resourceLoader, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto model = ref new MonthBlock(m_yearGroup, expected, m_resourceLoader, m_query, m_exceptionPolicy);
 
             auto month = model->Month;
 
@@ -64,36 +56,30 @@ namespace HiloTests
 
         TEST_METHOD(MonthBlockShouldCallPhotoCountQueryOnRepository)
         {
-            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_query, m_exceptionPolicy);
             task_status status;
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-            repository->PhotoToReturn = ref new StubPhoto();
 
             TestHelper::RunSynced(model->QueryPhotoCount(), status);
 
             Assert::AreEqual(completed, status);
-            Assert::IsTrue(repository->GetPhotoCountForQueryOperationAsyncCalled);
+            Assert::IsTrue(m_query->GetHasBeenCalled());
         }
 
         TEST_METHOD(MonthBlockShouldSetQueryWhenGettingPhotoCount)
         {
-            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_query, m_exceptionPolicy);
             task_status status;
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-            repository->PhotoToReturn = ref new StubPhoto();
 
             TestHelper::RunSynced(model->QueryPhotoCount(), status);
 
             Assert::AreEqual(completed, status);
-            Assert::IsNotNull(m_queryOperation->Query);
+            Assert::IsNotNull(m_query->GetDateRangeQuery());
         }
 
         TEST_METHOD(MonthBlockShouldHaveItemsWhenItemsReturnedFromQuery)
         {
-            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_repository, m_queryOperation, m_exceptionPolicy);
+            auto model = ref new MonthBlock(m_yearGroup, 12, m_resourceLoader, m_query, m_exceptionPolicy);
             task_status status;
-            StubRepository^ repository = dynamic_cast<StubRepository^>(m_repository);
-            repository->PhotoToReturn = ref new StubPhoto();
 
             TestHelper::RunSynced(model->QueryPhotoCount(), status);
 
@@ -102,10 +88,9 @@ namespace HiloTests
         }
 
     private:
-        IExceptionPolicy^ m_exceptionPolicy;
-        IRepository^ m_repository;
-        IQueryOperation^ m_queryOperation;
-        IYearGroup^ m_yearGroup;
-        IResourceLoader^ m_resourceLoader;
+        StubYearGroup^ m_yearGroup;
+        StubResourceLoader^ m_resourceLoader;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<StubMonthBlockQuery> m_query;
     };
 }

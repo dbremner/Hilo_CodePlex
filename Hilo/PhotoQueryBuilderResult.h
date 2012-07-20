@@ -7,6 +7,7 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
+
 namespace Hilo
 {
     template<typename T>

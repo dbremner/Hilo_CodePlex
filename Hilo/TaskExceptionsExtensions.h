@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -7,18 +7,15 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
-#include <ppltasks.h>
-#include "IExceptionPolicy.h"
+#include "ExceptionPolicy.h"
 
 namespace Hilo 
 {
     template<typename T>
     struct ObserveException
     {
-
-        ObserveException(IExceptionPolicy^ handler)
+        ObserveException(std::shared_ptr<ExceptionPolicy> handler) : m_handler(handler)
         {
-            m_handler = handler;
         }
 
         concurrency::task<T> operator()(concurrency::task<T> antecedent) const
@@ -28,13 +25,12 @@ namespace Hilo
             {
                 result = antecedent.get();
             }
-            catch(const concurrency::task_canceled)
+            catch(const concurrency::task_canceled&)
             {
                 // don't need to run canceled tasks through the policy
             }
             catch(const std::exception&)
             {
-                // todo: replace in RP
                 auto translatedException = ref new Platform::FailureException();
                 m_handler->HandleException(translatedException);
                 throw;
@@ -48,7 +44,7 @@ namespace Hilo
         }
 
     private:
-        IExceptionPolicy^ m_handler;
+        std::shared_ptr<ExceptionPolicy> m_handler;
     };
 
     template<>
@@ -58,13 +54,12 @@ namespace Hilo
         {
             antecedent.get();
         }
-        catch(const concurrency::task_canceled)
+        catch(const concurrency::task_canceled&)
         {
             // don't need to run canceled tasks through the policy
         }
         catch(const std::exception&)
         {
-            //todo: replace in RP
             auto translatedException = ref new Platform::FailureException();
             m_handler->HandleException(translatedException);
             throw;

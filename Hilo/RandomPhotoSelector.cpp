@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,20 +8,14 @@
 //===============================================================================
 #include "pch.h"
 #include "RandomPhotoSelector.h"
-#include <map>
 #include <random>
 #include <ctime>
-#include <ppltasks.h>
-#include <collection.h>
 
 using namespace concurrency;
+using namespace Hilo;
 using namespace std;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Foundation::Collections;
-using namespace Hilo;
-
-typedef map<unsigned int, bool> RandomMap;
 
 task<IVector<StorageFile^>^> RandomPhotoSelector::SelectFilesAsync(IVectorView<StorageFile^>^ photos, unsigned int count )
 {
@@ -44,18 +38,24 @@ task<IVector<StorageFile^>^> RandomPhotoSelector::SelectFilesAsync(IVectorView<S
 
 vector<unsigned int> RandomPhotoSelector::CreateRandomizedVector(unsigned int vectorSize, unsigned int sampleSize)
 {
+    // Holds each random number to ensure that we don't choose the same
+    // number more than one time.
+    typedef map<unsigned int, bool> RandomMap;
     RandomMap numbers;
 
+    // The resulting set of random numbers.
     vector<unsigned int> result;
 
     if (vectorSize >= sampleSize)
     {
+        // Select the set of random numbers.
         mt19937 rand(static_cast<unsigned int>(time(NULL)));
         while (numbers.size() < sampleSize)
         {
             int pickFile = static_cast<unsigned int>(rand() % vectorSize);
 
-            if (numbers.find(pickFile) == numbers.end())
+            // Use the number if it's unique.
+            if (numbers.find(pickFile) == end(numbers))
             {
                 numbers.insert(RandomMap::value_type(pickFile, true));
                 result.push_back(pickFile);
@@ -64,7 +64,8 @@ vector<unsigned int> RandomPhotoSelector::CreateRandomizedVector(unsigned int ve
     }
     else
     {
-        // Don't select any randomized images, just use all the images, no randomization
+        // We don't have enough images to choose a random collection.
+        // Just use all images.
         for(unsigned int i = 0; i < vectorSize; i++)
         {
             result.push_back(i);

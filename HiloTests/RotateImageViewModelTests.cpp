@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -9,14 +9,12 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include <tuple>
-//#include "..\Hilo\IPhoto.h"
-//#include "..\Hilo\IPhotoGroup.h"
 #include "..\Hilo\RotateImageViewModel.h"
 #include "..\Hilo\ImageNavigationData.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhotoGroup.h"
-#include "StubRepository.h"
 #include "StubPhoto.h"
+#include "StubSinglePhotoQuery.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -31,37 +29,43 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_query = std::make_shared<StubSinglePhotoQuery>();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
         }
 
         TEST_METHOD(RotateImageViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            RotateImageViewModel model(m_repository, m_exceptionPolicy);
+            RotateImageViewModel model(m_query, m_exceptionPolicy);
             Assert::IsNotNull(model.RotateCommand);
+        }
+
+        TEST_METHOD(RotateImageViewModelShouldSetupResumeRotateCommandWhenConstructed)
+        {
+            RotateImageViewModel model(m_query, m_exceptionPolicy);
+            Assert::IsNotNull(model.ResumeRotateCommand);
         }
 
         TEST_METHOD(RotateImageViewModelShouldSetupSaveCommandWhenConstructed)
         {
-            RotateImageViewModel model(m_repository, m_exceptionPolicy);
+            RotateImageViewModel model(m_query, m_exceptionPolicy);
             Assert::IsNotNull(model.SaveCommand);
         }
 
         TEST_METHOD(RotateImageViewModelShouldSetupCancelCommandWhenConstructed)
         {
-            RotateImageViewModel model(m_repository, m_exceptionPolicy);
+            RotateImageViewModel model(m_query, m_exceptionPolicy);
             Assert::IsNotNull(model.CancelCommand);
         }
 
         TEST_METHOD(RotateImageViewModelShouldSetIsAppBarStickyWhenConstructed)
         {
-            RotateImageViewModel model(m_repository, m_exceptionPolicy);
+            RotateImageViewModel model(m_query, m_exceptionPolicy);
             Assert::IsTrue(model.IsAppBarSticky);
         }
 
         TEST_METHOD(RotateImageViewModelShouldSetImageMarginToZeroWhenSettingRotationAngleToZero)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model] {
                 model->RotationAngle = 0;
@@ -76,7 +80,7 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelShouldSetImageMarginTopAndBottomToOneHundredAndTenWhenSettingRotationAngleToNinety)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model] {
                 model->RotationAngle = 90;
@@ -91,7 +95,7 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelShouldFirePropertyChangedForRotationAngleWhenSettingRotationAngle)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e)
             {
@@ -110,7 +114,7 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelShouldFirePropertyChangedForImageMarginWhenSettingRotationAngle)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
             bool propertyChangedFired = false;
             model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender, PropertyChangedEventArgs^ e)
             {
@@ -129,9 +133,9 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelInitialRotationAngleIsZero)
         {
-            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
-            vm->Initialize(ref new ImageNavigationData(ref new StubPhoto()));
+            vm->Initialize("");
 
             Assert::AreEqual(0.0, vm->RotationAngle);
         }
@@ -159,7 +163,7 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelShouldSaveAndLoadRotationAngle)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model] {
                 model->RotationAngle = 90;
@@ -168,7 +172,7 @@ namespace HiloTests
             auto state = ref new Platform::Collections::Map<String^, Object^>();
             model->SaveState(state);
 
-            auto newModel = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto newModel = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
             newModel->LoadState(state);
 
             Assert::AreEqual(model->RotationAngle, newModel->RotationAngle);
@@ -176,7 +180,7 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelShouldSaveAndLoadMargin)
         {
-            auto model = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto model = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
             TestHelper::RunUISynced([model] {
                 model->RotationAngle = 270; // Should set margin to something non-zero
@@ -185,7 +189,7 @@ namespace HiloTests
             auto state = ref new Platform::Collections::Map<String^, Object^>();
             model->SaveState(state);
 
-            auto newModel = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            auto newModel = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
             newModel->LoadState(state);
 
             Assert::AreEqual(model->ImageMargin, newModel->ImageMargin);
@@ -193,9 +197,9 @@ namespace HiloTests
 
         TEST_METHOD(RotateImageViewModelRotateCommandIncrementsBy90)
         {
-            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
-            vm->Initialize(ref new ImageNavigationData(ref new StubPhoto()));
+            vm->Initialize("");
 
             TestHelper::RunUISynced([this, vm](){
                 vm->RotateCommand->Execute(nullptr);
@@ -205,14 +209,14 @@ namespace HiloTests
         }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
-        StubRepository^ m_repository;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<StubSinglePhotoQuery> m_query;
 
         void TestRotation(double angle, double expected)
         {
-            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+            RotateImageViewModel^ vm = ref new RotateImageViewModel(m_query, m_exceptionPolicy);
 
-            vm->Initialize(ref new ImageNavigationData(ref new StubPhoto()));
+            vm->Initialize("");
 
             TestHelper::RunUISynced([this, vm, angle](){
                 vm->RotationAngle = angle;

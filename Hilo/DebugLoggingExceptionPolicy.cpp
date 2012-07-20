@@ -10,14 +10,13 @@
 #include "DebugLoggingExceptionPolicy.h"
 
 using namespace Hilo;
-using namespace Windows::Foundation;
 using namespace Platform;
-
+using namespace std;
 
 void DebugLoggingExceptionPolicy::HandleException(Exception^ exception)
 {
     assert(exception != nullptr);
-    std::wstringstream ss;
+    wstringstream ss;
     ss << "[HR: " << exception->HResult << "] " << exception->Message->Data();
     OutputDebugString(ss.str().c_str());
 }

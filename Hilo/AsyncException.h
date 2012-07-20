@@ -10,12 +10,11 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
+    class ExceptionPolicy;
 
     class AsyncException
     {
     public:
-        static Windows::Foundation::IAsyncAction^ ObserveWithPolicy(IExceptionPolicy^ policy, Windows::Foundation::IAsyncAction^ action);
+        static Windows::Foundation::IAsyncAction^ ObserveWithPolicy(std::shared_ptr<ExceptionPolicy> policy, Windows::Foundation::IAsyncAction^ action);
     };
-
 }

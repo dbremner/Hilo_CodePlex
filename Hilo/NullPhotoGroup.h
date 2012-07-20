@@ -7,7 +7,8 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
-#include "IPhotoGroup.h"  // required for inheritence from IPhotoGroup
+
+#include "IPhotoGroup.h"
 
 namespace Hilo
 {

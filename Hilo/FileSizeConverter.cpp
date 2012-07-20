@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -10,7 +10,6 @@
 #include "FileSizeConverter.h"
 
 using namespace Hilo;
-
 using namespace Platform;
 using namespace Windows::UI::Xaml::Interop;
 

@@ -12,18 +12,8 @@
 #include "ImageBrowserView.xaml.h"
 
 using namespace Hilo;
-
 using namespace Platform;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
-using namespace Windows::Graphics::Display;
-using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
-using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::Xaml::Data;
-using namespace Windows::UI::Xaml::Navigation;
-using namespace Windows::UI::ViewManagement;
 
 ImageBrowserView::ImageBrowserView()
 {
@@ -35,8 +25,8 @@ void ImageBrowserView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
     auto photo = dynamic_cast<Photo^>(e->ClickedItem);
     if (nullptr !=  photo)
     {
-        auto imageData = ref new ImageNavigationData(photo);
-        HiloPage::NavigateToPage(PageType::Image, imageData->SerializeToString());
+        ImageNavigationData imageData(photo);
+        HiloPage::NavigateToPage(PageType::Image, imageData.SerializeToString());
     }
 }
 

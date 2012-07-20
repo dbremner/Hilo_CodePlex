@@ -10,6 +10,7 @@
 
 namespace Hilo
 {
+    [Windows::Foundation::Metadata::WebHostHidden]
     public ref class VariableGridView sealed : public Windows::UI::Xaml::Controls::GridView
     {
     protected:

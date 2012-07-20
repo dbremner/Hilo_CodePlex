@@ -13,16 +13,19 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
     interface class IPhoto;
-    interface class IRepository;
+    class ExceptionPolicy;
+    class PictureHubGroupQuery;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class HubPhotoGroup sealed : public Common::BindableBase, public IPhotoGroup
     {
+    internal:
+        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, std::shared_ptr<PictureHubGroupQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        concurrency::task<void> QueryPhotosAsync();
+
     public:
-        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, IRepository^ repository, IExceptionPolicy^ exceptionPolicy);
-        ~HubPhotoGroup();
+        virtual ~HubPhotoGroup();
 
         property Platform::String^ Title 
         { 
@@ -34,18 +37,15 @@ namespace Hilo
             virtual Windows::Foundation::Collections::IObservableVector<IPhoto^>^ get();
         }
 
-    internal:
-        concurrency::task<void> QueryPhotosAsync();
-
     private:
         Platform::String^ m_title;
         Platform::String^ m_emptyTitle;
+        std::shared_ptr<PictureHubGroupQuery> m_query;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Platform::Collections::Vector<IPhoto^>^ m_photos;
         bool m_retrievedPhotos;
-        Windows::Storage::Search::IStorageQueryResultBase^ m_queryResult;
-        IExceptionPolicy^ m_exceptionPolicy;
-        IRepository^ m_repository;
-        Windows::Foundation::EventRegistrationToken m_dataToken;
+        bool m_receivedChangeWhileRunning;
+        bool m_runningQuery;
 
         void OnDataChanged();
     };

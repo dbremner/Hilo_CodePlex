@@ -8,7 +8,8 @@
 //===============================================================================
 #pragma once
 
-namespace Hilo {
+namespace Hilo 
+{
     class WideFiveImageTile
     {
     public:

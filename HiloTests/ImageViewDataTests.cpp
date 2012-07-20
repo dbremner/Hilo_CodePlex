@@ -11,7 +11,6 @@
 #include "..\Hilo\ImageNavigationData.h"
 #include "StubPhoto.h"
 #include "StubPhotoGroup.h"
-#include "StubExceptionPolicy.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -19,30 +18,24 @@ using namespace Platform;
 using namespace Windows::Globalization;
 using namespace Windows::Globalization::DateTimeFormatting;
 using namespace Windows::Foundation;
-using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {
     TEST_CLASS(ImageNavigationDataTests)
     {
     public:
-        TEST_METHOD_INITIALIZE(Initialize)
-        {
-            m_exceptionPolicy = ref new StubExceptionPolicy();
-        }
-
         TEST_METHOD(ImageNavigationDataShouldInitilizeFileNameAndDateFromPhoto)
         {
             StubPhoto^ photo = ref new StubPhoto();
             photo->Path = "Foo";
             photo->DateTaken = GetDateTaken();
             String^ expectedPath = "Foo";
-            DateTime expectedDate = GetDateTaken();;
+            DateTime expectedDate = GetDateTaken();
 
-            ImageNavigationData^ data = ref new ImageNavigationData(photo);
+            ImageNavigationData data(photo);
 
-            Assert::AreEqual(expectedDate.UniversalTime, data->FileDate.UniversalTime);
-            Assert::AreEqual(expectedPath, data->FilePath);
+            Assert::AreEqual(expectedDate.UniversalTime, data.GetFileDate().UniversalTime);
+            Assert::AreEqual(expectedPath, data.GetFilePath());
         }
 
         TEST_METHOD(ImageNavigationDataShouldReturnDateQueryForFileSystem)
@@ -67,16 +60,14 @@ namespace HiloTests
             std::wstringstream dateRange;
             dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
             auto expectedDateQuery = ref new String(dateRange.str().c_str());
-            ImageNavigationData^ data = ref new ImageNavigationData(photo);
+            ImageNavigationData data(photo);
 
-            auto query = data->DateQuery;
+            auto query = data.GetDateQuery();
 
             Assert::AreEqual(expectedDateQuery, query);
         }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
-
         static DateTime GetDateTaken()
         {
             Calendar cal;
@@ -86,6 +77,7 @@ namespace HiloTests
             cal.Hour = 1;
             cal.Minute = 30;
             cal.Second = 0;
+            cal.Nanosecond = 0;
             return cal.GetDateTime();
         }
     };

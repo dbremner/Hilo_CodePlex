@@ -8,14 +8,15 @@
 //===============================================================================
 #include "pch.h"
 #include "ViewModelBase.h"
+#include "ExceptionPolicy.h"
 
 using namespace Hilo;
-
 using namespace Platform;
+using namespace std;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Navigation;
 
-ViewModelBase::ViewModelBase(IExceptionPolicy^ exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
+ViewModelBase::ViewModelBase(shared_ptr<ExceptionPolicy> exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
 {
 }
 

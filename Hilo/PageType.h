@@ -15,7 +15,6 @@ namespace Hilo
         Hub,
         Browse,
         Image,
-        Edit,
         Crop,
         Rotate
     };

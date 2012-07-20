@@ -13,14 +13,17 @@
 namespace Hilo
 {
     ref class HubPhotoGroup;
-    interface class IExceptionPolicy;
     interface class IPhoto;
+    class ExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class MainHubViewModel sealed : public ViewModelBase
     {
+    internal:
+        MainHubViewModel(Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ photoGroups, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        
     public:
-        MainHubViewModel(Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ photoGroups, IExceptionPolicy^ exceptionPolicy);
+        virtual ~MainHubViewModel();
 
         property Windows::Foundation::Collections::IObservableVector<HubPhotoGroup^>^ PhotoGroups
         {
@@ -59,6 +62,7 @@ namespace Hilo
         bool m_isAppBarEnabled;
         IPhoto^ m_photo;
         HubPhotoGroup^ m_pictureGroup;
+        Windows::Foundation::EventRegistrationToken m_pictureGroupPropertyChangedToken;
 
         void NavigateToPictures(Platform::Object^ parameter);
         bool CanNavigateToPictures(Platform::Object^ parameter);
@@ -66,5 +70,6 @@ namespace Hilo
         bool CanCropImage(Platform::Object^ parameter);
         void RotateImage(Platform::Object^ parameter);
         bool CanCropOrRotateImage(Platform::Object^ parameter);
+        void OnPictureGroupPropertyChanged(Platform::Object^ sender, Windows::UI::Xaml::Data::PropertyChangedEventArgs^ e);
     };
 }

@@ -8,40 +8,48 @@
 //===============================================================================
 #include "pch.h"
 #include "HubPhotoGroup.h"
+#include "TaskExceptionsExtensions.h"
 #include "IPhoto.h"
 #include "IResizable.h"
-#include "Photo.h"
-#include "IRepository.h"
-#include "SimpleQueryOperation.h"
-#include "TaskExceptionsExtensions.h"
+#include "PictureHubGroupQuery.h"
+#include <wrl.h>
 
 using namespace concurrency;
 using namespace Hilo;
+using namespace std;
 using namespace Platform;
 using namespace Platform::Collections;
-using namespace Windows::ApplicationModel::Core;
-using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
-using namespace Windows::Storage::Search;
-using namespace Windows::UI::Core;
+using namespace Microsoft::WRL;
 
 const unsigned int MaxNumberOfPictures = 6;
 
-HubPhotoGroup::HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, IRepository^ repository, IExceptionPolicy^ exceptionPolicy) : 
-    m_title(title), m_emptyTitle(emptyTitle), m_retrievedPhotos(false), m_repository(repository), m_exceptionPolicy(exceptionPolicy)
+HubPhotoGroup::HubPhotoGroup(String^ title, String^ emptyTitle, shared_ptr<PictureHubGroupQuery> query, shared_ptr<ExceptionPolicy> exceptionPolicy) : 
+    m_title(title), m_emptyTitle(emptyTitle), m_retrievedPhotos(false), m_query(query), m_exceptionPolicy(exceptionPolicy)
 {
-    m_dataToken = m_repository->DataChanged += ref new DataChangedEventHandler(this, &HubPhotoGroup::OnDataChanged);
+    IInspectable* wr(reinterpret_cast<IInspectable*>(this));
+    function<void()> callback = [wr] {
+        Object^ obj = reinterpret_cast<Object^>(wr);
+        auto vm = dynamic_cast<HubPhotoGroup^>(obj);
+        if (nullptr != vm)
+        {
+            vm->OnDataChanged();
+        }
+    };
+    m_query->AddObserver(callback);
 }
 
 HubPhotoGroup::~HubPhotoGroup()
 {
-    m_repository->DataChanged -= m_dataToken;
+    if (nullptr != m_query)
+    {
+        m_query->RemoveObserver();
+    }
 }
 
 IObservableVector<IPhoto^>^ HubPhotoGroup::Items::get()
 {
+    assert(IsMainThread());
     if (m_photos == nullptr)
     {
         OnDataChanged();
@@ -71,30 +79,55 @@ task<void> HubPhotoGroup::QueryPhotosAsync()
         m_photos = ref new Vector<IPhoto^>();
     }
 
-    task<IVectorView<IPhoto^>^> t = create_task(m_repository->GetPhotosForGroupWithQueryOperationAsync(this, ref new SimpleQueryOperation(nullptr, MaxNumberOfPictures)));
-
+    m_photos->Clear();
+    auto t = m_query->GetPhotosForPictureHubGroupAsync(this, MaxNumberOfPictures, cancellation_token::none());
     return t.then([this](IVectorView<IPhoto^>^ photos)
     {
+        assert(IsMainThread());
         m_retrievedPhotos = true;
-        if (photos->Size > 0)
+        bool firstPhoto = true;
+        for (auto photo : photos)
         {
-            Array<IPhoto^>^ many = ref new Array<IPhoto^>(photos->Size);
-            photos->GetMany(0, many);
-            m_photos->ReplaceAll(many);
-            IResizable^ firstPhoto = dynamic_cast<IResizable^>(m_photos->GetAt(0));
-            if (nullptr != firstPhoto)
+            if (firstPhoto)
             {
-                firstPhoto->ColumnSpan = 2;
-                firstPhoto->RowSpan = 2;
+                IResizable^ resizable = dynamic_cast<IResizable^>(photo);
+                if (nullptr != resizable)
+                {
+                    resizable->ColumnSpan = 2;
+                    resizable->RowSpan = 2;
+                }
+                firstPhoto = false;
             }
-            OnPropertyChanged("Items");
-            
+            m_photos->Append(photo);
         }
-        OnPropertyChanged("Title");
     });
 }
 
 void HubPhotoGroup::OnDataChanged()
 {
-    QueryPhotosAsync().then(ObserveException<void>(m_exceptionPolicy));
+    assert(IsMainThread());
+    if (m_runningQuery)
+    {
+        m_receivedChangeWhileRunning = true;
+    }
+
+    if (!m_runningQuery)
+    {
+        m_runningQuery = true;
+        QueryPhotosAsync().then([this]
+        {
+            assert(IsMainThread());
+            if (!m_receivedChangeWhileRunning)
+            {
+                OnPropertyChanged("Items");
+                OnPropertyChanged("Title");
+            }
+            m_runningQuery = false;
+            if (m_receivedChangeWhileRunning)
+            {
+                m_receivedChangeWhileRunning = false;
+                OnDataChanged();
+            }
+        }).then(ObserveException<void>(m_exceptionPolicy));
+    }
 }

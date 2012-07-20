@@ -12,43 +12,38 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
+    class ExceptionPolicy;
 
     public delegate void NavigateEventHandler();
     public delegate void PageNavigateEventHandler(PageType page, Platform::Object^ parameter);
 
-#pragma warning(push)
-#pragma warning(disable: 4449)
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ViewModelBase : public Common::BindableBase
     {
     internal:
-        ViewModelBase(IExceptionPolicy^ exceptionPolicy);
+        ViewModelBase(std::shared_ptr<ExceptionPolicy> exceptionPolicy);
 
-    public:
         event NavigateEventHandler^ NavigateBack;
         event NavigateEventHandler^ NavigateHome;
         event PageNavigateEventHandler^ NavigateToPage;
 
-        property bool IsAppBarSticky { bool get(); void set(bool value); }
-        property bool IsAppBarOpen { bool get(); void set(bool value); }
-
         virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap);
         virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap);
-
         virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
         virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
 
-    protected:
+    public:
+        property bool IsAppBarSticky { bool get(); void set(bool value); }
+        property bool IsAppBarOpen { bool get(); void set(bool value); }
+
+    protected private:
         virtual void GoBack();
         virtual void GoHome();
         virtual void GoToPage(PageType page, Platform::Object^ parameter);
-	
-	protected private:
+
         bool m_isAppBarSticky;
         bool m_isAppBarOpen;
-        Hilo::IExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
     };
-#pragma warning(pop)
 }
 

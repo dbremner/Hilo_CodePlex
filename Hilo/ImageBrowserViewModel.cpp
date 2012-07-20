@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -8,7 +8,6 @@
 //===============================================================================
 #include "pch.h"
 #include "ImageBrowserViewModel.h"
-#include "IRepository.h"
 #include "IPhoto.h"
 #include "IMonthBlock.h"
 #include "IYearGroup.h"
@@ -17,21 +16,50 @@
 #include "DelegateCommand.h"
 #include "ImageNavigationData.h"
 #include "TaskExceptionsExtensions.h"
+#include "VirtualMonthFoldersQuery.h"
+#include "VirtualYearFoldersQuery.h"
+#include <wrl.h>
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
+using namespace std;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Microsoft::WRL;
 
-ImageBrowserViewModel::ImageBrowserViewModel(IRepository^ repository, IExceptionPolicy^ exceptionPolicy) : m_inProgress(true), m_photoCache(ref new PhotoCache()), ViewModelBase(exceptionPolicy), m_repository(repository)
+ImageBrowserViewModel::ImageBrowserViewModel(shared_ptr<VirtualMonthFoldersQuery> monthFoldersQuery, shared_ptr<VirtualYearFoldersQuery> yearFoldersQuery, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_inProgress(true), 
+    m_photoCache(std::make_shared<PhotoCache>()), 
+    ViewModelBase(exceptionPolicy), 
+    m_monthFoldersQuery(monthFoldersQuery), 
+    m_yearFoldersQuery(yearFoldersQuery),
+    m_monthCancelTokenSource(cancellation_token_source()),
+    m_yearCancelTokenSource(cancellation_token_source())
 {
     m_groupCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::NavigateToGroup), nullptr);
     m_cropImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
     m_rotateImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::RotateImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
+
+    IInspectable* wr(reinterpret_cast<IInspectable*>(this));
+    function<void()> callback = [wr] {
+        Object^ obj = reinterpret_cast<Object^>(wr);
+        auto vm = dynamic_cast<ImageBrowserViewModel^>(obj);
+        if (nullptr != vm)
+        {
+            vm->OnDataChanged();
+        }
+    };
+    m_monthFoldersQuery->AddObserver(callback);
+}
+
+ImageBrowserViewModel::~ImageBrowserViewModel()
+{
+    if (nullptr != m_monthFoldersQuery)
+    {
+        m_monthFoldersQuery->RemoveObserver();
+    }
 }
 
 ICommand^ ImageBrowserViewModel::GroupCommand::get()
@@ -74,39 +102,35 @@ IObservableVector<IPhotoGroup^>^ ImageBrowserViewModel::MonthGroups::get()
 {
     if (nullptr == m_monthGroups)
     {
-        m_inProgress = true;
-        OnPropertyChanged("InProgress");
-        QueryMonthGroupsAsync().then([this]
-        {
-            m_inProgress = false;
-            OnPropertyChanged("MonthGroups");
-            OnPropertyChanged("InProgress");
-        }).then(ObserveException<void>(m_exceptionPolicy));
+        OnDataChanged();
     }
     return m_monthGroups;
 }
 
 task<void> ImageBrowserViewModel::QueryMonthGroupsAsync()
 {
+    assert(IsMainThread());
+
+    if (nullptr == m_monthGroups)
+    {
+        m_monthGroups = ref new Vector<IPhotoGroup^>();
+    }
+
+    m_monthGroups->Clear();
     m_monthCancelTokenSource = cancellation_token_source();
     cancellation_token token = m_monthCancelTokenSource.get_token();
-    m_monthGroups = ref new Vector<IPhotoGroup^>();
-
-    auto t = create_task(m_repository->GetMonthGroupedPhotosWithCacheAsync(m_photoCache), token);
+    auto t = m_monthFoldersQuery->GetMonthGroupedPhotosWithCacheAsync(m_photoCache, token);
     return t.then([this](IVectorView<IPhotoGroup^>^ groups)
     {
-        Array<IPhotoGroup^>^ many = ref new Array<IPhotoGroup^>(groups->Size);
-        groups->GetMany(0, many);
-        m_monthGroups->ReplaceAll(many);
-    }).then([this](task<void> priorTask)
-    {
-        try
+        assert(IsMainThread());
+
+        if (groups->Size == 0)
         {
-            priorTask.get();
-        }
-        catch (const concurrency::task_canceled&)
+            cancel_current_task();
+        }        
+        for (auto group : groups)
         {
-            m_monthGroups = nullptr;
+            m_monthGroups->Append(group);
         }
     });
 }
@@ -115,36 +139,34 @@ IObservableVector<IYearGroup^>^ ImageBrowserViewModel::YearGroups::get()
 {
     if (nullptr == m_yearGroups)
     {
-        m_inProgress = true;
-        QueryYearGroupsAsync().then([this]
-        {
-            OnPropertyChanged("YearGroups");
-        }).then(ObserveException<void>(m_exceptionPolicy));
+        OnDataChanged();
     }
     return m_yearGroups;
 }
 
 task<void> ImageBrowserViewModel::QueryYearGroupsAsync()
 {
+    assert(IsMainThread());
+    if (nullptr == m_yearGroups)
+    {
+        m_yearGroups = ref new Vector<IYearGroup^>();
+    }
+
+    m_yearGroups->Clear();
     m_yearCancelTokenSource = cancellation_token_source();
     cancellation_token token = m_yearCancelTokenSource.get_token();
-    m_yearGroups = ref new Vector<IYearGroup^>();
-
-    auto t = create_task(m_repository->GetYearGroupedMonthsAsync(), token);
+    auto t = m_yearFoldersQuery->GetYearGroupedMonthsAsync(token);
     return t.then([this](IVectorView<IYearGroup^>^ groups)
     {
-        Array<IYearGroup^>^ many = ref new Array<IYearGroup^>(groups->Size);
-        groups->GetMany(0, many);
-        m_yearGroups->ReplaceAll(many);
-    }).then([this](task<void> priorTask)
-    {
-        try
+        assert(IsMainThread());
+        if (groups->Size == 0)
         {
-            priorTask.get();
+            cancel_current_task();
         }
-        catch (const concurrency::task_canceled&)
+
+        for (auto year : groups)
         {
-            m_yearGroups = nullptr;
+            m_yearGroups->Append(year);
         }
     });
 }
@@ -156,8 +178,21 @@ IPhoto^ ImageBrowserViewModel::GetPhotoForYearAndMonth(unsigned int year, unsign
 
 void ImageBrowserViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
 {
+    assert(IsMainThread());
+    m_active = false;
     m_monthCancelTokenSource.cancel();
     m_yearCancelTokenSource.cancel();
+}
+
+void ImageBrowserViewModel::OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e)
+{
+    assert(IsMainThread());
+    m_active = true;
+    if (m_receivedChangeWhileNotActive)
+    {
+        m_receivedChangeWhileNotActive = false;
+        OnDataChanged();
+    }
 }
 
 void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
@@ -168,8 +203,8 @@ void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
     {
         auto photo = dynamic_cast<IPhoto^>(group->Items->GetAt(0));
         assert(photo != nullptr);
-        auto imageData = ref new ImageNavigationData(photo);
-        ViewModelBase::GoToPage(PageType::Image, imageData->SerializeToString());
+        ImageNavigationData imageData(photo);
+        ViewModelBase::GoToPage(PageType::Image, imageData.SerializeToString());
     }
 }
 
@@ -180,12 +215,107 @@ bool ImageBrowserViewModel::CanCropOrRotateImage(Object^ paratmer)
 
 void ImageBrowserViewModel::CropImage(Object^ parameter)
 {
-    auto imageData = ref new ImageNavigationData(m_photo);
-    ViewModelBase::GoToPage(PageType::Crop, imageData->SerializeToString());
+    ImageNavigationData imageData(m_photo);
+    ViewModelBase::GoToPage(PageType::Crop, imageData.SerializeToString());
 }
 
 void ImageBrowserViewModel::RotateImage(Object^ parameter)
 {
-    auto imageData = ref new ImageNavigationData(m_photo);
-    ViewModelBase::GoToPage(PageType::Rotate, imageData->SerializeToString());
+    ImageNavigationData imageData(m_photo);
+    ViewModelBase::GoToPage(PageType::Rotate, imageData.SerializeToString());
+}
+
+void ImageBrowserViewModel::OnDataChanged()
+{
+    assert(IsMainThread());
+    if (!m_active)
+    {
+        m_receivedChangeWhileNotActive = true;
+        return;
+    }
+
+    if (m_runningMonthQuery || m_runningYearQuery)
+    {
+        m_receivedChangeWhileRunning = true;
+        return;
+    }
+
+    RunMonthQuery();
+    RunYearQuery();
+}
+
+void ImageBrowserViewModel::RunMonthQuery()
+{
+    if (m_runningMonthQuery)
+    {
+        return;
+    }
+
+    m_runningMonthQuery = true;
+    ShowProgress(true);
+    QueryMonthGroupsAsync().then([this](task<void> priorTask)
+    {
+        assert(IsMainThread());
+        try
+        {
+            priorTask.get();
+            if (!m_receivedChangeWhileRunning)
+            {
+                ShowProgress(false);
+                OnPropertyChanged("MonthGroups");
+            }
+            m_runningMonthQuery = false;
+            if (m_receivedChangeWhileRunning)
+            {
+                m_receivedChangeWhileRunning = false;
+                OnDataChanged();
+            }
+        }
+        catch (const concurrency::task_canceled&)
+        {
+            m_monthGroups = nullptr;
+            ShowProgress(false);
+            GoHome();
+        }
+    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+}
+
+void ImageBrowserViewModel::RunYearQuery()
+{
+    if (m_runningYearQuery)
+    {
+        return;
+    }
+    m_runningYearQuery = true;
+    QueryYearGroupsAsync().then([this](task<void> priorTask)
+    {
+        assert(IsMainThread());
+        try
+        {
+            priorTask.get();
+            if (!m_receivedChangeWhileRunning)
+            {
+                OnPropertyChanged("YearGroups");
+            }
+            m_runningYearQuery = false;
+            if (m_receivedChangeWhileRunning)
+            {
+                m_receivedChangeWhileRunning = false;
+                OnDataChanged();
+            }
+        }
+        catch (const concurrency::task_canceled&)
+        {
+            m_yearGroups = nullptr;
+            ShowProgress(false);
+            GoHome();
+        }
+    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+}
+
+void ImageBrowserViewModel::ShowProgress(bool showProgress)
+{
+    assert(IsMainThread());
+    m_inProgress = showProgress;
+    OnPropertyChanged("InProgress");
 }

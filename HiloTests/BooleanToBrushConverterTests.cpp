@@ -11,31 +11,30 @@
 #include "..\Hilo\BooleanToBrushConverter.h"
 
 using namespace Hilo;
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Interop;
 
 namespace HiloTests
 {
-	TEST_CLASS(BooleanToBrushConverterTests)
-	{
-	public:
-		
-		TEST_METHOD(BooleanToBrushConverterCanConvertTrueToBrush)
-		{
-			auto booleanBrushConverter = ref new BooleanToBrushConverter();
+    TEST_CLASS(BooleanToBrushConverterTests)
+    {
+    public:
+
+        TEST_METHOD(BooleanToBrushConverterCanConvertTrueToBrush)
+        {
+            auto booleanBrushConverter = ref new BooleanToBrushConverter();
             TypeName booleanBrushTypeName = { "Brush", TypeKind::Metadata };
             auto value = safe_cast<String^>(booleanBrushConverter->Convert(true, booleanBrushTypeName, nullptr, "en-US"));          
             Assert::AreEqual(value, "#FFF19720");
-		}
+        }
 
         TEST_METHOD(BooleanToBrushConverterCanConvertFalseToBrush)
-		{
-			auto booleanBrushConverter = ref new BooleanToBrushConverter();
+        {
+            auto booleanBrushConverter = ref new BooleanToBrushConverter();
             TypeName booleanBrushTypeName = { "Brush", TypeKind::Metadata };
             auto value = safe_cast<String^>(booleanBrushConverter->Convert(false, booleanBrushTypeName, nullptr, "en-US"));           
             Assert::AreEqual(value, "#E2E2E2");
-		}
-	};
+        }
+    };
 }

@@ -17,15 +17,12 @@ namespace Hilo
     interface class IPhotoCache;
     interface class IYearGroup;
     interface class IQueryOperation;
-    ref class PhotoGroupData;
 
     public interface class IRepository
     {
         Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IPhoto^>^>^ GetPhotosForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
-        Windows::Foundation::IAsyncOperation<PhotoGroupData^>^ GetPhotoGroupDataForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
         Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IPhotoGroup^>^>^ GetMonthGroupedPhotosWithCacheAsync(IPhotoCache^ photoCache);
         Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<IYearGroup^>^>^ GetYearGroupedMonthsAsync();
-        Windows::Foundation::IAsyncOperation<unsigned int>^ GetPhotoCountForQueryOperationAsync(IQueryOperation^ operation);
         Windows::Foundation::IAsyncOperation<IPhoto^>^ GetPhotoForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation);
 
         event DataChangedEventHandler^ DataChanged;

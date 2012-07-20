@@ -1,4 +1,4 @@
-//===============================================================================
+﻿//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -16,10 +16,10 @@ namespace Hilo
 {
     ref class CropImageViewModel;
 
-	public ref class CropImageView sealed
-	{
-	public:
-		CropImageView();
+    public ref class CropImageView sealed
+    {
+    public:
+        CropImageView();
 
     private:
         CropImageViewModel^ m_cropImageViewModel;

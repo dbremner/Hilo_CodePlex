@@ -21,7 +21,7 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
+    class ExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class ViewModelLocator sealed
@@ -37,8 +37,6 @@ namespace Hilo
 
     private:
         ImageBrowserViewModel^ m_imageBrowswerViewModel;
-        MainHubViewModel^ m_mainHubViewModel;
-        ImageViewModel^ m_imageViewModel;
-        IExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
     };
 }

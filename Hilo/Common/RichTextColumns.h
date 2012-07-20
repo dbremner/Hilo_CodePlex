@@ -41,7 +41,8 @@ namespace Hilo
 		/// space allows for all needed columns to be created.  When used in a vertically scrolling
 		/// space there will never be any additional columns.</remarks>
 		[Windows::UI::Xaml::Markup::ContentProperty(Name = "RichTextContent")]
-		public ref class RichTextColumns sealed : Windows::UI::Xaml::Controls::Panel
+		[Windows::Foundation::Metadata::WebHostHidden]
+        public ref class RichTextColumns sealed : Windows::UI::Xaml::Controls::Panel
 		{
 		public:
 			RichTextColumns();

@@ -8,21 +8,14 @@
 //===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Hilo\IPhoto.h"
-#include "..\Hilo\IRepository.h"
 #include "..\Hilo\HubPhotoGroup.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhoto.h"
-#include "StubRepository.h"
+#include "StubPictureHubGroupQuery.h"
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace Platform;
-using namespace Platform::Collections;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {
@@ -31,27 +24,33 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_repository = ref new StubRepository();
-            m_exceptionPolicy = ref new StubExceptionPolicy();
+            m_query = std::make_shared<StubPictureHubGroupQuery>();
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
         }
 
         TEST_METHOD(HubPhotoGroupShouldCallRepositoryToGetPhotos)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_query, m_exceptionPolicy);
             task_status status;
             
-             TestHelper::RunUISynced([photoGroup, &status]
+            TestHelper::RunUISynced([photoGroup, &status]
             {
                 TestHelper::RunSynced(photoGroup->QueryPhotosAsync(), status);
             });
 
             Assert::AreEqual(completed, status);
-            Assert::IsTrue(m_repository->GetPhotosForGroupWithQueryOperationAsyncCalled);
+            Assert::IsTrue(m_query->GetHasBeenCalled());
+        }
+
+        TEST_METHOD(HubPhotoGroupShouldAddItselfAsObserverOfQuery)
+        {
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_query, m_exceptionPolicy);      
+            Assert::IsTrue(m_query->GetObserved());
         }
 
         TEST_METHOD(HubPhotoGroupShouldReturnEmptyTitleWhenNoPicturesArePresent)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_query, m_exceptionPolicy);
             task_status status;
 
             TestHelper::RunUISynced([photoGroup, &status]
@@ -65,9 +64,9 @@ namespace HiloTests
 
         TEST_METHOD(HubPhotoGroupShouldReturnTitleWhenPicturesArePresent)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "No Title", m_query, m_exceptionPolicy);
             task_status status;
-            m_repository->PhotoToReturn = ref new StubPhoto();
+            m_query->SetPhotoToReturn(ref new StubPhoto());
 
             TestHelper::RunUISynced([photoGroup, &status]
             {
@@ -79,7 +78,7 @@ namespace HiloTests
         }
 
     private:
-        StubRepository^ m_repository;
-        StubExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<StubPictureHubGroupQuery> m_query;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
     };
 }

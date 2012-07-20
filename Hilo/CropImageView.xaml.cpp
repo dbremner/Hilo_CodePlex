@@ -7,21 +7,18 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #include "pch.h"
-#include "CropImageViewModel.h"
 #include "CropImageView.xaml.h"
+#include "CropImageViewModel.h"
 
 using namespace Hilo;
-
 using namespace Platform;
-using namespace Windows::Foundation;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Input;
-using namespace Windows::UI::Xaml::Navigation;
 
 CropImageView::CropImageView()
 {
-	InitializeComponent();
+    InitializeComponent();
     m_cropImageViewModel = static_cast<CropImageViewModel^>(DataContext);
     m_sizeChangedAttached = false;
 }

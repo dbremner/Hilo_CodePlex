@@ -10,11 +10,10 @@
 #include "CppUnitTest.h"
 #include "..\Hilo\HubPhotoGroup.h"
 #include "..\Hilo\MainHubViewModel.h"
-#include "..\Hilo\Photo.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhotoGroup.h"
-#include "StubRepository.h"
 #include "StubPhoto.h"
+#include "StubPictureHubGroupQuery.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -23,7 +22,6 @@ using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Interop;
 
@@ -34,18 +32,14 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_exceptionPolicy = ref new StubExceptionPolicy();
             m_photoGroup = ref new StubPhotoGroup("");
-            m_repository = ref new StubRepository();
-        }
-
-        TEST_METHOD_CLEANUP(Cleanup)
-        {
+            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
+            m_pictureHubGroupQuery = std::make_shared<StubPictureHubGroupQuery>();
         }
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsForHub)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
@@ -62,7 +56,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsAsIObservableVectorOfPhotoGroups)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             TypeName pageType;
@@ -82,7 +76,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldSetupNavigateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
@@ -93,7 +87,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
@@ -104,7 +98,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldSetupCropCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
@@ -115,7 +109,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldDefaultToSelectedItemBeingNull)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
 
@@ -126,7 +120,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldDisablePictureCommandsWhenSelectedItemIsNullptr)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
@@ -157,7 +151,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldEnablePictureCommandsWhenSelectedItemIsNotNullptr)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);
             auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
@@ -186,7 +180,7 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldFirePropertyChangeForSelectedItemWhenSettingSelectedItem)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
             auto vector = ref new Vector<HubPhotoGroup^>();
             vector->Append(photoGroup);            
             auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
@@ -208,8 +202,8 @@ namespace HiloTests
         }
 
     private:
-        StubExceptionPolicy^ m_exceptionPolicy;
         StubPhotoGroup^ m_photoGroup;
-        StubRepository^ m_repository;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<StubPictureHubGroupQuery> m_pictureHubGroupQuery;
     };
 }

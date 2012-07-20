@@ -1,4 +1,4 @@
-﻿//===============================================================================
+//===============================================================================
 // Microsoft patterns & practices
 // Hilo Guidance
 //===============================================================================
@@ -7,6 +7,7 @@
 // Microsoft patterns & practices license (http://hilo.codeplex.com/license)
 //===============================================================================
 #pragma once
+
 #include "Common\BindableBase.h"
 #include "IResizable.h"
 #include "IPhoto.h"
@@ -14,13 +15,15 @@
 namespace Hilo 
 {
     interface class IPhotoGroup;
-    interface class IExceptionPolicy;
+    class ExceptionPolicy;
 
     [Windows::UI::Xaml::Data::Bindable]
     public ref class Photo sealed : public Common::BindableBase, public IResizable, public IPhoto
     {
+    internal:
+        Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+
     public:
-        Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, IExceptionPolicy^ exceptionPolicy);
         virtual ~Photo();
 
         property IPhotoGroup^ Group
@@ -88,11 +91,6 @@ namespace Hilo
             virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
 
-        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
-        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
-
-        virtual void ClearImageData();
-
         property int ColumnSpan 
         {
             virtual int get();
@@ -105,17 +103,25 @@ namespace Hilo
             virtual void set(int value);
         }
 
+        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
+        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
+        virtual void ClearImageData();
+
+    internal:
+        concurrency::task<void> QueryPhotoImageAsync();
+
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
         Platform::WeakReference m_weakPhotoGroup;
-        //Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
-        IExceptionPolicy^ m_exceptionPolicy;
+        std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Windows::Foundation::EventRegistrationToken m_thumbnailUpdatedEventToken;
+        Windows::Foundation::EventRegistrationToken m_imageFailedEventToken;
         int m_columnSpan;
         int m_rowSpan;
+        bool m_queryPhotoImageAsyncIsRunning;
 
-        void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ args);
+        void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ e);
+        void OnImageFailedToOpen(Platform::Object^ sender, Windows::UI::Xaml::ExceptionRoutedEventArgs^ e);
     };
-
 }

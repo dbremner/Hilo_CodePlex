@@ -12,23 +12,21 @@
 
 namespace Hilo
 {
-    interface class IExceptionPolicy;
+    interface class IPhoto;
+    class ExceptionPolicy;
 
-#pragma warning(push)
-#pragma warning(disable: 4449)
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ImageBase : public ViewModelBase
     {
-    internal:
-        ImageBase(IExceptionPolicy^ exceptionPolicy);
-        
-    protected:
-        Windows::Foundation::IAsyncOperation<Windows::Storage::StorageFile^>^ GetFileNameFromFileSavePickerAsync(Platform::String^ fileType);
-        Windows::Foundation::IAsyncAction^ SaveImageAsync(Windows::Storage::StorageFile^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
 
-    private:
-        concurrency::task<Windows::Storage::StorageFile^> GetFileNameFromFileSavePickerAsyncImpl(Platform::String^ fileType);
-        concurrency::task<void> SaveImageAsyncImpl(Windows::Storage::StorageFile^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
+    private protected:
+        IPhoto^ m_photo;
+
+    internal:
+        ImageBase(std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+
+        concurrency::task<Windows::Storage::Streams::IRandomAccessStreamWithContentType^> GetStreamWithFailCheck();
+        concurrency::task<Windows::Storage::StorageFile^> GetFileNameFromFileSavePickerAsync(Platform::String^ fileType);
+        concurrency::task<void> SaveImageAsync(Windows::Storage::StorageFile^ file, Windows::Storage::Streams::IRandomAccessStream^ ras);
     };
-#pragma warning(pop)
 }
