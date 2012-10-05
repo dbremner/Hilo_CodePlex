@@ -1,11 +1,3 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ImageBase.h"
 #include "IPhoto.h"
@@ -64,7 +56,9 @@ task<StorageFile^> ImageBase::GetFileNameFromFileSavePickerAsync(String^ fileTyp
     savePicker->FileTypeChoices->Insert("Image", fileExtension);
     savePicker->DefaultFileExtension = fileType;
 
+    // <snippet807>
     auto filePickerTask = create_task(savePicker->PickSaveFileAsync());
+    // </snippet807>
     return filePickerTask.then([](StorageFile^ file)
     {
         assert(IsMainThread());

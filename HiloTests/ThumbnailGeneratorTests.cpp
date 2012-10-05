@@ -1,13 +1,6 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "UnitTestingAssertSpecializations.h"
 #include "..\Hilo\ThumbnailGenerator.h"
 #include "StubExceptionPolicy.h"
 
@@ -16,7 +9,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Windows::Storage;
 
 namespace HiloTests
-{		
+{
     TEST_CLASS(ThumbnailGeneratorTests)
     {
     public:

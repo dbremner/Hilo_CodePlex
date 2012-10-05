@@ -1,22 +1,14 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ImageNavigationData.h"
 #include "IPhoto.h"
+#include "CalendarExtensions.h"
+
 
 using namespace Hilo;
 using namespace Platform;
 using namespace std;
 using namespace Windows::Foundation;
-using namespace Windows::Globalization;
-using namespace Windows::Globalization::DateTimeFormatting;
-using namespace Windows::System::UserProfile;
+
 
 ImageNavigationData::ImageNavigationData(IPhoto^ photo)
 {
@@ -53,21 +45,7 @@ String^ ImageNavigationData::GetDateQuery()
 {
     if (nullptr == m_dateQuery)
     {
-        Calendar cal;
-        cal.SetDateTime(m_fileDate);
-
-        int lastDay = cal.LastDayInThisMonth;
-        int firstDay = cal.FirstDayInThisMonth;
-        DateTimeFormatter dtf("shortdate", GlobalizationPreferences::Languages);
-        cal.Day = firstDay;
-        String^ firstDate = dtf.Format(cal.GetDateTime());
-
-        cal.Day = lastDay;
-        String^ lastDate = dtf.Format(cal.GetDateTime());
-
-        std::wstringstream dateRange;
-        dateRange << L"System.ItemDate:" << firstDate->Data() << ".." << lastDate->Data();
-        m_dateQuery = ref new String(dateRange.str().c_str());
+        m_dateQuery = CalendarExtensions::CreateMonthRangeFromDate(m_fileDate);
     }
     return m_dateQuery;
 }

@@ -1,11 +1,3 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "RotateImageView.xaml.h"
 #include "ImageBrowserViewModel.h"
@@ -15,18 +7,7 @@ using namespace Windows::Foundation;
 using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml::Input;
 
-// This works around an issue with compiling for ARM.
-// This function does not need to be called but needs to be
-// seen by the compiler before the gesture manipulation events.
-void gestureRecognizerWorkaroundForARM()
-{
-    Point pt;
-    ManipulationVelocities vel;
-    CrossSlideThresholds thres;
-    (void)pt;
-    (void)vel;
-    (void)thres;
-}
+// See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
 
 RotateImageView::RotateImageView() 
 {
@@ -34,12 +15,14 @@ RotateImageView::RotateImageView()
     m_viewModel = dynamic_cast<Hilo::RotateImageViewModel^>(DataContext);
 }
 
+// <snippet1213>
 void RotateImageView::OnManipulationDelta(ManipulationDeltaRoutedEventArgs^ e)
 {
-    m_viewModel->RotationAngle += e->Delta.Rotation ;
+    m_viewModel->RotationAngle += e->Delta.Rotation;
 }
 
 void RotateImageView::OnManipulationCompleted(ManipulationCompletedRoutedEventArgs^ e)
 {
     m_viewModel->EndRotation();
 }
+// </snippet1213>

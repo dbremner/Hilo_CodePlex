@@ -1,12 +1,4 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#include "pch.h"
+﻿#include "pch.h"
 #include "LayoutAwarePage.h"
 #include "SuspensionManager.h"
 
@@ -40,36 +32,10 @@ LayoutAwarePage::LayoutAwarePage()
 	// When this page is part of the visual tree make two changes:
 	// 1) Map application view state to visual state for the page
 	// 2) Handle keyboard and mouse navigation requests
-	Loaded += ref new RoutedEventHandler([=](Object^ sender, RoutedEventArgs^ e)
-	{
-		this->StartLayoutUpdates(sender, e);
-
-		// Keyboard and mouse navigation only apply when occupying the entire window
-		if (this->ActualHeight == Window::Current->Bounds.Height &&
-			this->ActualWidth == Window::Current->Bounds.Width)
-		{
-			// Listen to the window directly so focus isn't required
-			_acceleratorKeyEventToken = Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated +=
-				ref new TypedEventHandler<CoreDispatcher^, AcceleratorKeyEventArgs^>(this,
-				&LayoutAwarePage::CoreDispatcher_AcceleratorKeyActivated);
-			_pointerPressedEventToken = Window::Current->CoreWindow->PointerPressed +=
-				ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this,
-				&LayoutAwarePage::CoreWindow_PointerPressed);
-			_navigationShortcutsRegistered = true;
-		}
-	});
+	Loaded += ref new RoutedEventHandler(this, &LayoutAwarePage::OnLoaded);
 
 	// Undo the same changes when the page is no longer visible
-	Unloaded += ref new RoutedEventHandler([=](Object^ sender, RoutedEventArgs^ e)
-	{
-		this->StopLayoutUpdates(sender, e);
-		if (_navigationShortcutsRegistered)
-		{
-			Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated -= _acceleratorKeyEventToken;
-			Window::Current->CoreWindow->PointerPressed -= _pointerPressedEventToken;
-			_navigationShortcutsRegistered = false;
-		}
-	});
+	Unloaded += ref new RoutedEventHandler(this, &LayoutAwarePage::OnUnloaded);
 }
 
 static DependencyProperty^ _defaultViewModelProperty =
@@ -100,6 +66,46 @@ IObservableMap<String^, Object^>^ LayoutAwarePage::DefaultViewModel::get()
 void LayoutAwarePage::DefaultViewModel::set(IObservableMap<String^, Object^>^ value)
 {
 	SetValue(DefaultViewModelProperty, value);
+}
+
+/// <summary>
+/// Invoked when the page is part of the visual tree
+/// </summary>
+/// <param name="sender">Instance that triggered the event.</param>
+/// <param name="e">Event data describing the conditions that led to the event.</param>
+void LayoutAwarePage::OnLoaded(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	this->StartLayoutUpdates(sender, e);
+
+	// Keyboard and mouse navigation only apply when occupying the entire window
+	if (this->ActualHeight == Window::Current->Bounds.Height &&
+		this->ActualWidth == Window::Current->Bounds.Width)
+	{
+		// Listen to the window directly so focus isn't required
+		_acceleratorKeyEventToken = Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated +=
+			ref new TypedEventHandler<CoreDispatcher^, AcceleratorKeyEventArgs^>(this,
+			&LayoutAwarePage::CoreDispatcher_AcceleratorKeyActivated);
+		_pointerPressedEventToken = Window::Current->CoreWindow->PointerPressed +=
+			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this,
+			&LayoutAwarePage::CoreWindow_PointerPressed);
+		_navigationShortcutsRegistered = true;
+	}
+}
+
+/// <summary>
+/// Invoked when the page is removed from visual tree
+/// </summary>
+/// <param name="sender">Instance that triggered the event.</param>
+/// <param name="e">Event data describing the conditions that led to the event.</param>
+void LayoutAwarePage::OnUnloaded(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if (_navigationShortcutsRegistered)
+	{
+		Window::Current->CoreWindow->Dispatcher->AcceleratorKeyActivated -= _acceleratorKeyEventToken;
+		Window::Current->CoreWindow->PointerPressed -= _pointerPressedEventToken;
+		_navigationShortcutsRegistered = false;
+	}
+	StopLayoutUpdates(sender, e);
 }
 
 #pragma region Navigation support
@@ -260,6 +266,9 @@ void LayoutAwarePage::StartLayoutUpdates(Object^ sender, RoutedEventArgs^ e)
 		// Start listening to view state changes when there are controls interested in updates
 		_layoutAwareControls = ref new Vector<Control^>();
 		_windowSizeEventToken = Window::Current->SizeChanged += ref new WindowSizeChangedEventHandler(this, &LayoutAwarePage::WindowSizeChanged);
+
+		// Page receives notifications for children. Protect the page until we stopped layout updates for all controls.
+		_this = this;
 	}
 	_layoutAwareControls->Append(control);
 
@@ -300,6 +309,8 @@ void LayoutAwarePage::StopLayoutUpdates(Object^ sender, RoutedEventArgs^ e)
 			// Stop listening to view state changes when no controls are interested in updates
 			Window::Current->SizeChanged -= _windowSizeEventToken;
 			_layoutAwareControls = nullptr;
+			// Last control has received the Unload notification.
+			_this = nullptr;
 		}
 	}
 }
@@ -360,6 +371,7 @@ void LayoutAwarePage::InvalidateVisualState()
 /// </summary>
 /// <param name="e">Event data that describes how this page was reached.  The Parameter
 /// property provides the group to be displayed.</param>
+// <snippet1612>
 void LayoutAwarePage::OnNavigatedTo(NavigationEventArgs^ e)
 {
 	// Returning to a cached page through navigation shouldn't trigger state loading
@@ -392,12 +404,14 @@ void LayoutAwarePage::OnNavigatedTo(NavigationEventArgs^ e)
 		LoadState(e->Parameter, safe_cast<IMap<String^, Object^>^>(frameState->Lookup(_pageKey)));
 	}
 }
+// </snippet1612>
 
 /// <summary>
 /// Invoked when this page will no longer be displayed in a Frame.
 /// </summary>
 /// <param name="e">Event data that describes how this page was reached.  The Parameter
 /// property provides the group to be displayed.</param>
+// <snippet1611>
 void LayoutAwarePage::OnNavigatedFrom(NavigationEventArgs^ e)
 {
 	auto frameState = SuspensionManager::SessionStateForFrame(Frame);
@@ -405,6 +419,7 @@ void LayoutAwarePage::OnNavigatedFrom(NavigationEventArgs^ e)
 	SaveState(pageState);
 	frameState->Insert(_pageKey, pageState);
 }
+// </snippet1611>
 
 /// <summary>
 /// Populates the page with content passed during navigation.  Any saved state is also

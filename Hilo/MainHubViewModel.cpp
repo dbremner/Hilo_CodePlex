@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "MainHubViewModel.h"
 #include "HubPhotoGroup.h"
@@ -23,22 +15,31 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 
 MainHubViewModel::MainHubViewModel(IObservableVector<HubPhotoGroup^>^ photoGroups, shared_ptr<ExceptionPolicy> exceptionPolicy) 
-    : m_photoGroups(photoGroups), m_isAppBarEnabled(false), m_photo(nullptr), ViewModelBase(exceptionPolicy)
+    : m_photoGroups(photoGroups), m_photo(nullptr), ViewModelBase(exceptionPolicy)
 {
-    m_navigateToPicturesCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &MainHubViewModel::NavigateToPictures), ref new CanExecuteDelegate(this, &MainHubViewModel::CanNavigateToPictures));
-    m_cropImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &MainHubViewModel::CropImage), ref new CanExecuteDelegate(this, &MainHubViewModel::CanCropOrRotateImage));
-    m_rotateImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &MainHubViewModel::RotateImage), ref new CanExecuteDelegate(this, &MainHubViewModel::CanCropOrRotateImage));
+    m_navigateToPicturesCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &MainHubViewModel::NavigateToPictures),
+        ref new CanExecuteDelegate(this, &MainHubViewModel::CanNavigateToPictures));
+    m_cropImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &MainHubViewModel::CropImage), 
+        ref new CanExecuteDelegate(this, &MainHubViewModel::CanProcessImage));
+    m_rotateImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &MainHubViewModel::RotateImage),
+        ref new CanExecuteDelegate(this, &MainHubViewModel::CanProcessImage));
+    m_cartoonizeImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &MainHubViewModel::CartoonizeImage), 
+        ref new CanExecuteDelegate(this, &MainHubViewModel::CanProcessImage));
 
     m_pictureGroup = static_cast<HubPhotoGroup^>(m_photoGroups->GetAt(static_cast<unsigned int>(HubGroupType::Pictures)));
     assert(m_pictureGroup != nullptr);
-    m_pictureGroupPropertyChangedToken = m_pictureGroup->PropertyChanged += ref new PropertyChangedEventHandler(this, &MainHubViewModel::OnPictureGroupPropertyChanged);
+    m_pictureGroupPropertyChangedToken = m_pictureGroup->PropertyChanged::add(ref new PropertyChangedEventHandler(this, &MainHubViewModel::OnPictureGroupPropertyChanged));
 }
 
 MainHubViewModel::~MainHubViewModel()
 {
     if (nullptr != m_pictureGroup)
     {
-        m_pictureGroup->PropertyChanged -= m_pictureGroupPropertyChangedToken;
+        m_pictureGroup->PropertyChanged::remove(m_pictureGroupPropertyChangedToken);
     }
 }
 
@@ -56,9 +57,15 @@ void MainHubViewModel::SelectedItem::set(Object^ value)
 {
     if (m_photo != value)
     {
+        ViewModelBase::m_isAppBarOpen = false;
         m_photo = dynamic_cast<IPhoto^>(value);
-        m_cropImageCommand->CanExecute(nullptr);
-        m_rotateImageCommand->CanExecute(nullptr);
+        bool result = CanProcessImage(nullptr);
+        m_rotateImageCommand->CanExecute(result);
+        m_cropImageCommand->CanExecute(result);
+        m_cartoonizeImageCommand->CanExecute(result);
+        IsAppBarEnabled = value != nullptr;
+        IsAppBarOpen = value != nullptr;
+        IsAppBarSticky = value != nullptr;
         OnPropertyChanged("SelectedItem");
     }
 }
@@ -76,6 +83,11 @@ ICommand^ MainHubViewModel::CropImageCommand::get()
 ICommand^ MainHubViewModel::RotateImageCommand::get()
 {
     return m_rotateImageCommand;
+}
+
+ICommand^ MainHubViewModel::CartoonizeImageCommand::get()
+{
+    return m_cartoonizeImageCommand;
 }
 
 void MainHubViewModel::NavigateToPictures(Object^ parameter)
@@ -100,9 +112,15 @@ void MainHubViewModel::RotateImage(Object^ parameter)
     ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
 }
 
-bool MainHubViewModel::CanCropOrRotateImage(Object^ paratmer)
+void MainHubViewModel::CartoonizeImage(Object^ parameter)
 {
-    return (nullptr != m_photo);
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+}
+
+bool MainHubViewModel::CanProcessImage(Object^ parameter)
+{
+    return (m_photo != nullptr && !m_photo->IsInvalidThumbnail);
 }
 
 void MainHubViewModel::OnPictureGroupPropertyChanged(Object^ sender, PropertyChangedEventArgs^ e)

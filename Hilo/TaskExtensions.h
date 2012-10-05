@@ -1,21 +1,22 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo 
 {
     // Creates a task that completes with the provided result.
     template <typename Result>
-    concurrency::task<Result> task_from_result(Result result)
+    inline concurrency::task<Result> create_task_from_result(Result result)
     {
         return concurrency::create_task([result]() -> Result { return result; });
     }
+
+    // Creates a task that completes with a void result.
+    inline concurrency::task<void> create_empty_task()
+    {
+        return concurrency::create_task([]{});
+    }
+
+    // Runs a function in the main thread with non-interactive priority.
+    void run_async_non_interactive(std::function<void ()>&& action);
 }
 
 #ifndef NDEBUG

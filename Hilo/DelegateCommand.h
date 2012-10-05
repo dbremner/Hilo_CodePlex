@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo
@@ -13,6 +5,8 @@ namespace Hilo
     public delegate void ExecuteDelegate(Platform::Object^ parameter);
     public delegate bool CanExecuteDelegate(Platform::Object^ parameter);
 
+    // The DelegateCommand class implements Hilo commands. It is used by XAML button controls.
+    [Windows::Foundation::Metadata::WebHostHidden]
     public ref class DelegateCommand sealed : public Windows::UI::Xaml::Input::ICommand
     {
     public:

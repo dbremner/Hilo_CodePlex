@@ -1,12 +1,4 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#pragma once
+﻿#pragma once
 
 namespace Hilo
 {
@@ -15,6 +7,7 @@ namespace Hilo
 		/// <summary>
 		/// Value converter that translates true to false and vice versa.
 		/// </summary>
+		[Windows::Foundation::Metadata::WebHostHidden]
 		public ref class BooleanNegationConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 		{
 		public:

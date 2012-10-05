@@ -1,22 +1,18 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 #include "Common\BindableBase.h"
 #include "PageType.h"
 
 namespace Hilo
 {
+    // See http://go.microsoft.com/fwlink/?LinkId=267276 for info on how view model classes interact 
+    // with view classes (pages) and model classes (the state and operations of business objects).
+
     class ExceptionPolicy;
 
     public delegate void NavigateEventHandler();
     public delegate void PageNavigateEventHandler(PageType page, Platform::Object^ parameter);
 
+    // The ViewModelBase class contains the common presentation logic used by all view models in Hilo.
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ViewModelBase : public Common::BindableBase
     {
@@ -33,16 +29,19 @@ namespace Hilo
         virtual void OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e);
 
     public:
-        property bool IsAppBarSticky { bool get(); void set(bool value); }
+        property bool IsAppBarEnabled { bool get(); void set(bool value); }
         property bool IsAppBarOpen { bool get(); void set(bool value); }
+        property bool IsAppBarSticky { bool get(); void set(bool value); }
 
     protected private:
         virtual void GoBack();
         virtual void GoHome();
         virtual void GoToPage(PageType page, Platform::Object^ parameter);
 
-        bool m_isAppBarSticky;
+        bool m_isAppBarEnabled;
         bool m_isAppBarOpen;
+        bool m_isAppBarSticky;
+
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
     };
 }

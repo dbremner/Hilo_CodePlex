@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include "..\Hilo\IPhoto.h"
@@ -15,6 +7,8 @@ namespace HiloTests
     ref class StubPhoto sealed : public Hilo::IPhoto
     {
     public:
+        StubPhoto();
+
         property Hilo::IPhotoGroup^ Group
         {
             virtual Hilo::IPhotoGroup^ get();
@@ -62,9 +56,9 @@ namespace HiloTests
             virtual Platform::String^ get();
         }
 
-        property unsigned long long FileSize
+        property uint64 FileSize
         {
-            virtual unsigned long long get();
+            virtual uint64 get();
         }
 
         property Platform::String^ DisplayType
@@ -82,7 +76,11 @@ namespace HiloTests
             virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
 
-        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
+        property bool IsInvalidThumbnail
+        {
+            virtual bool get();
+        }
+
         virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
         virtual void ClearImageData();
 
@@ -92,11 +90,11 @@ namespace HiloTests
         Windows::Foundation::DateTime m_dateTaken;
         Platform::String^ m_path;
         Platform::String^ m_resolution;
-        unsigned long long m_fileSize;
+        uint64 m_fileSize;
         Platform::String^ m_displayType;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
-        Windows::Storage::FileProperties::ImageProperties^ m_imageProperties;
         Windows::Storage::Streams::IRandomAccessStreamWithContentType^ m_randomAccessStream;
+        bool m_isInvalidThumbnail;
     };
 }

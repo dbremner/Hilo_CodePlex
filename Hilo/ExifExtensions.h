@@ -1,30 +1,25 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo 
 {
-    enum ExifRotations
+    // ExifRotations values represent the codes used by JPEG image files to indicated how an image should be rotated for display.
+    public enum class ExifRotations
     {
         NotRotated = 1,
         RotatedDown = 3,
-        RotatedLeft = 6,		
+        RotatedLeft = 6,
         RotatedRight = 8
     };
 
+    // ExifExtensions is a helper class that converts image rotation angles between degrees and 
+    // Exchangeable image file format (Exif) codes that are used by JPEG images.
     class ExifExtensions 
     {
 
     public:
-        static Windows::Foundation::Rect RotateClockwise(Windows::Foundation::Rect rect, Windows::Foundation::Rect bitmapSize, double degrees);
-        static unsigned int ConvertExifOrientationToDegreesRotation(unsigned int exifOrientationFlag);
-        static unsigned int ConvertDegreesRotationToExifOrientation(unsigned int angle);
+        static Windows::Foundation::Rect RotateClockwise(Windows::Foundation::Rect rect, Windows::Foundation::Rect bitmapSize, float64 degrees);
+        static unsigned int ConvertExifOrientationToDegreesRotation(ExifRotations exifOrientationFlag);
+        static ExifRotations ConvertDegreesRotationToExifOrientation(unsigned int angle);
 
     };
 }

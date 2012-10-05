@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\PhotoCache.h"
@@ -38,9 +30,9 @@ namespace HiloTests
             photo->DateTaken = cal->GetDateTime();
 
             photoCache.InsertPhoto(photo);
-
             auto actual = photoCache.GetForYearAndMonth(cal->Year, cal->Month);
             auto name = actual->Name;
+
             Assert::AreEqual(photo->Name, actual->Name);
         }
 

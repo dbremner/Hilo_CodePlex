@@ -1,19 +1,12 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "UnitTestingAssertSpecializations.h"
 #include "..\Hilo\HubPhotoGroup.h"
 #include "..\Hilo\MainHubViewModel.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhotoGroup.h"
 #include "StubPhoto.h"
-#include "StubPictureHubGroupQuery.h"
+#include "StubRepository.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -34,17 +27,23 @@ namespace HiloTests
         {
             m_photoGroup = ref new StubPhotoGroup("");
             m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
-            m_pictureHubGroupQuery = std::make_shared<StubPictureHubGroupQuery>();
+            m_repository = std::make_shared<StubRepository>(m_exceptionPolicy);
         }
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsForHub)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
-            auto photoGroupTasks = create_task([model]()-> Object^ {
-                return model->PhotoGroups;
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
+
+            auto photoGroupTasks = create_task([vm]()-> Object^ 
+            {
+                return (*vm)->PhotoGroups;
             });
             task_status status;
 
@@ -56,13 +55,18 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldGetPhotoGroupsAsIObservableVectorOfPhotoGroups)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
-            TypeName pageType;
-            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
-            auto photoGroupTasks = create_task([model]()-> Object^ {
-                return model->PhotoGroups;
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
+
+            auto photoGroupTasks = create_task([vm]()-> Object^ 
+            {
+                return (*vm)->PhotoGroups;
             });
             task_status status;
 
@@ -76,134 +80,157 @@ namespace HiloTests
 
         TEST_METHOD(MainHubViewModelShouldSetupNavigateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
 
-            MainHubViewModel model(vector, m_exceptionPolicy);
-
-            Assert::IsNotNull(model.NavigateToPicturesCommand);
+            Assert::IsNotNull((*vm)->NavigateToPicturesCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
 
-            MainHubViewModel model(vector, m_exceptionPolicy);
-
-            Assert::IsNotNull(model.RotateImageCommand);
+            Assert::IsNotNull((*vm)->RotateImageCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldSetupCropCommandWhenConstructed)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
 
-            MainHubViewModel model(vector, m_exceptionPolicy);
+            Assert::IsNotNull((*vm)->CropImageCommand);
+        }
 
-            Assert::IsNotNull(model.CropImageCommand);
+        TEST_METHOD(MainHubViewModelShouldSetupCartoonizeCommandWhenConstructed)
+        {
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]()
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
+
+            Assert::IsNotNull((*vm)->CartoonizeImageCommand);
         }
 
         TEST_METHOD(MainHubViewModelShouldDefaultToSelectedItemBeingNull)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+            });
 
-            MainHubViewModel model(vector, m_exceptionPolicy);
-
-            Assert::IsNull(model.SelectedItem);
+            Assert::IsNull((*vm)->SelectedItem);
         }
-
-        TEST_METHOD(MainHubViewModelShouldDisablePictureCommandsWhenSelectedItemIsNullptr)
+      
+        TEST_METHOD(MainHubViewModelShouldEnableAppBarWhenSettingTheSelectedItemToAPhoto)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
-
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = ref new StubPhoto();
-            });
-
-            bool canExecuteCropCommand = true;
-            model->CropImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteCropCommand](Object^ sender, Object^ e)
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
             {
-                canExecuteCropCommand = model->CropImageCommand->CanExecute(e);
-            });
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+                (*vm)->SelectedItem = ref new StubPhoto();
+            });    
 
-            bool canExecuteRotateCommand = true;
-             model->RotateImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteRotateCommand](Object^ sender, Object^ e)
-            {
-                canExecuteRotateCommand = model->RotateImageCommand->CanExecute(e);
-            });
-
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = nullptr;
-            });
-
-            Assert::IsFalse(canExecuteCropCommand);
-            Assert::IsFalse(canExecuteRotateCommand);
+            Assert::IsTrue((*vm)->IsAppBarEnabled);
         }
 
-        TEST_METHOD(MainHubViewModelShouldEnablePictureCommandsWhenSelectedItemIsNotNullptr)
+        TEST_METHOD(MainHubViewModelShouldDisableAppBarWhenSettingTheSelectedItemToANullPtr)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);
-            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
-
-            bool canExecuteCropCommand = false;
-            model->CropImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteCropCommand](Object^ sender, Object^ e)
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
             {
-                canExecuteCropCommand = model->CropImageCommand->CanExecute(e);
-            });
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+                (*vm)->SelectedItem = nullptr;
+            });    
 
-            bool canExecuteRotateCommand = false;
-            model->RotateImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteRotateCommand](Object^ sender, Object^ e)
-            {
-                canExecuteRotateCommand = model->RotateImageCommand->CanExecute(e);
-            });
-
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = ref new StubPhoto();
-            });
-
-            Assert::IsTrue(canExecuteCropCommand);
-            Assert::IsTrue(canExecuteRotateCommand);
+            Assert::IsFalse((*vm)->IsAppBarEnabled);
         }
-
-
-
+        
         TEST_METHOD(MainHubViewModelShouldFirePropertyChangeForSelectedItemWhenSettingSelectedItem)
         {
-            auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_pictureHubGroupQuery, m_exceptionPolicy);
-            auto vector = ref new Vector<HubPhotoGroup^>();
-            vector->Append(photoGroup);            
-            auto model = ref new MainHubViewModel(vector, m_exceptionPolicy);
-            bool propertyChangedFired = false;
-            model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
-            {
-                if (e->PropertyName == "SelectedItem")
-                {
-                    propertyChangedFired = true;
-                }
-            });
-            auto photo = ref new StubPhoto();
+            bool propertyChangedFired = false; 
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
 
-            TestHelper::RunUISynced([model, photo] {
-                model->SelectedItem = photo;
+            TestHelper::RunUISynced([this, vm, &propertyChangedFired]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+
+                (*vm)->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
+                {
+                    if (e->PropertyName == "SelectedItem")
+                    {
+                        propertyChangedFired = true;
+                    }
+                });
+
+                (*vm)->SelectedItem = ref new StubPhoto();
             });
 
             Assert::IsTrue(propertyChangedFired);
         }
 
+        TEST_METHOD(MainHubViewModelShouldFirePropertyChangeForIsAppBarEnabledWhenSettingSelectedItem)
+        {
+            bool propertyChangedFired = false; 
+            auto vm = std::make_shared<MainHubViewModel^>(nullptr);
+
+            TestHelper::RunUISynced([this, vm, &propertyChangedFired]() 
+            {
+                auto photoGroup = ref new HubPhotoGroup("Title", "Empty Title", m_repository, m_exceptionPolicy);
+                auto vector = ref new Vector<HubPhotoGroup^>();
+                vector->Append(photoGroup);
+                (*vm) = ref new MainHubViewModel(vector, m_exceptionPolicy);
+
+                (*vm)->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
+                {
+                    if (e->PropertyName == "IsAppBarEnabled")
+                    {
+                        propertyChangedFired = true;
+                    }
+                });
+
+                (*vm)->SelectedItem = ref new StubPhoto();
+            });           
+        }
+
     private:
         StubPhotoGroup^ m_photoGroup;
         std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
-        std::shared_ptr<StubPictureHubGroupQuery> m_pictureHubGroupQuery;
+        std::shared_ptr<StubRepository> m_repository;
     };
 }

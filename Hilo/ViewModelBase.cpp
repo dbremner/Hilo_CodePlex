@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ViewModelBase.h"
 #include "ExceptionPolicy.h"
@@ -16,21 +8,22 @@ using namespace std;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Navigation;
 
-ViewModelBase::ViewModelBase(shared_ptr<ExceptionPolicy> exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
+ViewModelBase::ViewModelBase(shared_ptr<ExceptionPolicy> exceptionPolicy) : m_exceptionPolicy(exceptionPolicy), m_isAppBarEnabled(false),
+    m_isAppBarOpen(false), m_isAppBarSticky(false)
 {
 }
 
-bool ViewModelBase::IsAppBarSticky::get()
+bool ViewModelBase::IsAppBarEnabled::get()
 {
-    return m_isAppBarSticky;
+    return m_isAppBarEnabled;
 }
 
-void ViewModelBase::IsAppBarSticky::set(bool value)
+void ViewModelBase::IsAppBarEnabled::set(bool value)
 {
-    if (m_isAppBarSticky != value)
+    if (m_isAppBarEnabled != value)
     {
-        m_isAppBarSticky = value;
-        OnPropertyChanged("IsAppBarSticky");
+        m_isAppBarEnabled = value;
+        OnPropertyChanged("IsAppBarEnabled");
     }
 }
 
@@ -48,6 +41,19 @@ void ViewModelBase::IsAppBarOpen::set(bool value)
     }
 }
 
+bool ViewModelBase::IsAppBarSticky::get()
+{
+    return m_isAppBarSticky;
+}
+
+void ViewModelBase::IsAppBarSticky::set(bool value)
+{
+    if (m_isAppBarSticky != value)
+    {
+        m_isAppBarSticky = value;
+        OnPropertyChanged("IsAppBarSticky");
+    }
+}
 
 void ViewModelBase::OnNavigatedTo(NavigationEventArgs^ e)
 {

@@ -27,13 +27,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5dbadc64-9396-4844-91fa-b5e3bf5c95f7}</ProjectGuid>
+    <ProjectGuid>{fc57eb26-7350-4753-9728-a601b9b70646}</ProjectGuid>
     <RootNamespace>HiloTests</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxPackage>True</AppxPackage>
     <AppxPackageIncludePrivateSymbols>true</AppxPackageIncludePrivateSymbols>
-    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
-    <AppContainerApplication>true</AppContainerApplication></PropertyGroup>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ProjectName>HiloTests</ProjectName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -110,27 +115,38 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
-    <PackageCertificateKeyFile>HiloTests_TemporaryKey.pfx</PackageCertificateKeyFile>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <AdditionalOptions>/bigobj -D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
@@ -140,7 +156,8 @@
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\amd64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -150,7 +167,8 @@
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\amd64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
@@ -160,7 +178,8 @@
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\ARM\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -169,73 +188,77 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
     </ClCompile>
-    <Link Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\ARM\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
+    <Link Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>x64;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>x64;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup>
     <ClCompile Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ARM;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\CartoonEffect;$(VCInstallDir)UnitTest\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ARM;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Hilo\AllPhotosQuery.h" />
-    <ClInclude Include="..\Hilo\AsyncException.h" />
     <ClInclude Include="..\Hilo\BooleanToBrushConverter.h" />
+    <ClInclude Include="..\Hilo\CalendarExtensions.h" />
+    <ClInclude Include="..\Hilo\CartoonizeImageViewModel.h" />
     <ClInclude Include="..\Hilo\Common\BindableBase.h" />
     <ClInclude Include="..\Hilo\CropImageViewModel.h" />
     <ClInclude Include="..\Hilo\DelegateCommand.h" />
     <ClInclude Include="..\Hilo\ExifExtensions.h" />
-    <ClInclude Include="..\Hilo\FileAllPhotosQuery.h" />
-    <ClInclude Include="..\Hilo\FileMonthBlockQuery.h" />
-    <ClInclude Include="..\Hilo\FileMonthGroupQuery.h" />
-    <ClInclude Include="..\Hilo\FilePictureHubGroupQuery.h" />
-    <ClInclude Include="..\Hilo\FileSinglePhotoQuery.h" />
-    <ClInclude Include="..\Hilo\FileVirtualMonthFoldersQuery.h" />
-    <ClInclude Include="..\Hilo\FileVirtualYearFoldersQuery.h" />
     <ClInclude Include="..\Hilo\FileSizeConverter.h" />
     <ClInclude Include="..\Hilo\HubGroupType.h" />
     <ClInclude Include="..\Hilo\HubPhotoGroup.h" />
     <ClInclude Include="..\Hilo\ImageBase.h" />
     <ClInclude Include="..\Hilo\ImageBrowserViewModel.h" />
     <ClInclude Include="..\Hilo\ImageNavigationData.h" />
+    <ClInclude Include="..\Hilo\ImageUtilities.h" />
     <ClInclude Include="..\Hilo\ImageViewModel.h" />
-    <ClInclude Include="..\Hilo\InverterConverter.h" />
     <ClInclude Include="..\Hilo\IPhoto.h" />
     <ClInclude Include="..\Hilo\IPhotoGroup.h" />
     <ClInclude Include="..\Hilo\IResizable.h" />
@@ -243,75 +266,53 @@
     <ClInclude Include="..\Hilo\LocalResourceLoader.h" />
     <ClInclude Include="..\Hilo\MainHubViewModel.h" />
     <ClInclude Include="..\Hilo\MonthBlock.h" />
-    <ClInclude Include="..\Hilo\MonthBlockQuery.h" />
     <ClInclude Include="..\Hilo\MonthGroup.h" />
-    <ClInclude Include="..\Hilo\MonthGroupQuery.h" />
     <ClInclude Include="..\Hilo\ObservableQuery.h" />
+    <ClInclude Include="..\Hilo\PageType.h" />
     <ClInclude Include="..\Hilo\Photo.h" />
     <ClInclude Include="..\Hilo\PhotoCache.h" />
-    <ClInclude Include="..\Hilo\PhotoGroupData.h" />
     <ClInclude Include="..\Hilo\PhotoPathComparer.h" />
-    <ClInclude Include="..\Hilo\PhotoQueryBuilder.h" />
-    <ClInclude Include="..\Hilo\PhotoQueryBuilderResult.h" />
-    <ClInclude Include="..\Hilo\PictureHubGroupQuery.h" />
     <ClInclude Include="..\Hilo\QueryChange.h" />
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h" />
     <ClInclude Include="..\Hilo\RotateImageViewModel.h" />
-    <ClInclude Include="..\Hilo\SinglePhotoQuery.h" />
     <ClInclude Include="..\Hilo\ThumbnailGenerator.h" />
     <ClInclude Include="..\Hilo\ViewModelBase.h" />
-    <ClInclude Include="..\Hilo\VirtualMonthFoldersQuery.h" />
-    <ClInclude Include="..\Hilo\VirtualYearFoldersQuery.h" />
     <ClInclude Include="..\Hilo\WideFiveImageTile.h" />
     <ClInclude Include="..\Hilo\YearGroup.h" />
-    <ClInclude Include="DispatchedEvent.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="StubAllPhotosQuery.h" />
     <ClInclude Include="StubExceptionPolicy.h" />
-    <ClInclude Include="StubMonthBlockQuery.h" />
-    <ClInclude Include="StubMonthGroupQuery.h" />
     <ClInclude Include="StubPhoto.h" />
     <ClInclude Include="StubPhotoGroup.h" />
-    <ClInclude Include="StubPictureHubGroupQuery.h" />
+    <ClInclude Include="StubRepository.h" />
     <ClInclude Include="StubResourceLoader.h" />
-    <ClInclude Include="StubSinglePhotoQuery.h" />
-    <ClInclude Include=".\StubVirtualMonthFoldersQuery.h" />
-    <ClInclude Include="StubVirtualYearFoldersQuery.h" />
     <ClInclude Include="StubYearGroup.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestHelper.h" />
     <ClInclude Include="TestImageGenerator.h" />
+    <ClInclude Include="UnitTestingAssertSpecializations.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Hilo\AsyncException.cpp" />
     <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp" />
+    <ClCompile Include="..\Hilo\CalendarExtensions.cpp" />
+    <ClCompile Include="..\Hilo\CartoonizeImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\Common\BindableBase.cpp" />
     <ClCompile Include="..\Hilo\CropImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\DelegateCommand.cpp" />
     <ClCompile Include="..\Hilo\ExifExtensions.cpp" />
-    <ClCompile Include="..\Hilo\FileAllPhotosQuery.cpp" />
-    <ClCompile Include="..\Hilo\FileMonthBlockQuery.cpp" />
-    <ClCompile Include="..\Hilo\FileMonthGroupQuery.cpp" />
-    <ClCompile Include="..\Hilo\FilePictureHubGroupQuery.cpp" />
-    <ClCompile Include="..\Hilo\FileSinglePhotoQuery.cpp" />
     <ClCompile Include="..\Hilo\FileSizeConverter.cpp" />
-    <ClCompile Include="..\Hilo\FileVirtualMonthFoldersQuery.cpp" />
-    <ClCompile Include="..\Hilo\FileVirtualYearFoldersQuery.cpp" />
     <ClCompile Include="..\Hilo\HubPhotoGroup.cpp" />
     <ClCompile Include="..\Hilo\ImageBase.cpp" />
     <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp" />
     <ClCompile Include="..\Hilo\ImageNavigationData.cpp" />
+    <ClCompile Include="..\Hilo\ImageUtilities.cpp" />
     <ClCompile Include="..\Hilo\ImageViewModel.cpp" />
-    <ClCompile Include="..\Hilo\InverterConverter.cpp" />
     <ClCompile Include="..\Hilo\LocalResourceLoader.cpp" />
     <ClCompile Include="..\Hilo\MainHubViewModel.cpp" />
     <ClCompile Include="..\Hilo\MonthBlock.cpp" />
     <ClCompile Include="..\Hilo\MonthGroup.cpp" />
     <ClCompile Include="..\Hilo\Photo.cpp" />
     <ClCompile Include="..\Hilo\PhotoCache.cpp" />
-    <ClCompile Include="..\Hilo\PhotoGroupData.cpp" />
     <ClCompile Include="..\Hilo\PhotoPathComparer.cpp" />
-    <ClCompile Include="..\Hilo\PhotoQueryBuilder.cpp" />
     <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp" />
     <ClCompile Include="..\Hilo\RotateImageViewModel.cpp" />
     <ClCompile Include="..\Hilo\TaskExtensions.cpp" />
@@ -319,15 +320,12 @@
     <ClCompile Include="..\Hilo\ViewModelBase.cpp" />
     <ClCompile Include="..\Hilo\WideFiveImageTile.cpp" />
     <ClCompile Include="..\Hilo\YearGroup.cpp" />
-    <ClCompile Include="AsyncExceptionTests.cpp" />
     <ClCompile Include="BooleanToBrushConverterTests.cpp" />
+    <ClCompile Include="CartoonizeImageViewModelTests.cpp" />
     <ClCompile Include="CropImageViewModelTests.cpp" />
-    <ClCompile Include="DispatchedEvent.cpp" />
     <ClCompile Include="ExifExtensionTests.cpp" />
     <ClCompile Include="FileSizeConverterTests.cpp" />
-    <ClCompile Include=".\InverterConverterTests.cpp" />
     <ClCompile Include="HubPhotoGroupTests.cpp" />
-    <ClCompile Include=".\PhotoTests.cpp" />
     <ClCompile Include="ImageBrowserViewModelTests.cpp" />
     <ClCompile Include="ImageViewDataTests.cpp" />
     <ClCompile Include="ImageViewModelTests.cpp" />
@@ -343,20 +341,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PhotoCacheTests.cpp" />
-    <ClCompile Include=".\PhotoQueryBuilderTests.cpp" />
+    <ClCompile Include="PhotoTests.cpp" />
     <ClCompile Include="RandomPhotoSelectorTests.cpp" />
     <ClCompile Include="RotateImageViewModelTests.cpp" />
-    <ClCompile Include="StubAllPhotosQuery.cpp" />
     <ClCompile Include="StubExceptionPolicy.cpp" />
-    <ClCompile Include="StubMonthBlockQuery.cpp" />
-    <ClCompile Include="StubMonthGroupQuery.cpp" />
     <ClCompile Include="StubPhoto.cpp" />
     <ClCompile Include="StubPhotoGroup.cpp" />
-    <ClCompile Include="StubPictureHubGroupQuery.cpp" />
+    <ClCompile Include="StubRepository.cpp" />
     <ClCompile Include="StubResourceLoader.cpp" />
-    <ClCompile Include="StubSinglePhotoQuery.cpp" />
-    <ClCompile Include=".\StubVirtualMonthFoldersQuery.cpp" />
-    <ClCompile Include="StubVirtualYearFoldersQuery.cpp" />
     <ClCompile Include="StubYearGroup.cpp" />
     <ClCompile Include="TaskExceptionTests.cpp" />
     <ClCompile Include="TestHelper.cpp" />
@@ -373,7 +365,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="HiloTests_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\InvalidImageFile.jpg" />

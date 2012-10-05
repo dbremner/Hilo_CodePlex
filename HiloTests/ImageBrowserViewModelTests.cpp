@@ -1,19 +1,10 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\ImageBrowserViewModel.h"
 #include "StubExceptionPolicy.h"
 #include "StubPhotoGroup.h"
-#include "StubVirtualMonthFoldersQuery.h"
-#include "StubVirtualYearFoldersQuery.h"
 #include "StubPhoto.h"
+#include "StubRepository.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -31,126 +22,138 @@ namespace HiloTests
         {
             m_photoGroup = ref new StubPhotoGroup("");
             m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
-            m_monthQuery = std::make_shared<StubVirtualMonthFoldersQuery>();
-            m_yearQuery = std::make_shared<StubVirtualYearFoldersQuery>();
+            m_repository = std::make_shared<StubRepository>(m_exceptionPolicy);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldSetupGroupCommandWhenConstructed)
         {
-            ImageBrowserViewModel model(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            Assert::IsNotNull(model.GroupCommand);
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsNotNull((*vm)->GroupCommand);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldSetupRotateCommandWhenConstructed)
         {
-            ImageBrowserViewModel model(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            Assert::IsNotNull(model.RotateImageCommand);
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsNotNull((*vm)->RotateImageCommand);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldSetupCropCommandWhenConstructed)
         {
-            ImageBrowserViewModel model(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            Assert::IsNotNull(model.CropImageCommand);
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsNotNull((*vm)->CropImageCommand);
+        }
+
+        TEST_METHOD(ImageBrowserViewModelShouldSetupCartoonizeCommandWhenConstructed)
+        {
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]()
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsNotNull((*vm)->CartoonizeImageCommand);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldDefaultToSelectedItemBeingNull)
         {
-            ImageBrowserViewModel model(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            Assert::IsNull(model.SelectedItem);
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsNull((*vm)->SelectedItem);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldAddItselfAsObserverOfQuery)
         {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            Assert::IsTrue(m_monthQuery->GetObserved());
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+            });
+            Assert::IsTrue(m_repository->GetAddObserverHasBeenCalled());
         }
 
-        TEST_METHOD(ImageBrowserViewModelShouldEnablePictureCommandsWhenSelectedItemIsNotNullptr)
+        TEST_METHOD(ImageBrowserViewModelShouldEnableAppBarWhenSettingTheSelectedItemToAPhoto)
         {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            bool canExecuteCropCommand = false;
-            model->CropImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteCropCommand](Object^ sender, Object^ e)
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
             {
-                canExecuteCropCommand = model->CropImageCommand->CanExecute(e);
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+                (*vm)->SelectedItem = ref new StubPhoto();
             });
-            bool canExecuteRotateCommand = false;
-            model->RotateImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteRotateCommand](Object^ sender, Object^ e)
-            {
-                canExecuteRotateCommand = model->RotateImageCommand->CanExecute(e);
-            });
-
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = ref new StubPhoto();
-            });
-
-            Assert::IsTrue(canExecuteCropCommand);
-            Assert::IsTrue(canExecuteRotateCommand);
+            Assert::IsTrue((*vm)->IsAppBarEnabled);
         }
 
-        TEST_METHOD(ImageBrowserViewModelShouldDisablePictureCommandsWhenSelectedItemIsNullptr)
+        TEST_METHOD(ImageBrowserViewModelShouldDisableAppBarWhenSettingTheSelectedItemToANullPtr)
         {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            bool canExecuteCropCommand = true;
-            model->CropImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteCropCommand](Object^ sender, Object^ e)
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            TestHelper::RunUISynced([this, vm]() 
             {
-                canExecuteCropCommand = model->CropImageCommand->CanExecute(e);
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+                (*vm)->SelectedItem = nullptr;
             });
-            bool canExecuteRotateCommand = true;
-            model->RotateImageCommand->CanExecuteChanged += ref new EventHandler<Object^>([model, &canExecuteRotateCommand](Object^ sender, Object^ e)
-            {
-                canExecuteRotateCommand = model->RotateImageCommand->CanExecute(e);
-            });
-
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = ref new StubPhoto();
-                model->SelectedItem = nullptr;
-            });
-
-            Assert::IsFalse(canExecuteCropCommand);
-            Assert::IsFalse(canExecuteRotateCommand);
+            Assert::IsFalse((*vm)->IsAppBarEnabled);
         }
 
         TEST_METHOD(ImageBrowserViewModelShouldFirePropertyChangeOfSelectedItemWhenSettingSelectedItem)
         {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
             bool propertyChangedFired = false;
-            model->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
-            {
-                if (e->PropertyName == "SelectedItem")
-                {
-                    propertyChangedFired = true;
-                }
-            });
 
-            TestHelper::RunUISynced([model] {
-                model->SelectedItem = ref new StubPhoto();
+            TestHelper::RunUISynced([this, vm, &propertyChangedFired]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+                (*vm)->SelectedItem = nullptr;
+                (*vm)->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
+                {
+                    if (e->PropertyName == "SelectedItem")
+                    {
+                        propertyChangedFired = true;
+                    }
+                });
+                (*vm)->SelectedItem = ref new StubPhoto();
             });
 
             Assert::IsTrue(propertyChangedFired);
         }
 
-        TEST_METHOD(ImageBrowserViewModelShouldCallRepositoryWhenQueryForMonthGroups)
+        TEST_METHOD(ImageBrowserViewModelShouldFirePropertyChangeForIsAppBarEnabledWhenSettingSelectedItem)
         {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            task_status status;
+            auto vm = std::make_shared<ImageBrowserViewModel^>(nullptr);
+            bool propertyChangedFired = false;
 
-            TestHelper::RunSynced(model->QueryMonthGroupsAsync(), status);
-            Assert::IsTrue(m_monthQuery->GetHasBeenCalled());
-        }
+            TestHelper::RunUISynced([this, vm, &propertyChangedFired]() 
+            {
+                (*vm) = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
+                (*vm)->SelectedItem = nullptr;
+                (*vm)->PropertyChanged += ref new PropertyChangedEventHandler([&propertyChangedFired](Object^ sender,  PropertyChangedEventArgs^ e) 
+                {
+                    if (e->PropertyName == "IsAppBarEnabled")
+                    {
+                        propertyChangedFired = true;
+                    }
+                });
+                (*vm)->SelectedItem = ref new StubPhoto();
+            });
 
-        TEST_METHOD(ImageBrowserViewModelShouldCallRepositoryWhenQueryForYearGroups)
-        {
-            auto model = ref new ImageBrowserViewModel(m_monthQuery, m_yearQuery, m_exceptionPolicy);
-            task_status status;
-
-            TestHelper::RunSynced(model->QueryYearGroupsAsync(), status);
-            Assert::IsTrue(m_yearQuery->GetHasBeenCalled());
+            Assert::IsTrue(propertyChangedFired);
         }
 
     private:
         std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
         StubPhotoGroup^ m_photoGroup;
-        std::shared_ptr<StubVirtualMonthFoldersQuery> m_monthQuery;
-        std::shared_ptr<StubVirtualYearFoldersQuery> m_yearQuery;
+        std::shared_ptr<StubRepository> m_repository;
     };
 }

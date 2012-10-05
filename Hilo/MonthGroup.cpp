@@ -1,92 +1,138 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "MonthGroup.h"
 #include "TaskExceptionsExtensions.h"
 #include "PhotoCache.h"
-#include "MonthGroupQuery.h"
+#include "Repository.h"
 #include "IPhoto.h"
 #include "ExceptionPolicy.h"
+#include "CalendarExtensions.h"
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace std;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Storage::Search;
 
 const unsigned int MaxNumberOfPictures = 8;
 
-MonthGroup::MonthGroup(String^ title, shared_ptr<PhotoCache> photoCache, shared_ptr<MonthGroupQuery> query, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_title(title), m_weakPhotoCache(photoCache), m_query(query), m_exceptionPolicy(exceptionPolicy)
+MonthGroup::MonthGroup(shared_ptr<PhotoCache> photoCache, IStorageFolderQueryOperations^ folderQuery, 
+    shared_ptr<Repository> repository, shared_ptr<ExceptionPolicy> exceptionPolicy) : 
+    m_count(0u), m_weakPhotoCache(photoCache), m_folderQuery(folderQuery), m_repository(repository), m_exceptionPolicy(exceptionPolicy), 
+    m_hasCount(false), m_runningQuery(false)
 {
+    m_dateTimeForTitle.UniversalTime = 0ll;
+}
+
+void MonthGroup::OnPropertyChanged(String^ propertyName)
+{
+    assert(IsMainThread());
+    PropertyChanged(this, ref new Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
 }
 
 IObservableVector<IPhoto^>^ MonthGroup::Items::get()
 {
+    assert(IsMainThread());
     if (nullptr == m_photos)
     {
+        m_photos = ref new Vector<IPhoto^>();
+
         if (!m_runningQuery)
         {
             m_runningQuery = true;
-            QueryPhotosAsync().then([this]
+            OnPropertyChanged("IsRunning");
+            QueryPhotosAsync().then([this](task<DateTime> priorTask)
             {
-                OnPropertyChanged("Items");
-                OnPropertyChanged("Title");
-                OnPropertyChanged("HasPhotos");
                 m_runningQuery = false;
-            }).then(ObserveException<void>(m_exceptionPolicy));
+                m_dateTimeForTitle = priorTask.get();
+                OnPropertyChanged("Items");
+                OnPropertyChanged("Title");                  
+                OnPropertyChanged("IsRunning");                    
+            }).then([this]() {
+                run_async_non_interactive([this]() {
+                    if (m_dateTimeForTitle.UniversalTime > 0ll)
+                    {
+                        m_repository->GetFolderPhotoCountAsync(m_folderQuery).then([this](size_t count)
+                        {
+                            assert(IsMainThread());
+                            m_count = count;
+                            OnPropertyChanged("Title");   
+                            OnPropertyChanged("HasPhotos");
+                        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+                    }
+                });
+            })
+                .then(ObserveException<void>(m_exceptionPolicy));
         }
     }
     return m_photos;
 }
 
+// <snippet905>
 bool MonthGroup::HasPhotos::get()
 {
     return m_count > 0;
 }
+// </snippet905>
 
-task<void> MonthGroup::QueryPhotosAsync()
+bool MonthGroup::IsRunning::get()
 {
-    // Only need to call this once and have to check since this can be called from multiple places.
+    return m_runningQuery;
+}
+
+task<DateTime> MonthGroup::QueryPhotosAsync()
+{
+    // for unit tests only
     if (nullptr == m_photos)
     {
         m_photos = ref new Vector<IPhoto^>();
     }
 
-    m_photos->Clear();
-    auto photosTask = m_query->GetPhotoDataForMonthGroup(this, MaxNumberOfPictures, cancellation_token::none());
-    return photosTask.then([this](PhotoGroupData photoGroupData)
+    auto photosTask = m_repository->GetPhotoDataForMonthGroup(this, m_folderQuery, MaxNumberOfPictures);
+    return photosTask.then([this](IVectorView<IPhoto^>^ photos)
     {
         assert(IsMainThread());
         bool first = true;
         shared_ptr<PhotoCache> cache = m_weakPhotoCache.lock();
-        m_count = photoGroupData.GetSize();
-        auto photos = photoGroupData.GetPhotos();
+        DateTime dateTime = {0ll};
+
         for (auto item : photos)
         {
+            // Add this photo to the display graph.
             m_photos->Append(item);
             if (first)
             {
+                // Cache a handle to the first photo. We will need this later when we want to scroll the grid of month
+                // groups to a chosen month. (We can only scroll to a given item, not to a property of that item.)
                 cache->InsertPhoto(item);
+
+                // Remember the date of the first picture. We need this later to correctly display the name of the month group.
+                dateTime = item->DateTaken;
             }
             first = false;
         }
+        return dateTime;
     });
 }
 
 String^ MonthGroup::Title::get()
 {
-    wstringstream title;
-    title << m_title->Data();
-    if (m_count > 0)
+    // Set title to month name if available
+    if (m_title == nullptr && !m_runningQuery && m_dateTimeForTitle.UniversalTime != 0ll)
     {
-        title << L" (" << m_count.ToString()->Data() << L")";
+        m_title = CalendarExtensions::GetLocalizedMonthAndYear(m_dateTimeForTitle);
     }
-    return ref new String(title.str().c_str());
+
+    // Add count to title if available (this will be after the month name becomes available)
+    if (m_title != nullptr && m_count > 0 && !m_hasCount)
+    {
+        auto formatter = ref new Windows::Globalization::NumberFormatting::DecimalFormatter();
+        formatter->FractionDigits = 0;
+        auto count = formatter->FormatUInt(m_count);
+        m_title = m_title + " (" + count + ")";
+        m_hasCount = true;
+    }
+    return m_title;
 }

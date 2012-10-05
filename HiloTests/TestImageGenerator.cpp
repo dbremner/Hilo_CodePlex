@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "TestImageGenerator.h"
 
@@ -22,7 +14,7 @@ concurrency::task<FileInformation^> TestImageGenerator::CreateTestImageFileFromL
     return concurrency::create_task(installStorageFolder->GetFileAsync("Images\\" + fileName))
         .then([newName](Windows::Storage::StorageFile^ file) {
             return file->CopyAsync(Windows::Storage::KnownFolders::PicturesLibrary, newName, Windows::Storage::NameCollisionOption::ReplaceExisting);
-    }).then([](Windows::Storage::StorageFile^ file) {		
+    }).then([](Windows::Storage::StorageFile^ file) {
         auto fileTypeFilter = ref new Platform::Collections::Vector<Platform::String^>();
         fileTypeFilter->Append(".png");
         fileTypeFilter->Append(".jpg");
@@ -58,7 +50,7 @@ concurrency::task<void> HiloTests::TestImageGenerator::DeleteFilesAsync()
     });
 }
 
-concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestImageGenerator::CreateTestImagesFromLocalFolder( Platform::String^ fileName, unsigned int count, Platform::String^ nameBase /*= "test"*/, Platform::String^ extension /*= ".png" */ )
+concurrency::task<IVectorView<Windows::Storage::StorageFile^>^> HiloTests::TestImageGenerator::CreateTestImagesFromLocalFolder(Platform::String^ fileName, unsigned int count, Platform::String^ nameBase /*= "test"*/, Platform::String^ extension /*= ".png" */)
 {
     Windows::Storage::StorageFolder^ installStorageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
     return concurrency::create_task(installStorageFolder->GetFileAsync("Images\\" + fileName))

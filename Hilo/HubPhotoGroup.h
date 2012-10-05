@@ -1,31 +1,26 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
 #include "IPhotoGroup.h"
 
 namespace Hilo
 {
     interface class IPhoto;
     class ExceptionPolicy;
-    class PictureHubGroupQuery;
+    class Repository;
 
+    // The HubPhotoGroup class provides data for the main hub page's grid control.
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class HubPhotoGroup sealed : public Common::BindableBase, public IPhotoGroup
+    [Windows::Foundation::Metadata::WebHostHidden]
+    public ref class HubPhotoGroup sealed : public IPhotoGroup, public Windows::UI::Xaml::Data::INotifyPropertyChanged
     {
     internal:
-        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, std::shared_ptr<PictureHubGroupQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        HubPhotoGroup(Platform::String^ title, Platform::String^ emptyTitle, std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
         concurrency::task<void> QueryPhotosAsync();
 
     public:
         virtual ~HubPhotoGroup();
+
+        virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
 
         property Platform::String^ Title 
         { 
@@ -40,13 +35,17 @@ namespace Hilo
     private:
         Platform::String^ m_title;
         Platform::String^ m_emptyTitle;
-        std::shared_ptr<PictureHubGroupQuery> m_query;
+        std::shared_ptr<Repository> m_repository;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Platform::Collections::Vector<IPhoto^>^ m_photos;
         bool m_retrievedPhotos;
         bool m_receivedChangeWhileRunning;
         bool m_runningQuery;
+        bool m_hasFileUpdateTask;
+        ULONGLONG m_lastFileChangeTime;
 
         void OnDataChanged();
+        void ObserveFileChange();
+        void OnPropertyChanged(Platform::String^ propertyName);
     };
 }

@@ -1,16 +1,7 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "UnitTestingAssertSpecializations.h"
 #include "..\Hilo\RandomPhotoSelector.h"
-#include "..\Hilo\PhotoQueryBuilder.h"
-#include <memory>
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -48,7 +39,7 @@ namespace HiloTests
             }), status);
 
             Assert::AreEqual(concurrency::completed, status);
-            Assert::AreEqual(5U, selectedPhotos->Size);		
+            Assert::AreEqual(5U, selectedPhotos->Size);
         }
 
         TEST_METHOD(RandomPhotoSelectorUsesSizeOfProvidedFilesIfLessThanRequestedCount)

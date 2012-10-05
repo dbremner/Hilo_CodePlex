@@ -1,14 +1,7 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\WideFiveImageTile.h"
+#include "StubResourceLoader.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Hilo;
@@ -20,9 +13,14 @@ namespace HiloTests
     TEST_CLASS(WideFiveImageTileTests)
     {
     public:
+        TEST_METHOD_INITIALIZE(Initialize)
+        {
+            m_resourceLoader = ref new StubResourceLoader();
+        }
+
         TEST_METHOD(WideFiveImageTileTestsReturnsNotificationTileWhenRequested)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
 
             auto notification = tile.GetTileNotification();
 
@@ -31,7 +29,7 @@ namespace HiloTests
 
         TEST_METHOD(WideFiveImageTileTestsReturnsDefaultContentIfNoFilesProvided)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
             auto defaultContent = TileUpdateManager::GetTemplateContent(TileTemplateType::TileWideImageCollection);
 
             auto notification = tile.GetTileNotification();
@@ -41,9 +39,9 @@ namespace HiloTests
 
         TEST_METHOD(WideFiveImageTileTestsWhenProvideFileNamesThenReplacesImageSourceInContent)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
 
-            const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
+            const std::array<std::wstring, 5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
             
             tile.SetImageFilePaths(fileNames);
@@ -65,21 +63,22 @@ namespace HiloTests
 
         TEST_METHOD(WideFiveImageTileTestsWhenProvideMoreThanFiveFileNamesThrows)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
 
-            const std::array<std::wstring,6> names = { L"path1", L"path2", L"path3", L"path4", L"path5", L"pathTooMany" };
+            const std::array<std::wstring, 6> names = { L"path1", L"path2", L"path3", L"path4", L"path5", L"pathTooMany" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
 
-            Assert::ExpectException<std::exception>([&tile, fileNames] () {
+            Assert::ExpectException<Platform::FailureException^>([&tile, fileNames] () 
+            {
                 tile.SetImageFilePaths(fileNames);
             });
         }
 
         TEST_METHOD(WideFiveImageTileTestsIncludesTileSquareImageNode)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
 
-            const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
+            const std::array<std::wstring, 5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
             tile.SetImageFilePaths(fileNames);
 
@@ -91,9 +90,9 @@ namespace HiloTests
 
         TEST_METHOD(WideFiveImageTileTestsSetsTileSquareImageSourceToFirstFile)
         {
-            WideFiveImageTile tile;
+            WideFiveImageTile tile(m_resourceLoader);
 
-            const std::array<std::wstring,5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
+            const std::array<std::wstring, 5> names = { L"path1", L"path2", L"path3", L"path4", L"path5" };
             std::vector<std::wstring> fileNames(begin(names), end(names));
             tile.SetImageFilePaths(fileNames);
 
@@ -103,5 +102,8 @@ namespace HiloTests
             auto squareImage = squareImageBinding->SelectSingleNode("image/@src")->InnerText;
             Assert::AreEqual(fileNames[0].c_str(), squareImage->Data());
         }
+
+    private:
+        StubResourceLoader^ m_resourceLoader;
     };
 }

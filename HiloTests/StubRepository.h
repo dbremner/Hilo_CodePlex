@@ -1,61 +1,55 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "..\Hilo\IRepository.h"
+#include "..\Hilo\Repository.h"
+#include "..\Hilo\PageType.h"
 
 namespace HiloTests
 {
-    interface class Hilo::IPhoto;
-    interface class Hilo::IPhotoGroup;
-    interface class Hilo::IPhotoCache;
-    interface class Hilo::IYearGroup;
-    interface class Hilo::IQueryOperation;
-    ref class Hilo::PhotoGroupData;
+    class StubExceptionPolicy;
 
-    ref class StubRepository sealed : public Hilo::IRepository
+    class StubRepository : public Hilo::Repository
     {
     public:
-        StubRepository();
+        StubRepository(std::shared_ptr<StubExceptionPolicy> exceptionPolicy);
 
-        property Hilo::IPhoto^ PhotoToReturn;
+        virtual void AddObserver(const std::function<void()> callback, Hilo::PageType pageType);
+        virtual void RemoveObserver(Hilo::PageType pageType);
 
-        property bool GetPhotosForGroupWithQueryOperationAsyncCalled;
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhotoGroup^>^> GetMonthGroupedPhotosWithCacheAsync(std::shared_ptr<Hilo::PhotoCache> photoCache, concurrency::cancellation_token token);
+        virtual concurrency::task<Hilo::IPhoto^> GetSinglePhotoAsync(Platform::String^ photoPath);
+        virtual concurrency::task<unsigned int> GetFolderPhotoCountAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhoto^>^> GetPhotoDataForMonthGroup(Hilo::IPhotoGroup^ photoGroup, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems);
+        virtual concurrency::task<bool> HasPhotosInRangeAsync(Platform::String^ dateRangeQuery, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhoto^>^> GetPhotosForDateRangeQueryAsync(Platform::String^ dateRangeQuery);
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhoto^>^> GetPhotosForPictureHubGroupAsync(Hilo::IPhotoGroup^ photoGroup, unsigned int maxNumberOfItems);
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IYearGroup^>^> GetYearGroupedMonthsAsync(concurrency::cancellation_token token);
+        virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile^>^> GetPhotoStorageFilesAsync(Platform::String^ query, unsigned int maxNumberOfItems = 25);
+        virtual void NotifyAllObservers();
 
-        property bool GetPhotoGroupDataForGroupWithQueryOperationAsyncCalled;
-
-        property bool GetMonthGroupedPhotosWithCacheAsyncCalled;
-
-        property bool GetYearGroupedMonthsAsyncCalled;
-
-        property bool GetPhotoCountForQueryOperationAsyncCalled;
-
-        property bool GetPhotoForGroupWithQueryOperationAsyncCalled;
-
-        property bool DataChangedEventObserved;
-
-        virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Hilo::IPhoto^>^>^ GetPhotosForGroupWithQueryOperationAsync(Hilo::IPhotoGroup^ photoGroup, Hilo::IQueryOperation^ operation);
-        virtual Windows::Foundation::IAsyncOperation<Hilo::PhotoGroupData^>^ GetPhotoGroupDataForGroupWithQueryOperationAsync(Hilo::IPhotoGroup^ photoGroup, Hilo::IQueryOperation^ operation);
-        virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Hilo::IPhotoGroup^>^>^ GetMonthGroupedPhotosWithCacheAsync(Hilo::IPhotoCache^ photoCache);
-        virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::Collections::IVectorView<Hilo::IYearGroup^>^>^ GetYearGroupedMonthsAsync();
-        virtual Windows::Foundation::IAsyncOperation<unsigned int>^ GetPhotoCountForQueryOperationAsync(Hilo::IQueryOperation^ operation);
-        virtual Windows::Foundation::IAsyncOperation<Hilo::IPhoto^>^ GetPhotoForGroupWithQueryOperationAsync(Hilo::IPhotoGroup^ photoGroup, Hilo::IQueryOperation^ operation);
-        
-        event Hilo::DataChangedEventHandler^ DataChanged
-        {
-            virtual Windows::Foundation::EventRegistrationToken add(Hilo::DataChangedEventHandler^ e);
-            virtual void remove(Windows::Foundation::EventRegistrationToken);
-        }
+        bool GetMonthGroupedPhotosWithCacheAsyncHasBeenCalled();
+        bool GetSinglePhotoAsyncHasBeenCalled();
+        bool GetFolderPhotoCountAsyncHasBeenCalled();
+        bool GetPhotoDataForMonthGroupHasBeenCalled();
+        bool GetPhotosForDateRangeQueryAsyncHasBeenCalled();
+        bool GetPhotosForPictureHubGroupAsyncHasBeenCalled();
+        bool GetYearGroupedMonthsAsyncHasBeenCalled();
+        bool GetPhotoStorageFilesAsyncHasBeenCalled();
+        bool GetAddObserverHasBeenCalled();
+        bool GetRemoveObserverHasBeenCalled();
+        void SetPhotoToReturn(Hilo::IPhoto^ photo);
 
     private:
-        bool m_observed;
-        event Hilo::DataChangedEventHandler^ m_dataChangedEvent;
-        Windows::Foundation::EventRegistrationToken m_watchToken;
+        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
+        bool m_getMonthGroupedPhotosWithCacheAsyncCalled;
+        bool m_getSinglePhotoAsyncCalled;
+        bool m_GetFolderPhotoCountAsyncHasBeenCalled;
+        bool m_getPhotoDataForMonthGroupHasBeenCalled;
+        bool m_getPhotosForDateRangeQueryAsyncCalled;
+        bool m_getPhotosForPictureHubgGroupAsyncCalled;
+        bool m_getYearGroupedMonthsAsyncCalled;
+        bool m_getPhotoStorageFilesAsyncCalled;
+        bool m_addObserverCalled;
+        bool m_removeObserverCalled;
+        Hilo::IPhoto^ m_photoToReturn;
     };
 }

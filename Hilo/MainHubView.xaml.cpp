@@ -1,18 +1,12 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#include "pch.h"
+﻿#include "pch.h"
 #include "MainHubView.xaml.h"
 #include "ImageNavigationData.h"
 
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Controls;
+
+// See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
 
 MainHubView::MainHubView()
 {

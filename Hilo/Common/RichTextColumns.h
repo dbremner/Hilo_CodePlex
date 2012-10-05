@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include <collection.h>
@@ -42,7 +34,7 @@ namespace Hilo
 		/// space there will never be any additional columns.</remarks>
 		[Windows::UI::Xaml::Markup::ContentProperty(Name = "RichTextContent")]
 		[Windows::Foundation::Metadata::WebHostHidden]
-        public ref class RichTextColumns sealed : Windows::UI::Xaml::Controls::Panel
+		public ref class RichTextColumns sealed : Windows::UI::Xaml::Controls::Panel
 		{
 		public:
 			RichTextColumns();

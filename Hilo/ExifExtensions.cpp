@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ExifExtensions.h"
 
@@ -17,7 +9,7 @@ using namespace std;
 using namespace Hilo;
 using namespace Windows::Foundation;
 
-Rect ExifExtensions::RotateClockwise(Rect rect, Rect bitmapSize, double degrees)
+Rect ExifExtensions::RotateClockwise(Rect rect, Rect bitmapSize, float64 degrees)
 {
     auto radians = (M_PI / 180.0) * degrees;
 
@@ -45,47 +37,47 @@ Rect ExifExtensions::RotateClockwise(Rect rect, Rect bitmapSize, double degrees)
     auto xOther = (rect.Right * angleCos - rect.Bottom * angleSin) - minX;
     auto yOther = (rect.Right * angleSin + rect.Bottom * angleCos) - minY;
 
-    Point newOrigin(	static_cast<float>(min(xOrigin, xOther)), 
+    Point newOrigin(static_cast<float>(min(xOrigin, xOther)), 
         static_cast<float>(min(yOrigin, yOther)));
-    Point newOther( static_cast<float>(max(xOrigin, xOther)), 
+    Point newOther(static_cast<float>(max(xOrigin, xOther)), 
         static_cast<float>(max(yOrigin, yOther)));
 
     return Rect(newOrigin, newOther);
 }
 
-unsigned int ExifExtensions::ConvertExifOrientationToDegreesRotation(unsigned int exifOrientationFlag)
+unsigned int ExifExtensions::ConvertExifOrientationToDegreesRotation(ExifRotations exifOrientationFlag)
 {
     switch (exifOrientationFlag)
     {
-    case 1:
+    case ExifRotations::NotRotated:
         return 0;
-    case 6:
+    case ExifRotations::RotatedLeft:
         return 90;
-    case 3:
+    case ExifRotations::RotatedDown:
         return 180;
-    case 8:
+    case ExifRotations::RotatedRight:
         return 270;
     default:
-        // Ignore flip/mirroring values (2,4,5,7)
+        // Ignore flip/mirroring values (2, 4, 5, 7)
         return 0;
     }
 }
 
-unsigned int ExifExtensions::ConvertDegreesRotationToExifOrientation(unsigned int angle)
+ExifRotations ExifExtensions::ConvertDegreesRotationToExifOrientation(unsigned int angle)
 {
     switch (angle)
     {
     case 0:
-        return 1;
+        return ExifRotations::NotRotated;
     case 90:
-        return 6;
+        return ExifRotations::RotatedLeft;
     case 180:
-        return 3;
+        return ExifRotations::RotatedDown;
     case 270:
-        return 8;
+        return ExifRotations::RotatedRight;
     default:
-        // Ignore flip/mirroring values (2,4,5,7)
-        return 1;
+        // Ignore flip/mirroring values (2, 4, 5, 7)
+        return ExifRotations::NotRotated;
     }
 
 }

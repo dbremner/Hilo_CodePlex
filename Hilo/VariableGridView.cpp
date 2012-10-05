@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "VariableGridView.h"
 #include "IResizable.h"
@@ -14,6 +6,7 @@ using namespace Hilo;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Controls;
 
+// <snippet920>
 void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element, Object^ item)
 {
     auto model = dynamic_cast<IResizable^>(item);
@@ -26,3 +19,4 @@ void VariableGridView::PrepareContainerForItemOverride(DependencyObject^ element
 
     GridView::PrepareContainerForItemOverride(element, item);
 }
+// </snippet920>

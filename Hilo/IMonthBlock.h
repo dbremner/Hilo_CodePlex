@@ -1,17 +1,12 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo
 {
     interface class IYearGroup;
 
+    // The IMonthBlock class defines the signature of per-month data used by the 
+    // image browser's zoomed-out view of the user's picture library. XAML controls
+    // bind to objects of this type.
     public interface class IMonthBlock
     {
         property Platform::String^ Name 

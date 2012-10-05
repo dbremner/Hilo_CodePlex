@@ -1,13 +1,6 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "UnitTestingAssertSpecializations.h"
 #include "..\Hilo\Photo.h"
 #include "StubPhotoGroup.h"
 #include "StubExceptionPolicy.h"
@@ -98,7 +91,8 @@ namespace HiloTests
             auto photo = TestHelper::RunSynced<Photo^>(t2, status);
 
             BitmapImage^ image;
-            TestHelper::RunUISynced([photo, &image] {
+            TestHelper::RunUISynced([photo, &image] 
+            {
                 image = photo->Thumbnail;
             });
 

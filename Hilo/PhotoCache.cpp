@@ -1,26 +1,25 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "PhotoCache.h"
 #include "IPhoto.h"
+#include "CalendarExtensions.h"
 
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::Globalization;
 
+void PhotoCache::Clear()
+{
+    m_photoCache.clear();
+}
+
 void PhotoCache::InsertPhoto(IPhoto^ photo)
 {
-    Calendar cal;
-    auto dateTaken = photo->DateTaken;
-    cal.SetDateTime(dateTaken);
-    auto &yearPair = m_photoCache[cal.Year];
-    yearPair[cal.Month] = WeakReference(photo);
+    int year, month;
+    auto monthDate = photo->DateTaken;
+
+    CalendarExtensions::WriteLocalizedYearAndMonth(monthDate, year, month);
+    auto &yearPair = m_photoCache[year];
+    yearPair[month] = WeakReference(photo);
 }
 
 IPhoto^ PhotoCache::GetForYearAndMonth(int year, int month)

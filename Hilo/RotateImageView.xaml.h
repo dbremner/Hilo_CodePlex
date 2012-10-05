@@ -1,18 +1,18 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#pragma once
+﻿#pragma once
 
-#include "HiloPage.h"
 #include "RotateImageView.g.h"
 
 namespace Hilo
 {
+    // See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
+
+    // See http://go.microsoft.com/fwlink/?LinkId=267276 for info on how view classes interact 
+    // with corresponding view model classes that encapsulate the app’s state, actions, and operations.
+
+    // See http://go.microsoft.com/fwlink/?LinkId=267279 for info on how Hilo pages use XAML controls.
+
+    // The RotateImageView class implements the rotate page.
+    [Windows::Foundation::Metadata::WebHostHidden]
     public ref class RotateImageView sealed
     {
     public:

@@ -1,30 +1,26 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
 #include "IPhotoGroup.h"
 
 namespace Hilo
 {
+    interface class IPhotoGroup;
     class ExceptionPolicy;
     class PhotoCache;
-    class MonthGroupQuery;
+    class Repository;
 
+    // The MonthGroup class provides data to the image browser's grid control.
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class MonthGroup sealed : public Common::BindableBase, public IPhotoGroup
+    [Windows::Foundation::Metadata::WebHostHidden]
+    public ref class MonthGroup sealed : public IPhotoGroup, public Windows::UI::Xaml::Data::INotifyPropertyChanged
     {
     internal:
-        MonthGroup(Platform::String^ title, std::shared_ptr<PhotoCache> photoCache, std::shared_ptr<MonthGroupQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);     
-        concurrency::task<void> QueryPhotosAsync();
+        MonthGroup(std::shared_ptr<PhotoCache> photoCache, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> exceptionPolicy);     
+        concurrency::task<Windows::Foundation::DateTime> QueryPhotosAsync();
 
     public:
+        virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
+
         property Platform::String^ Title 
         { 
             virtual Platform::String^ get();
@@ -40,13 +36,23 @@ namespace Hilo
             bool get();
         }
 
+        property bool IsRunning
+        {
+            bool get();
+        }
+
     private:
         Platform::String^ m_title;
+        Windows::Foundation::DateTime m_dateTimeForTitle;
         std::weak_ptr<PhotoCache> m_weakPhotoCache;
-        std::shared_ptr<MonthGroupQuery> m_query;
+        Windows::Storage::Search::IStorageFolderQueryOperations^ m_folderQuery;
+        std::shared_ptr<Repository> m_repository;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Platform::Collections::Vector<IPhoto^>^ m_photos;
-        unsigned int m_count;
+        size_t m_count;
+        bool m_hasCount;
         bool m_runningQuery;
+
+        void OnPropertyChanged(Platform::String^ propertyName);
     };
 }

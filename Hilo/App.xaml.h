@@ -1,12 +1,4 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-//
+﻿//
 // App.xaml.h
 // Declaration of the App class
 //
@@ -14,11 +6,17 @@
 #pragma once
 
 #include "App.g.h"
+#include "HiloPage.h"
 #include "ViewModelLocator.h"  // Required by generated header
+#include "DesignTimeData.h" // Required by generated header
 
 namespace Hilo
 {
+    // See http://go.microsoft.com/fwlink/?LinkId=267274 for info about this app.
+
     class ExceptionPolicy;
+    class TileUpdateScheduler;
+    class Repository;
 
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -27,10 +25,16 @@ namespace Hilo
     {
     public:
         App();
-        virtual void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ pArgs) override;
+        virtual void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ args) override;
+
+    internal:
+        std::shared_ptr<Repository> GetRepository() { return m_repository; }
 
     private:
         void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
+        void App::OnResume(Object^ sender, Platform::Object^ e);
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<TileUpdateScheduler> m_tileUpdateScheduler;
+        std::shared_ptr<Repository> m_repository;
     };
 }

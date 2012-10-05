@@ -1,21 +1,14 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\YearGroup.h"
 #include "..\Hilo\IMonthBlock.h"
 #include "StubExceptionPolicy.h"
-#include "StubMonthBlockQuery.h"
+#include "StubRepository.h"
 
 using namespace Hilo;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform;
+using namespace Windows::Globalization;
 
 namespace HiloTests
 {
@@ -24,52 +17,23 @@ namespace HiloTests
     public:
         TEST_METHOD_INITIALIZE(Initialize)
         {
-            m_query = std::make_shared<StubMonthBlockQuery>();
-            m_exceptionPolicy = std::make_shared<StubExceptionPolicy>();
+            m_calendar = ref new Calendar();
         }
 
-        TEST_METHOD(YearGroupShouldSetTitleForNamePassedIntoConstructor)
-        {
-            String^ expected = "1999";
-
-            auto group = ref new YearGroup(expected, m_query, m_exceptionPolicy);
-
-            Assert::AreEqual(expected, group->Title);
-        }
-
-        TEST_METHOD(YearGroupShouldSetYearForNamePassedIntoConstructor)
-        {
-            // we have to this because the folder 
-            String^ name = " 1999";
-            unsigned int expected = 1999U;
-
-            auto group = ref new YearGroup(name, m_query, m_exceptionPolicy);
-
-            Assert::AreEqual(expected, group->Year);
-        }
-
-        TEST_METHOD(YearGroupShouldCreateTwelveMonthBlocksForYear)
-        {
-            String^ name = " 1999";
-            auto group = ref new YearGroup(name, m_query, m_exceptionPolicy);
-
-            unsigned int months = group->Items->Size;
-
-            Assert::AreEqual(months, 12U);
-        }
-
+        // Note: Assumes en-US language and locale
         TEST_METHOD(YearGroupShouldPassSelfToMonth)
         {
-            String^ name = " 1999";
-            IYearGroup^ group = ref new YearGroup(name, m_query, m_exceptionPolicy);
+            m_calendar->Year = 1999;
+            m_calendar->Month = 1;
+            m_calendar->Day = 1;
+            auto yearDate = m_calendar->GetDateTime();
 
+            auto group = ref new YearGroup(yearDate, nullptr, nullptr, nullptr);
             auto monthBlock = group->Items->GetAt(0);
-
             Assert::AreEqual(group->Title, monthBlock->Group->Title);
         }
 
     private:
-        std::shared_ptr<StubExceptionPolicy> m_exceptionPolicy;
-        std::shared_ptr<StubMonthBlockQuery> m_query;
+        Windows::Globalization::Calendar ^m_calendar;
     };
 }

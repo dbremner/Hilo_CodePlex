@@ -1,17 +1,13 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo
 {
     interface class IPhoto;
 
+    // The IPhotoGroup class defines the interface of the app's photo containers
+    // (the HubPhotoGroup, MonthGroup, NullPhotoGroup classes). XAML controls
+    // bind to objects of this type.
+    [Windows::Foundation::Metadata::WebHostHidden]
     public interface class IPhotoGroup
     {
         property Platform::String^ Title 

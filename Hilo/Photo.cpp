@@ -1,13 +1,4 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
-#include "HiloCommonDefinitions.h"
 #include "Photo.h"
 #include "ExceptionPolicy.h"
 #include "TaskExceptionsExtensions.h"
@@ -27,18 +18,37 @@ using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), m_exceptionPolicy(exceptionPolicy), m_columnSpan(1), m_rowSpan(1), m_queryPhotoImageAsyncIsRunning(false)
+Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), 
+    m_exceptionPolicy(exceptionPolicy), 
+    m_columnSpan(1), m_rowSpan(1), m_queryPhotoImageAsyncIsRunning(false), m_isInvalidThumbnail(false)
 {
-    m_thumbnailUpdatedEventToken = m_fileInfo->ThumbnailUpdated += ref new TypedEventHandler<IStorageItemInformation^, Object^>(this, &Photo::OnThumbnailUpdated);
+    m_thumbnailUpdatedEventToken = m_fileInfo->ThumbnailUpdated::add(ref new TypedEventHandler<IStorageItemInformation^, Object^>(this, &Photo::OnThumbnailUpdated));
 }
 
 Photo::~Photo()
 {
     if (nullptr != m_fileInfo)
     {
-        m_fileInfo->ThumbnailUpdated -= m_thumbnailUpdatedEventToken;
+        m_fileInfo->ThumbnailUpdated::remove(m_thumbnailUpdatedEventToken);
     }
-    ClearImageData();
+
+    if (nullptr != m_image && m_imageFailedEventToken.Value != 0)
+    {
+        // Remove the event handler on the UI thread because BitmapImage methods
+        // must be called on the UI thread.
+        auto image = m_image;
+        auto imageFailedEventToken = m_imageFailedEventToken;
+        run_async_non_interactive([image, imageFailedEventToken]()
+        {
+            image->ImageFailed::remove(imageFailedEventToken);
+        });
+    }
+}
+
+void Photo::OnPropertyChanged(String^ propertyName)
+{
+    assert(IsMainThread());
+    PropertyChanged(this, ref new Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
 }
 
 void Photo::OnThumbnailUpdated(IStorageItemInformation^ sender, Object^ e)
@@ -51,10 +61,12 @@ void Photo::OnThumbnailUpdated(IStorageItemInformation^ sender, Object^ e)
     }));
 }
 
+// <snippet812>
 IPhotoGroup^ Photo::Group::get()
 {
     return m_weakPhotoGroup.Resolve<IPhotoGroup>();
 }
+// </snippet812>
 
 String^ Photo::Name::get()
 {
@@ -107,7 +119,7 @@ String^ Photo::Resolution::get()
     return m_fileInfo->ImageProperties->Width + " x " + m_fileInfo->ImageProperties->Height;
 }
 
-unsigned long long Photo::FileSize::get()
+uint64 Photo::FileSize::get()
 {
     return m_fileInfo->BasicProperties->Size;
 }
@@ -123,11 +135,14 @@ BitmapImage^ Photo::Thumbnail::get()
     IRandomAccessStream^ thumbnailStream = dynamic_cast<IRandomAccessStream^>(m_fileInfo->Thumbnail);
     if (nullptr == thumbnailStream)
     {
+        m_isInvalidThumbnail = true;
         return ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));
     }
 
     auto thumbnail = ref new BitmapImage();
-    thumbnail->SetSource(thumbnailStream);
+    create_task(thumbnail->SetSourceAsync(thumbnailStream)).then(ObserveException<void>(m_exceptionPolicy));
+ 
+    m_isInvalidThumbnail = false;
     return thumbnail;
 }
 
@@ -138,62 +153,64 @@ BitmapImage^ Photo::Image::get()
     {
         m_queryPhotoImageAsyncIsRunning = true;
         QueryPhotoImageAsync().then([this](task<void> priorTask)
-        {
-            m_queryPhotoImageAsyncIsRunning = false;
-            priorTask.get();
-            OnPropertyChanged("Image");
-        }).then(ObserveException<void>(m_exceptionPolicy));
+            {
+                m_queryPhotoImageAsyncIsRunning = false;
+                priorTask.get();
+                OnPropertyChanged("Image");
+            }).then(ObserveException<void>(m_exceptionPolicy));        
     }
     return m_image;
 }
 
+bool Photo::IsInvalidThumbnail::get()
+{
+    return m_isInvalidThumbnail;
+}
+
+// <snippet851>
 task<void> Photo::QueryPhotoImageAsync()
 {
     auto imageStreamTask = create_task(m_fileInfo->OpenReadAsync());
-    return imageStreamTask.then([this](task<IRandomAccessStreamWithContentType^> antecedent)
+    return imageStreamTask.then([this](task<IRandomAccessStreamWithContentType^> priorTask) -> task<void>
     {
+        assert(IsMainThread());
+        IRandomAccessStreamWithContentType^ imageData = priorTask.get();
+        // <snippet709>
+        m_image = ref new BitmapImage();
+        m_imageFailedEventToken = m_image->ImageFailed::add(ref new ExceptionRoutedEventHandler(this, &Photo::OnImageFailedToOpen));
+        // </snippet709>
+        return create_task(m_image->SetSourceAsync(imageData));
+    }).then([this](task<void> priorTask) {
         assert(IsMainThread());
         try
         {
-            IRandomAccessStreamWithContentType^ imageData = antecedent.get();
-            m_image = ref new BitmapImage();
-            m_imageFailedEventToken = m_image->ImageFailed += ref new ExceptionRoutedEventHandler(this, &Photo::OnImageFailedToOpen);
-            m_image->SetSource(imageData);
+            priorTask.get();
         }
         catch (Exception^ e)
         {
-            auto hr = e->HResult;
-            if (hr == HILO_PHOTO_FILE_NOT_FOUND) 
-            {
-                OnImageFailedToOpen(nullptr, nullptr);
-            }
-            else
-            {
-                throw;
-            }
+           OnImageFailedToOpen(nullptr, nullptr);
         }
     });
 }
+// </snippet851>
 
+// <snippet710>
 void Photo::OnImageFailedToOpen(Object^ sender, ExceptionRoutedEventArgs^ e)
 {
     assert(IsMainThread());
-    m_image = ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));
-    OnPropertyChanged("Image");
+
+    // Load a default image.
+    m_image = ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));  
 }
+// </snippet710>
 
 void Photo::ClearImageData()
 {
     if (nullptr != m_image && m_imageFailedEventToken.Value != 0)
     {
-        m_image->ImageFailed -= m_imageFailedEventToken;
+        m_image->ImageFailed::remove(m_imageFailedEventToken);
     }
     m_image = nullptr;
-}
-
-IAsyncOperation<ImageProperties^>^ Photo::GetImagePropertiesAsync()
-{
-    return m_fileInfo->Properties->GetImagePropertiesAsync();
 }
 
 IAsyncOperation<IRandomAccessStreamWithContentType^>^ Photo::OpenReadAsync()

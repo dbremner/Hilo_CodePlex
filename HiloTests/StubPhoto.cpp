@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "StubPhoto.h"
 #include "..\Hilo\IPhotoGroup.h"
@@ -21,6 +13,11 @@ using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Streams;
 using namespace Windows::System::UserProfile;
 using namespace Windows::UI::Xaml::Media::Imaging;
+
+StubPhoto::StubPhoto()
+{
+    m_name = "Stub Photo";
+}
 
 IPhotoGroup^ StubPhoto::Group::get()
 {
@@ -88,12 +85,17 @@ BitmapImage^ StubPhoto::Image::get()
     return m_image;
 }
 
+bool StubPhoto::IsInvalidThumbnail::get()
+{
+    return m_isInvalidThumbnail;
+}
+
 String^ StubPhoto::Resolution::get()
 {
     return m_resolution;
 }
 
-unsigned long long StubPhoto::FileSize::get()
+uint64 StubPhoto::FileSize::get()
 {
     return m_fileSize;
 }
@@ -106,14 +108,6 @@ String^ StubPhoto::DisplayType::get()
 void StubPhoto::ClearImageData()
 {
     // not implemented
-}
-
-IAsyncOperation<ImageProperties^>^ StubPhoto::GetImagePropertiesAsync()
-{
-    return create_async([this]
-    {
-        return m_imageProperties;
-    });
 }
 
 IAsyncOperation<IRandomAccessStreamWithContentType^>^ StubPhoto::OpenReadAsync()

@@ -1,13 +1,7 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
+#include "LocalResourceLoader.h"
 #include "WideFiveImageTile.h"
+#include "LocalResourceLoader.h"
 
 using namespace Hilo;
 using namespace std;
@@ -17,26 +11,37 @@ using namespace Windows::Data::Xml::Dom;
 
 const unsigned int MaxTemplateImages = 5;
 
+WideFiveImageTile::WideFiveImageTile()
+{
+    m_loader = ref new LocalResourceLoader();
+}
+
+WideFiveImageTile::WideFiveImageTile(Hilo::IResourceLoader^ loader) : m_loader(loader)
+{
+}
+
 TileNotification^ WideFiveImageTile::GetTileNotification()
 {
-    auto content = TileUpdateManager::GetTemplateContent(
-        TileTemplateType::TileWideImageCollection);
+    auto content = TileUpdateManager::GetTemplateContent(TileTemplateType::TileWideImageCollection);
 
     UpdateContentWithValues(content);
 
     return ref new TileNotification(content);
 }
 
+// <snippet1903>
 void WideFiveImageTile::SetImageFilePaths(const vector<wstring>& fileNames)
 {
     if (fileNames.size() > MaxTemplateImages)
     {
-        throw exception("Wide tile can only take up to 5 images.");
+        throw ref new FailureException(m_loader->GetString("ErrorWideTileTooBig"));
     }
 
     m_fileNames = fileNames;
 }
+// </snippet1903>
 
+// <snippet504>
 void WideFiveImageTile::UpdateContentWithValues(XmlDocument^ content)
 {
     if (m_fileNames.size() == 0) return;
@@ -49,6 +54,7 @@ void WideFiveImageTile::UpdateContentWithValues(XmlDocument^ content)
             m_fileNames[image].c_str());
     }
 
+    // Update square tile template with the first image.
     TileTemplateType squareTileTemplate = TileTemplateType::TileSquareImage;
     XmlDocument^ squareTileXml = TileUpdateManager::GetTemplateContent(squareTileTemplate);
 
@@ -59,3 +65,4 @@ void WideFiveImageTile::UpdateContentWithValues(XmlDocument^ content)
     auto node = content->ImportNode(squareTileXml->GetElementsByTagName("binding")->First()->Current, true);
     content->GetElementsByTagName("visual")->First()->Current->AppendChild(node);
 }
+// </snippet504>

@@ -1,12 +1,4 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#include "pch.h"
+﻿#include "pch.h"
 #include "ImageView.xaml.h"
 #include "ImageViewModel.h"
 
@@ -16,21 +8,31 @@ using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Input;
 
-ImageView::ImageView()
+ImageView::ImageView() : m_pointerPressed(false)
 {
     InitializeComponent();
 
-    m_filmStripLoadedToken = PhotosFilmStripGridView->Loaded += ref new RoutedEventHandler(this, &ImageView::OnFilmStripLoaded);
+    m_filmStripLoadedToken = PhotosFilmStripGridView->Loaded::add(ref new RoutedEventHandler(this, &ImageView::OnFilmStripLoaded));
 }
 
+// <snippet821>
 ImageView::~ImageView()
 {
     if (nullptr != PhotosFilmStripGridView)
     {
-        PhotosFilmStripGridView->Loaded -= m_filmStripLoadedToken;
+        // Remove the event handler on the UI thread because GridView methods
+        // must be called on the UI thread.
+        auto photosFilmStripGridView = PhotosFilmStripGridView;
+        auto filmStripLoadedToken = m_filmStripLoadedToken;
+        run_async_non_interactive([photosFilmStripGridView, filmStripLoadedToken]()
+        {
+            photosFilmStripGridView->Loaded::remove(filmStripLoadedToken);
+        });
     }
 }
+// </snippet821>
 
+// <snippet900>
 // Scrolls the selected item into view after the collection is likely to have loaded.
 void ImageView::OnFilmStripLoaded(Object^ sender, RoutedEventArgs^ e)
 {
@@ -40,9 +42,11 @@ void ImageView::OnFilmStripLoaded(Object^ sender, RoutedEventArgs^ e)
         PhotosFilmStripGridView->ScrollIntoView(vm->SelectedItem);
     }
 
-    PhotosFilmStripGridView->Loaded -= m_filmStripLoadedToken;
+    PhotosFilmStripGridView->Loaded::remove(m_filmStripLoadedToken);
 }
+// </snippet900>
 
+// <snippet1401>
 void Hilo::ImageView::OnImagePointerPressed(Object^ sender, PointerRoutedEventArgs^ e)
 {
     m_pointerPressed = true;
@@ -55,7 +59,9 @@ void Hilo::ImageView::OnImagePointerPressed(Object^ sender, PointerRoutedEventAr
         ImageViewFileInformationPopup->IsOpen = true;
     }
 }
+// </snippet1401>
 
+// <snippet1402>
 void Hilo::ImageView::OnImagePointerReleased(Object^ sender, PointerRoutedEventArgs^ e)
 {
     if (m_pointerPressed)
@@ -64,7 +70,9 @@ void Hilo::ImageView::OnImagePointerReleased(Object^ sender, PointerRoutedEventA
         m_pointerPressed = false;
     }
 }
+// </snippet1402>
 
+// <snippet1403>
 void Hilo::ImageView::OnImagePointerMoved(Object^ sender, PointerRoutedEventArgs^ e)
 {
     if (m_pointerPressed)
@@ -76,3 +84,4 @@ void Hilo::ImageView::OnImagePointerMoved(Object^ sender, PointerRoutedEventArgs
         }
     }
 }
+// </snippet1403>

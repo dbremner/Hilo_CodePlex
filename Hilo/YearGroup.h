@@ -1,37 +1,32 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
 #include "IYearGroup.h"
 
 namespace Hilo
 {
     interface class IMonthBlock;
     class ExceptionPolicy;
-    class MonthBlockQuery;
+    class Repository;
 
+    // The YearGroup class provides the data for the image browser's zoomed-out view of the user's picture library.
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class YearGroup sealed : public Common::BindableBase, public IYearGroup
+    [Windows::Foundation::Metadata::WebHostHidden]
+    public ref class YearGroup sealed : public IYearGroup, public Windows::UI::Xaml::Data::INotifyPropertyChanged
     {
     internal:
-        YearGroup(Platform::String^ name, std::shared_ptr<MonthBlockQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        YearGroup(Windows::Foundation::DateTime yearDate, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
 
     public:
+        virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
+
         property Platform::String^ Title
         { 
             virtual Platform::String^ get();
         }
 
-        property unsigned int Year
+        property int Year
         {
-            virtual unsigned int get();
+            virtual int get();
         }
 
         property Windows::Foundation::Collections::IObservableVector<IMonthBlock^>^ Items
@@ -41,9 +36,13 @@ namespace Hilo
 
     private:
         Platform::String^ m_name;
-        std::shared_ptr<MonthBlockQuery> m_query;
+        Windows::Foundation::DateTime m_yearDate;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
-        unsigned int m_year;
+        std::shared_ptr<Repository> m_repository;
+        int m_year;
         Platform::Collections::Vector<IMonthBlock^>^ m_months;
+        Windows::Storage::Search::IStorageFolderQueryOperations^ m_folderQuery;
+
+        void OnPropertyChanged(Platform::String^ propertyName);
     };
 }

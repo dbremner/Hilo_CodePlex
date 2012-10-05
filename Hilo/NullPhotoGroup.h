@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include "IPhotoGroup.h"
@@ -14,14 +6,17 @@ namespace Hilo
 {
     interface class IPhoto;
 
+    // Instances of the NullPhotoGroup class are placeholders used by photos that are not part of any group.
     ref class NullPhotoGroup : public IPhotoGroup
     {
-    public:
+    
+    internal:
         virtual operator Windows::Storage::IStorageFolder^ ()
         {
             return nullptr;
         }
 
+    public:
         property Platform::String^ Title 
         { 
             virtual Platform::String^ get()

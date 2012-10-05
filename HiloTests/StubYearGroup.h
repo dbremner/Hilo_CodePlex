@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 #include "..\Hilo\IYearGroup.h"
 
@@ -16,16 +8,16 @@ namespace HiloTests
     ref class StubYearGroup sealed : public Hilo::IYearGroup
     {
     public:
-        StubYearGroup(Platform::String^ title, unsigned int year);
+        StubYearGroup(Windows::Foundation::DateTime yearDate);
 
         property Platform::String^ Title
         { 
             virtual Platform::String^ get();
         }
 
-        property unsigned int Year
+        property int Year
         {
-            virtual unsigned int get();
+            virtual int get();
         }
 
         property Windows::Foundation::Collections::IObservableVector<Hilo::IMonthBlock^>^ Items
@@ -34,7 +26,6 @@ namespace HiloTests
         }
 
     private:
-        Platform::String^ m_title;
-        unsigned int m_year;
+        Windows::Foundation::DateTime m_yearDate;
     };
 }

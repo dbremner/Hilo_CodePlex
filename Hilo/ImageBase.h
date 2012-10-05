@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include "ViewModelBase.h"
@@ -15,6 +7,7 @@ namespace Hilo
     interface class IPhoto;
     class ExceptionPolicy;
 
+    // The ImageBase class provides load and save functionality for image files.
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ImageBase : public ViewModelBase
     {

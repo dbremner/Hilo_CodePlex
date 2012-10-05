@@ -1,14 +1,5 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
 #include "IMonthBlock.h"
 
 namespace Hilo
@@ -16,16 +7,22 @@ namespace Hilo
     interface class IYearGroup;
     interface class IResourceLoader;
     class ExceptionPolicy;
-    class MonthBlockQuery;
+    class Repository;
 
+    // The MonthBlock class provides per-month data used by the image browser's 
+    // zoomed-out view of the user's picture library. XAML controls bind
+    // to objects of this type.
+    [Windows::Foundation::Metadata::WebHostHidden]
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class MonthBlock sealed : public Common::BindableBase, public IMonthBlock
+    public ref class MonthBlock sealed : public IMonthBlock, public Windows::UI::Xaml::Data::INotifyPropertyChanged
     {
     internal:
-        MonthBlock(IYearGroup^ yearGroup, unsigned int month, IResourceLoader^ resourceLoader, std::shared_ptr<MonthBlockQuery> query, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        MonthBlock(IYearGroup^ yearGroup, int month, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
         concurrency::task<void> QueryPhotoCount();
 
     public:
+        virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
+
         property Platform::String^ Name 
         { 
             virtual Platform::String^ get(); 
@@ -48,14 +45,16 @@ namespace Hilo
 
     private:
         Platform::WeakReference m_weakYearGroup;
-        unsigned int m_month;
-        IResourceLoader^ m_resourceLoader;
-        std::shared_ptr<MonthBlockQuery> m_query;
+        int m_month;
+        Platform::String^ m_name;
+        Windows::Storage::Search::IStorageFolderQueryOperations^ m_folderQuery;
+        std::shared_ptr<Repository> m_repository;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         unsigned int m_count;
         bool m_runOperation;
         bool m_runningOperation;
 
         Platform::String^ BuildDateQuery();
+        void OnPropertyChanged(Platform::String^ propertyName);
     };
 }

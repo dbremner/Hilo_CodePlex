@@ -1,16 +1,9 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 #include "ExceptionPolicy.h"
 
 namespace Hilo 
 {
+    // <snippet406>
     template<typename T>
     struct ObserveException
     {
@@ -46,6 +39,7 @@ namespace Hilo
     private:
         std::shared_ptr<ExceptionPolicy> m_handler;
     };
+// </snippet406>
 
     template<>
     concurrency::task<void> ObserveException<void>::operator()(concurrency::task<void> antecedent) const

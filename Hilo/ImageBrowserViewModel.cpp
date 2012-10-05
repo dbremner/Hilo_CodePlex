@@ -1,11 +1,3 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ImageBrowserViewModel.h"
 #include "IPhoto.h"
@@ -16,9 +8,7 @@
 #include "DelegateCommand.h"
 #include "ImageNavigationData.h"
 #include "TaskExceptionsExtensions.h"
-#include "VirtualMonthFoldersQuery.h"
-#include "VirtualYearFoldersQuery.h"
-#include <wrl.h>
+#include "Repository.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -28,40 +18,54 @@ using namespace std;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Navigation;
-using namespace Microsoft::WRL;
 
-ImageBrowserViewModel::ImageBrowserViewModel(shared_ptr<VirtualMonthFoldersQuery> monthFoldersQuery, shared_ptr<VirtualYearFoldersQuery> yearFoldersQuery, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_inProgress(true), 
-    m_photoCache(std::make_shared<PhotoCache>()), 
+ImageBrowserViewModel::ImageBrowserViewModel(shared_ptr<Repository> repository, shared_ptr<ExceptionPolicy> exceptionPolicy) :  
+    m_repository(repository),
     ViewModelBase(exceptionPolicy), 
-    m_monthFoldersQuery(monthFoldersQuery), 
-    m_yearFoldersQuery(yearFoldersQuery),
-    m_monthCancelTokenSource(cancellation_token_source()),
-    m_yearCancelTokenSource(cancellation_token_source())
+    m_photoCache(std::make_shared<PhotoCache>()), 
+    m_monthGroups(ref new Vector<IPhotoGroup^>()),
+    m_yearGroups(ref new Vector<IYearGroup^>()),
+    m_cancellationTokenSource(cancellation_token_source()),
+    m_currentQueryId(1),
+    m_currentMode(Mode::Pending),
+    m_lastFileChangeTime(0ull),
+    m_hasFileUpdateTask(false),
+    m_runningMonthQuery(false), m_runningYearQuery(false)
 {
+    // <snippet914>
     m_groupCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::NavigateToGroup), nullptr);
-    m_cropImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
-    m_rotateImageCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::RotateImage), ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanCropOrRotateImage));
+    // </snippet914>
+    m_cropImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage),
+        ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanProcessImage));
+    m_rotateImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &ImageBrowserViewModel::RotateImage),
+        ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanProcessImage));
+    m_cartoonizeImageCommand = ref new DelegateCommand(
+        ref new ExecuteDelegate(this, &ImageBrowserViewModel::CartoonizeImage),
+        ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanProcessImage));
 
-    IInspectable* wr(reinterpret_cast<IInspectable*>(this));
+    // Register with the repository to receive notifications of file system changes.
+    auto wr = Platform::WeakReference(this);
     function<void()> callback = [wr] {
-        Object^ obj = reinterpret_cast<Object^>(wr);
-        auto vm = dynamic_cast<ImageBrowserViewModel^>(obj);
+        auto vm = wr.Resolve<ImageBrowserViewModel>();
         if (nullptr != vm)
         {
             vm->OnDataChanged();
         }
     };
-    m_monthFoldersQuery->AddObserver(callback);
+    m_repository->AddObserver(callback, PageType::Browse);
 }
 
 ImageBrowserViewModel::~ImageBrowserViewModel()
 {
-    if (nullptr != m_monthFoldersQuery)
+    if (nullptr != m_repository)
     {
-        m_monthFoldersQuery->RemoveObserver();
+        m_repository->RemoveObserver(PageType::Browse);
     }
 }
 
+#pragma region XAML Properties
 ICommand^ ImageBrowserViewModel::GroupCommand::get()
 {
     return m_groupCommand;
@@ -77,9 +81,14 @@ ICommand^ ImageBrowserViewModel::RotateImageCommand::get()
     return m_rotateImageCommand;
 }
 
+ICommand^ ImageBrowserViewModel::CartoonizeImageCommand::get()
+{
+    return m_cartoonizeImageCommand;
+}
+
 bool ImageBrowserViewModel::InProgress::get()
 {
-    return m_inProgress;
+    return m_runningMonthQuery;
 }
 
 Object^ ImageBrowserViewModel::SelectedItem::get()
@@ -91,110 +100,92 @@ void ImageBrowserViewModel::SelectedItem::set(Object^ value)
 {
     if (m_photo != value)
     {
+        ViewModelBase::m_isAppBarOpen = false;
         m_photo = dynamic_cast<IPhoto^>(value);
-        m_cropImageCommand->CanExecute(nullptr);
-        m_rotateImageCommand->CanExecute(nullptr);
+        bool result = CanProcessImage(nullptr);
+        m_rotateImageCommand->CanExecute(result);
+        m_cropImageCommand->CanExecute(result);
+        m_cartoonizeImageCommand->CanExecute(result);
+        IsAppBarEnabled = value != nullptr;
+        IsAppBarOpen = value != nullptr;
+        IsAppBarSticky = value != nullptr;
         OnPropertyChanged("SelectedItem");
     }
 }
 
 IObservableVector<IPhotoGroup^>^ ImageBrowserViewModel::MonthGroups::get()
 {
-    if (nullptr == m_monthGroups)
-    {
-        OnDataChanged();
-    }
+    assert(nullptr != m_monthGroups);
     return m_monthGroups;
-}
-
-task<void> ImageBrowserViewModel::QueryMonthGroupsAsync()
-{
-    assert(IsMainThread());
-
-    if (nullptr == m_monthGroups)
-    {
-        m_monthGroups = ref new Vector<IPhotoGroup^>();
-    }
-
-    m_monthGroups->Clear();
-    m_monthCancelTokenSource = cancellation_token_source();
-    cancellation_token token = m_monthCancelTokenSource.get_token();
-    auto t = m_monthFoldersQuery->GetMonthGroupedPhotosWithCacheAsync(m_photoCache, token);
-    return t.then([this](IVectorView<IPhotoGroup^>^ groups)
-    {
-        assert(IsMainThread());
-
-        if (groups->Size == 0)
-        {
-            cancel_current_task();
-        }        
-        for (auto group : groups)
-        {
-            m_monthGroups->Append(group);
-        }
-    });
 }
 
 IObservableVector<IYearGroup^>^ ImageBrowserViewModel::YearGroups::get()
 {
-    if (nullptr == m_yearGroups)
-    {
-        OnDataChanged();
-    }
+    assert(nullptr != m_yearGroups);
     return m_yearGroups;
-}
-
-task<void> ImageBrowserViewModel::QueryYearGroupsAsync()
-{
-    assert(IsMainThread());
-    if (nullptr == m_yearGroups)
-    {
-        m_yearGroups = ref new Vector<IYearGroup^>();
-    }
-
-    m_yearGroups->Clear();
-    m_yearCancelTokenSource = cancellation_token_source();
-    cancellation_token token = m_yearCancelTokenSource.get_token();
-    auto t = m_yearFoldersQuery->GetYearGroupedMonthsAsync(token);
-    return t.then([this](IVectorView<IYearGroup^>^ groups)
-    {
-        assert(IsMainThread());
-        if (groups->Size == 0)
-        {
-            cancel_current_task();
-        }
-
-        for (auto year : groups)
-        {
-            m_yearGroups->Append(year);
-        }
-    });
 }
 
 IPhoto^ ImageBrowserViewModel::GetPhotoForYearAndMonth(unsigned int year, unsigned int month)
 {
     return m_photoCache->GetForYearAndMonth(year, month);
-}
+}  
+#pragma endregion
 
-void ImageBrowserViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
+
+#pragma region Regulate File Update Events
+// To prevent UI flicker, the ImageBrowserViewMode limits the frequency of update events
+// that occur when file system changes require the image brower to update the displayed items.
+
+// This is minimum allowed time in milliseconds between successive file system change notifications. 
+const ULONGLONG EVENTSPACING = 30000ul;
+
+// This is the handler that is invoked whenever the file system notifies the image browser view model of a change in the
+// previously submitted month query. The handler propagates updates at a maximum rate of one for each EVENTSPACING/1000 seconds.
+void ImageBrowserViewModel::OnDataChanged()
 {
     assert(IsMainThread());
-    m_active = false;
-    m_monthCancelTokenSource.cancel();
-    m_yearCancelTokenSource.cancel();
-}
 
-void ImageBrowserViewModel::OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e)
-{
-    assert(IsMainThread());
-    m_active = true;
-    if (m_receivedChangeWhileNotActive)
+    auto currentTime = GetTickCount64();
+
+    if (m_hasFileUpdateTask || m_currentMode == Mode::Pending)
     {
-        m_receivedChangeWhileNotActive = false;
-        OnDataChanged();
+        // An update is already scheduled to occur. Ignore the current change notification.
+    }
+    else if (m_lastFileChangeTime == 0l || currentTime > (m_lastFileChangeTime + EVENTSPACING))
+    {
+        // If it's the first change, or more than EVENTSPACING/1000 seconds have elapsed since the last update, observe the change immediately.
+        m_lastFileChangeTime = currentTime;
+        ObserveFileChange();
+    }
+    else
+    {
+        // Otherwise, schedule the update to occur EVENTSPACING/1000 seconds from the previous update.
+        auto timeSinceUpdate = (currentTime > m_lastFileChangeTime ? currentTime - m_lastFileChangeTime : 0ul);
+        unsigned int timeToWait = (timeSinceUpdate < EVENTSPACING ? EVENTSPACING - (unsigned int)timeSinceUpdate : EVENTSPACING);
+        m_lastFileChangeTime = currentTime + timeToWait;
+        m_hasFileUpdateTask = true;
+
+        // Use weak reference to avoid inadvertently extending object lifetime.
+        auto weakThis = Platform::WeakReference(this);
+
+        // Observe the update after waiting the specified amount of time.
+        create_task([timeToWait]() {
+            assert(IsBackgroundThread());
+            ::wait(timeToWait);
+        }).then([weakThis]() {
+            assert(IsMainThread());
+            auto vm = weakThis.Resolve<ImageBrowserViewModel>();
+            if (nullptr != vm)
+            {
+                vm->ObserveFileChange();
+                vm->m_hasFileUpdateTask = false;
+            }
+        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
     }
 }
+#pragma endregion
 
+// <snippet915>
 void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
 {
     auto group = dynamic_cast<IPhotoGroup^>(parameter);
@@ -207,115 +198,288 @@ void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
         ViewModelBase::GoToPage(PageType::Image, imageData.SerializeToString());
     }
 }
-
-bool ImageBrowserViewModel::CanCropOrRotateImage(Object^ paratmer)
-{
-    return (nullptr != m_photo);
-}
+// </snippet915>
 
 void ImageBrowserViewModel::CropImage(Object^ parameter)
 {
-    ImageNavigationData imageData(m_photo);
-    ViewModelBase::GoToPage(PageType::Crop, imageData.SerializeToString());
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
 }
 
 void ImageBrowserViewModel::RotateImage(Object^ parameter)
 {
-    ImageNavigationData imageData(m_photo);
-    ViewModelBase::GoToPage(PageType::Rotate, imageData.SerializeToString());
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
 }
 
-void ImageBrowserViewModel::OnDataChanged()
+void ImageBrowserViewModel::CartoonizeImage(Object^ parameter)
+{
+    ImageNavigationData data(m_photo);
+    ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+}
+
+bool ImageBrowserViewModel::CanProcessImage(Object^ parameter)
+{
+    return (m_photo != nullptr && !m_photo->IsInvalidThumbnail);
+}
+
+#pragma region ImageViewModelStateMachine
+
+// The functions in this region implement a finite state machine that handles
+// all possible interleavings of ImageBrowserViewModel actions. These include
+// user requests, file system update notifications and completions of in-flight 
+// async operations.
+
+// Possible modes or states:
+//    Default (0, 0, 0): no pending data changes, not running query, view inactive  
+//    Pending (1, 0, 0): pending data changes, not running query, view inactive 
+//    Active  (0, 0, 1): no pending data changes, not running query, view active 
+//    Running (0, 1, 1): no pending data changes, running query, view active   
+
+// Transitions between modes:
+//    OnNavigatedFrom - occurs when view becomes inactive
+//    OnNavigatedTo - occurs when becomes active
+//    ObserveFileChange - occurs when file system changes invalidate the result of the current query
+//    FinishMonthAndYearQueries - occurs when current month and year queries are both complete
+
+// <snippet403>
+// State transition occurs when view model becomes inactive (no longer visible).
+void ImageBrowserViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
 {
     assert(IsMainThread());
-    if (!m_active)
+    switch (m_currentMode)
     {
-        m_receivedChangeWhileNotActive = true;
-        return;
-    }
+    case Mode::Default:
+        assert(false);       // Can't navigate from an inactive view model
+        break;
 
-    if (m_runningMonthQuery || m_runningYearQuery)
+    case Mode::Pending:
+        assert(false);       // Can't navigate from an inactive view model
+        break;
+
+    case Mode::Active:
+        m_currentMode = Mode::Default;
+        break;
+
+    case Mode::Running:
+        CancelMonthAndYearQueries();
+        m_currentMode = Mode::Pending;
+        break;
+    }
+}
+// </snippet403>
+
+// State transition occurs when view model becomes active (visible).
+void ImageBrowserViewModel::OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e)
+{
+    assert(IsMainThread());
+    switch (m_currentMode)
     {
-        m_receivedChangeWhileRunning = true;
-        return;
-    }
+    case Mode::Default:
+        m_currentMode = Mode::Active;
+        break;
 
-    RunMonthQuery();
-    RunYearQuery();
+    case Mode::Pending:
+        StartMonthAndYearQueries();
+        m_currentMode = Mode::Running;
+        break;
+
+    case Mode::Active:
+        assert(false);   // Can't navigate to already active view model
+        break;
+
+    case Mode::Running:
+        assert(false);   // Can't navigate to already active view model
+        break;
+    }
 }
 
-void ImageBrowserViewModel::RunMonthQuery()
+// <snippet414>
+// State transition occurs when file system changes invalidate the result of the current query.
+void ImageBrowserViewModel::ObserveFileChange()
 {
+    assert(IsMainThread());
+
+    switch (m_currentMode)
+    {
+    case Mode::Default:
+        m_currentMode = Mode::Pending;
+        break;
+
+    case Mode::Pending:
+        m_currentMode = Mode::Pending;
+        break;
+
+    case Mode::Active:
+        StartMonthAndYearQueries();
+        m_currentMode = Mode::Running;
+        break;
+
+    case Mode::Running:
+        CancelMonthAndYearQueries();
+        StartMonthAndYearQueries();
+        m_currentMode = Mode::Running;
+        break;
+    }
+}
+// </snippet414>
+
+// State transition occurs when both month and year queries have finished running. 
+void ImageBrowserViewModel::FinishMonthAndYearQueries()
+{
+    assert(m_runningMonthQuery == false);
+    assert(m_runningYearQuery == false);
+    assert(m_currentMode == Mode::Running);
+
+    switch (m_currentMode)
+    {
+    case Mode::Default:
+        assert(false);  // There is no query in flight in the Default mode.
+        break;
+
+    case Mode::Pending:
+        assert(false);  // There is no query in flight in the Pending mode.
+        break;
+
+    case Mode::Active:
+        assert(false);  // There is no query in flight in the Active mode.
+        break;
+
+    case Mode::Running:
+        m_currentMode = Mode::Active;
+        m_currentQueryId++;
+        break;
+    }
+}
+#pragma endregion
+
+#pragma region YearAndMonthQueries
+void ImageBrowserViewModel::CancelMonthAndYearQueries()
+{
+    assert(m_currentMode == Mode::Running);
+
     if (m_runningMonthQuery)
     {
-        return;
+        m_runningMonthQuery = false;
+        OnPropertyChanged("InProgress");
     }
-
-    m_runningMonthQuery = true;
-    ShowProgress(true);
-    QueryMonthGroupsAsync().then([this](task<void> priorTask)
-    {
-        assert(IsMainThread());
-        try
-        {
-            priorTask.get();
-            if (!m_receivedChangeWhileRunning)
-            {
-                ShowProgress(false);
-                OnPropertyChanged("MonthGroups");
-            }
-            m_runningMonthQuery = false;
-            if (m_receivedChangeWhileRunning)
-            {
-                m_receivedChangeWhileRunning = false;
-                OnDataChanged();
-            }
-        }
-        catch (const concurrency::task_canceled&)
-        {
-            m_monthGroups = nullptr;
-            ShowProgress(false);
-            GoHome();
-        }
-    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+    m_runningYearQuery = false;
+    m_currentQueryId++;
+    m_cancellationTokenSource.cancel();
 }
 
-void ImageBrowserViewModel::RunYearQuery()
-{
-    if (m_runningYearQuery)
-    {
-        return;
-    }
-    m_runningYearQuery = true;
-    QueryYearGroupsAsync().then([this](task<void> priorTask)
-    {
-        assert(IsMainThread());
-        try
-        {
-            priorTask.get();
-            if (!m_receivedChangeWhileRunning)
-            {
-                OnPropertyChanged("YearGroups");
-            }
-            m_runningYearQuery = false;
-            if (m_receivedChangeWhileRunning)
-            {
-                m_receivedChangeWhileRunning = false;
-                OnDataChanged();
-            }
-        }
-        catch (const concurrency::task_canceled&)
-        {
-            m_yearGroups = nullptr;
-            ShowProgress(false);
-            GoHome();
-        }
-    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
-}
-
-void ImageBrowserViewModel::ShowProgress(bool showProgress)
+void ImageBrowserViewModel::StartMonthAndYearQueries()
 {
     assert(IsMainThread());
-    m_inProgress = showProgress;
-    OnPropertyChanged("InProgress");
+    assert(!m_runningMonthQuery);
+    assert(!m_runningYearQuery);
+    assert(m_currentMode == Mode::Active || m_currentMode == Mode::Running || m_currentMode == Mode::Pending);
+
+    m_cancellationTokenSource = cancellation_token_source();
+    auto token = m_cancellationTokenSource.get_token();
+    StartMonthQuery(m_currentQueryId, token);
+    StartYearQuery(m_currentQueryId, token);
 }
+
+// <snippet402>
+// <snippet804>
+void ImageBrowserViewModel::StartMonthQuery(int queryId, cancellation_token token)
+{
+    m_runningMonthQuery = true;
+    OnPropertyChanged("InProgress");
+    m_photoCache->Clear();
+    run_async_non_interactive([this, queryId, token]()
+    {
+        // if query is obsolete, don't run it.
+        if (queryId != m_currentQueryId) return;
+
+        m_repository->GetMonthGroupedPhotosWithCacheAsync(m_photoCache, token).then([this, queryId](task<IVectorView<IPhotoGroup^>^> priorTask)
+        {
+            assert(IsMainThread());
+            if (queryId != m_currentQueryId)  
+            {
+                // Query is obsolete. Propagate exception and quit.
+                priorTask.get();
+                return;
+            }
+
+            m_runningMonthQuery = false;
+            OnPropertyChanged("InProgress");
+            if (!m_runningYearQuery)
+            {
+                FinishMonthAndYearQueries();
+            }
+            try
+            {     
+                // Update display with results.
+                m_monthGroups->Clear();                   
+                for (auto group : priorTask.get())
+                {  
+                    m_monthGroups->Append(group);
+                }
+                OnPropertyChanged("MonthGroups");
+            }
+            // On exception (including cancellation), remove any partially computed results and rethrow.
+            catch (...)
+            {
+                m_monthGroups = ref new Vector<IPhotoGroup^>();
+                throw;
+            }
+        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+    });
+}
+// </snippet804>
+// </snippet402>
+
+void ImageBrowserViewModel::StartYearQuery(int queryId, cancellation_token token)
+{
+    assert(!m_runningYearQuery);
+    assert(m_currentMode == Mode::Active || m_currentMode == Mode::Running || m_currentMode == Mode::Pending);
+
+    m_runningYearQuery = true;
+    run_async_non_interactive([this, queryId, token]()
+    {
+        assert(IsMainThread());
+
+        // If query is obsolete, don't run it.
+        if (queryId != m_currentQueryId) return;
+
+        m_repository->GetYearGroupedMonthsAsync(token).then([this, queryId](task<IVectorView<IYearGroup^>^> priorTask)
+        {
+            assert(IsMainThread());
+            if (queryId != m_currentQueryId)
+            {
+                // Query is obsolete. Rethrow any exception and exit.
+                priorTask.get();
+                return;
+            }
+
+            m_runningYearQuery = false;
+            if (!m_runningMonthQuery)
+            {
+                FinishMonthAndYearQueries();
+            }
+
+            try
+            {
+                // Update display with results.
+                m_yearGroups->Clear();  
+                for (auto group : priorTask.get())
+                {  
+                    m_yearGroups->Append(group);
+                }
+                OnPropertyChanged("YearGroups");
+            }
+            // On exception (including cancellation), remove any partially computed results and rethrow.
+            catch (...)
+            {
+                m_yearGroups = ref new Vector<IYearGroup^>();
+                throw;
+            }
+        }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
+    });
+}
+#pragma endregion
+
+
+

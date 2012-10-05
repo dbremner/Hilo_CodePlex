@@ -1,19 +1,6 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ViewModelLocator.h"
 #include "DebugLoggingExceptionPolicy.h"
-#include "FilePictureHubGroupQuery.h"
-#include "FileSinglePhotoQuery.h"
-#include "FileAllPhotosQuery.h"
-#include "FileVirtualMonthFoldersQuery.h"
-#include "FileVirtualYearFoldersQuery.h"
 
 using namespace Hilo;
 using namespace Platform::Collections;
@@ -23,8 +10,12 @@ using namespace Windows::ApplicationModel::Resources;
 ViewModelLocator::ViewModelLocator()
 {
     m_exceptionPolicy = make_shared<DebugLoggingExceptionPolicy>();
+    // <snippet2302>
+    m_repository = safe_cast<Hilo::App^>(Windows::UI::Xaml::Application::Current)->GetRepository();
+    // </snippet2302>
 }
 
+// <snippet702>
 MainHubViewModel^ ViewModelLocator::MainHubVM::get()
 {
     auto vector = ref new Vector<HubPhotoGroup^>();
@@ -32,31 +23,40 @@ MainHubViewModel^ ViewModelLocator::MainHubVM::get()
     auto loader = ref new ResourceLoader();
     auto title = loader->GetString("PicturesTitle");
     auto emptyTitle = loader->GetString("EmptyPicturesTitle");
-    auto picturesGroup = ref new HubPhotoGroup(title, emptyTitle, make_shared<FilePictureHubGroupQuery>(m_exceptionPolicy), m_exceptionPolicy);
+    auto picturesGroup = ref new HubPhotoGroup(title, emptyTitle, m_repository, m_exceptionPolicy);
     vector->Append(picturesGroup);
     return ref new MainHubViewModel(vector, m_exceptionPolicy);
 }
+// </snippet702>
 
 ImageBrowserViewModel^ ViewModelLocator::ImageBrowserVM::get()
 {
     if (nullptr == m_imageBrowswerViewModel)
     {
-        m_imageBrowswerViewModel = ref new ImageBrowserViewModel(make_shared<FileVirtualMonthFoldersQuery>(m_exceptionPolicy), make_shared<FileVirtualYearFoldersQuery>(m_exceptionPolicy), m_exceptionPolicy);
+        m_imageBrowswerViewModel = ref new ImageBrowserViewModel(m_repository, m_exceptionPolicy);
     }
+
     return m_imageBrowswerViewModel;
 }
 
 ImageViewModel^ ViewModelLocator::ImageVM::get()
 {
-    return ref new ImageViewModel(make_shared<FileSinglePhotoQuery>(m_exceptionPolicy), make_shared<FileAllPhotosQuery>(m_exceptionPolicy), m_exceptionPolicy);
+    return ref new ImageViewModel(m_repository, m_exceptionPolicy);
 }
 
 CropImageViewModel^ ViewModelLocator::CropImageVM::get()
 {
-    return ref new CropImageViewModel(make_shared<FileSinglePhotoQuery>(m_exceptionPolicy), m_exceptionPolicy);
+    return ref new CropImageViewModel(m_repository, m_exceptionPolicy);
 }
 
+// <snippet2303>
 RotateImageViewModel^ ViewModelLocator::RotateImageVM::get()
 {
-    return ref new RotateImageViewModel(make_shared<FileSinglePhotoQuery>(m_exceptionPolicy), m_exceptionPolicy);
+    return ref new RotateImageViewModel(m_repository, m_exceptionPolicy);
+}
+// </snippet2303>
+
+CartoonizeImageViewModel^ ViewModelLocator::CartoonizeImageVM::get()
+{
+    return ref new CartoonizeImageViewModel(m_repository, m_exceptionPolicy);
 }

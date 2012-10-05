@@ -1,13 +1,6 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "UnitTestingAssertSpecializations.h"
 #include "StubExceptionPolicy.h"
 #include "..\Hilo\TaskExceptionsExtensions.h"
 
@@ -47,7 +40,6 @@ namespace HiloTests
             }).then(ObserveException<void>(policy)), status);
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
-
             Assert::IsNull(policy->GetSuppliedException());
         }
 
@@ -79,7 +71,6 @@ namespace HiloTests
             }).then(ObserveException<void>(policy)), status);
 
             Assert::AreEqual(concurrency::task_status::completed, status);
-
             Assert::IsNull(policy->GetSuppliedException());
         }
 
@@ -94,7 +85,6 @@ namespace HiloTests
             }).then(ObserveException<void>(policy)), status);
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
-
             Assert::IsNull(policy->GetSuppliedException());
         }
 
@@ -104,12 +94,12 @@ namespace HiloTests
             concurrency::task_status status;
             TestHelper::RunSynced(concurrency::task<int>([]
             {
+                #pragma warning( disable : 4702 )
                 concurrency::cancel_current_task();
                 return 3; // Should never reach here
             }).then(ObserveException<int>(policy)), status);
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
-
             Assert::IsNull(policy->GetSuppliedException());
         }
 
@@ -121,17 +111,17 @@ namespace HiloTests
 
             TestHelper::RunSynced(concurrency::task<int>([]
             {
+                #pragma warning( disable : 4702 )
                 concurrency::cancel_current_task();
-
                 return 3;  // should never reach here
             }).then(ObserveException<int>(policy))
                 .then([&reachedContinuation](int value) 
             {
+                (void)value;
                 reachedContinuation = true;
             }), status);
 
             Assert::AreEqual(concurrency::task_status::canceled, status);
-
             Assert::IsFalse(reachedContinuation);
         }
     };

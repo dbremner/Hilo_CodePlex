@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include "ViewModelBase.h"
@@ -15,14 +7,18 @@ namespace Hilo
 {
     interface class IPhoto;
     class ExceptionPolicy;
-    class SinglePhotoQuery;
-    class AllPhotosQuery;
+    class Repository;
 
+    // See http://go.microsoft.com/fwlink/?LinkId=267276 for info on how view model classes interact 
+    // with view classes (pages) and model classes (the state and operations of business objects).
+
+    // The ImageViewModel class contains the presentation logic for the image view page (ImageView.xaml).
     [Windows::UI::Xaml::Data::Bindable]
+    [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ImageViewModel sealed : public ViewModelBase
     {
     internal:
-        ImageViewModel(std::shared_ptr<SinglePhotoQuery> singlePhotoQuery, std::shared_ptr<AllPhotosQuery> allPhotosQuery, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        ImageViewModel(std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
         
         virtual void SaveState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
         virtual void LoadState(Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ stateMap) override;
@@ -65,9 +61,13 @@ namespace Hilo
             Windows::UI::Xaml::Input::ICommand^ get();
         }
 
+        property Windows::UI::Xaml::Input::ICommand^ CartoonizeImageCommand
+        {
+            Windows::UI::Xaml::Input::ICommand^ get();
+        }
+
     private:
-        std::shared_ptr<SinglePhotoQuery> m_singlePhotoQuery;
-        std::shared_ptr<AllPhotosQuery> m_allPhotosQuery;
+        std::shared_ptr<Repository> m_repository;
         bool m_runningQuerySinglePhotoAsync;
         bool m_runningQueryPhotosAsync;
         Windows::Foundation::DateTime m_fileDate;
@@ -79,11 +79,13 @@ namespace Hilo
         concurrency::cancellation_token_source m_photoCts;
         Windows::UI::Xaml::Input::ICommand^ m_cropImageCommand;
         Windows::UI::Xaml::Input::ICommand^ m_rotateImageCommand;
+        Windows::UI::Xaml::Input::ICommand^ m_cartoonizeImageCommand;
         bool m_receivedChangeWhileRunning;
 
         void CropImage(Platform::Object^ parameter);
         void RotateImage(Platform::Object^ parameter);
-        bool CanCropOrRotateImage(Platform::Object^ paratmer);
+        void CartoonizeImage(Platform::Object^ parameter);
+        bool CanProcessImage(Object^ parameter);
         void OnDataChanged();
         void ClearCachedData();
     };

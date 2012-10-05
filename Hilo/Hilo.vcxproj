@@ -27,12 +27,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{44fdb5f0-7979-4922-a6b4-10f5437b91e9}</ProjectGuid>
+    <ProjectGuid>{c2108ff5-7d30-4522-8740-ac5e552cd817}</ProjectGuid>
     <RootNamespace>Hilo</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <AppContainerApplication>true</AppContainerApplication></PropertyGroup>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ProjectName>Hilo</ProjectName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -89,65 +94,107 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
-    <PackageCertificateKeyFile>Hilo_TemporaryKey.pfx</PackageCertificateKeyFile>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CartoonEffect;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AllPhotosQuery.h" />
-    <ClInclude Include="AsyncException.h" />
     <ClInclude Include="BooleanToBrushConverter.h" />
+    <ClInclude Include="CalendarExtensions.h" />
+    <ClInclude Include="CartoonizeImageView.xaml.h">
+      <DependentUpon>CartoonizeImageView.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="CartoonizeImageViewModel.h" />
     <ClInclude Include="CropImageView.xaml.h">
       <DependentUpon>CropImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="CropImageViewModel.h" />
     <ClInclude Include="DebugLoggingExceptionPolicy.h" />
     <ClInclude Include="DelegateCommand.h" />
+    <ClInclude Include="DesignTimeData.h" />
     <ClInclude Include="ExceptionPolicy.h" />
     <ClInclude Include="ExceptionPolicyFactory.h" />
     <ClInclude Include="ExifExtensions.h" />
-    <ClInclude Include="FileMonthGroupQuery.h" />
-    <ClInclude Include=".\FilePictureHubGroupQuery.h" />
-    <ClInclude Include="FileSinglePhotoQuery.h" />
-    <ClInclude Include=".\FileAllPhotosQuery.h" />
-    <ClInclude Include="FileVirtualMonthFoldersQuery.h" />
-    <ClInclude Include="FileVirtualYearFoldersQuery.h" />
+    <ClInclude Include="FileSystemRepository.h" />
     <ClInclude Include="FileSizeConverter.h" />
-    <ClInclude Include=".\InverterConverter.h" />
     <ClInclude Include="HiloCommonDefinitions.h" />
     <ClInclude Include="HiloPage.h" />
     <ClInclude Include="HubGroupType.h" />
@@ -157,10 +204,11 @@
       <DependentUpon>ImageBrowserView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="ImageBrowserViewModel.h" />
+    <ClInclude Include="ImageNavigationData.h" />
+    <ClInclude Include="ImageUtilities.h" />
     <ClInclude Include="ImageView.xaml.h">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include=".\ImageNavigationData.h" />
     <ClInclude Include="ImageViewModel.h" />
     <ClInclude Include="IMonthBlock.h" />
     <ClInclude Include="IPhoto.h" />
@@ -174,11 +222,9 @@
     </ClInclude>
     <ClInclude Include="MainHubViewModel.h" />
     <ClInclude Include="MonthBlock.h" />
-    <ClInclude Include=".\FileMonthBlockQuery.h" />
-    <ClInclude Include="MonthBlockQuery.h" />
     <ClInclude Include="MonthGroup.h" />
-    <ClInclude Include="MonthGroupQuery.h" />
     <ClInclude Include="NullPhotoGroup.h" />
+    <ClInclude Include="ObservableQuery.h" />
     <ClInclude Include="PageType.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Common\BindableBase.h" />
@@ -192,19 +238,14 @@
     </ClInclude>
     <ClInclude Include="Photo.h" />
     <ClInclude Include="PhotoCache.h" />
-    <ClInclude Include="PhotoGroupData.h" />
     <ClInclude Include="PhotoPathComparer.h" />
-    <ClInclude Include=".\PhotoQueryBuilder.h" />
-    <ClInclude Include=".\PhotoQueryBuilderResult.h" />
-    <ClInclude Include="PictureHubGroupQuery.h" />
     <ClInclude Include="QueryChange.h" />
     <ClInclude Include="RandomPhotoSelector.h" />
-    <ClInclude Include=".\ObservableQuery.h" />
+    <ClInclude Include="Repository.h" />
     <ClInclude Include="RotateImageView.xaml.h">
       <DependentUpon>RotateImageView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="RotateImageViewModel.h" />
-    <ClInclude Include="SinglePhotoQuery.h" />
     <ClInclude Include="TaskExceptionsExtensions.h" />
     <ClInclude Include="TaskExtensions.h" />
     <ClInclude Include="ThumbnailGenerator.h" />
@@ -212,8 +253,6 @@
     <ClInclude Include="VariableGridView.h" />
     <ClInclude Include="ViewModelBase.h" />
     <ClInclude Include="ViewModelLocator.h" />
-    <ClInclude Include="VirtualMonthFoldersQuery.h" />
-    <ClInclude Include="VirtualYearFoldersQuery.h" />
     <ClInclude Include="WideFiveImageTile.h" />
     <ClInclude Include="YearGroup.h" />
   </ItemGroup>
@@ -222,6 +261,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="ApplicationStyles.xaml" />
+    <Page Include="CartoonizeImageView.xaml" />
     <Page Include="Common\StandardStyles.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -236,21 +276,17 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="Common\ReadMe.txt" />
-    <None Include="Hilo_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Assets\HiloLogo.png" />
-    <Image Include="Assets\HiloSmallLogo.png" />
-    <Image Include="Assets\HiloWideLogo.png" />
-    <Image Include="Assets\HiloSplash.png" />
-    <Image Include="Assets\HiloStoreLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="AsyncException.cpp" />
     <ClCompile Include="BooleanToBrushConverter.cpp" />
+    <ClCompile Include="CalendarExtensions.cpp" />
+    <ClCompile Include="CartoonizeImageView.xaml.cpp">
+      <DependentUpon>CartoonizeImageView.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="CartoonizeImageViewModel.cpp" />
     <ClCompile Include="Common\BindableBase.cpp" />
     <ClCompile Include="Common\BooleanToVisibilityConverter.cpp" />
     <ClCompile Include="Common\BooleanNegationConverter.cpp" />
@@ -263,16 +299,11 @@
     <ClCompile Include="CropImageViewModel.cpp" />
     <ClCompile Include="DebugLoggingExceptionPolicy.cpp" />
     <ClCompile Include="DelegateCommand.cpp" />
+    <ClCompile Include="DesignTimeData.cpp" />
     <ClCompile Include="ExceptionPolicyFactory.cpp" />
     <ClCompile Include="ExifExtensions.cpp" />
-    <ClCompile Include="FileMonthGroupQuery.cpp" />
-    <ClCompile Include=".\FilePictureHubGroupQuery.cpp" />
-    <ClCompile Include="FileSinglePhotoQuery.cpp" />
-    <ClCompile Include=".\FileAllPhotosQuery.cpp" />
-    <ClCompile Include="FileVirtualMonthFoldersQuery.cpp" />
-    <ClCompile Include="FileVirtualYearFoldersQuery.cpp" />
+    <ClCompile Include="FileSystemRepository.cpp" />
     <ClCompile Include="FileSizeConverter.cpp" />
-    <ClCompile Include=".\InverterConverter.cpp" />
     <ClCompile Include="HiloPage.cpp" />
     <ClCompile Include="HubPhotoGroup.cpp" />
     <ClCompile Include="ImageBase.cpp" />
@@ -281,6 +312,7 @@
     </ClCompile>
     <ClCompile Include="ImageBrowserViewModel.cpp" />
     <ClCompile Include="ImageNavigationData.cpp" />
+    <ClCompile Include="ImageUtilities.cpp" />
     <ClCompile Include="ImageView.xaml.cpp">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </ClCompile>
@@ -291,7 +323,6 @@
     </ClCompile>
     <ClCompile Include="MainHubViewModel.cpp" />
     <ClCompile Include="MonthBlock.cpp" />
-    <ClCompile Include=".\FileMonthBlockQuery.cpp" />
     <ClCompile Include="MonthGroup.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -303,9 +334,7 @@
     </ClCompile>
     <ClCompile Include="Photo.cpp" />
     <ClCompile Include="PhotoCache.cpp" />
-    <ClCompile Include="PhotoGroupData.cpp" />
     <ClCompile Include="PhotoPathComparer.cpp" />
-    <ClCompile Include=".\PhotoQueryBuilder.cpp" />
     <ClCompile Include="RandomPhotoSelector.cpp" />
     <ClCompile Include="RotateImageView.xaml.cpp">
       <DependentUpon>RotateImageView.xaml</DependentUpon>
@@ -321,7 +350,28 @@
     <ClCompile Include="YearGroup.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <PRIResource Include="en-US\Resources.resw" />
+    <PRIResource Include="Strings\ar-SA\Resources.resw" />
+    <PRIResource Include="Strings\de-DE\Resources.resw" />
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\ja-JP\Resources.resw" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\HiloLogo.scale-100.png" />
+    <Image Include="Assets\HiloLogo.scale-80.png" />
+    <Image Include="Assets\HiloSmallLogo.scale-100.png" />
+    <Image Include="Assets\HiloSmallLogo.scale-80.png" />
+    <Image Include="Assets\HiloSplash.scale-100.png" />
+    <Image Include="Assets\HiloSplash.scale-100_contrast-black.png" />
+    <Image Include="Assets\HiloSplash.scale-100_contrast-white.png" />
+    <Image Include="Assets\HiloSplash.scale-140.png" />
+    <Image Include="Assets\HiloSplash.scale-180.png" />
+    <Image Include="Assets\HiloStoreLogo.scale-100.png" />
+    <Image Include="Assets\HiloStoreLogo.scale-100_contrast-black.png" />
+    <Image Include="Assets\HiloStoreLogo.scale-100_contrast-white.png" />
+    <Image Include="Assets\HiloStoreLogo.scale-140.png" />
+    <Image Include="Assets\HiloStoreLogo.scale-180.png" />
+    <Image Include="Assets\HiloWideLogo.scale-100.png" />
+    <Image Include="Assets\HiloWideLogo.scale-80.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

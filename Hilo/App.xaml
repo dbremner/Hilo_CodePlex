@@ -1,14 +1,4 @@
-﻿<!--
-===============================================================================
- Microsoft patterns & practices
- Hilo Guidance
-===============================================================================
- Copyright © Microsoft Corporation.  All rights reserved.
- This code released under the terms of the 
- Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-===============================================================================
--->
-<Application
+﻿<Application
     x:Class="Hilo.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -29,7 +19,6 @@
 
             <!-- Application-specific resources -->
             <local:ViewModelLocator x:Key="ViewModelLocator" />
-            <x:String x:Key="AppName">Hilo</x:String>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

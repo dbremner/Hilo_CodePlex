@@ -1,139 +1,202 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "StubRepository.h"
-#include "..\Hilo\IPhotoGroup.h"
-#include "..\Hilo\IPhoto.h"
-#include "..\Hilo\IPhotoCache.h"
-#include "..\Hilo\IQueryOperation.h"
-#include "..\Hilo\IYearGroup.h"
-#include "..\Hilo\PhotoGroupData.h"
 #include "StubPhoto.h"
+#include "..\Hilo\IPhotoGroup.h"
+#include "..\Hilo\PhotoCache.h"
+#include "..\Hilo\IYearGroup.h"
 
 using namespace concurrency;
 using namespace Hilo;
 using namespace HiloTests;
+using namespace std;
 using namespace Platform;
 using namespace Platform::Collections;
-using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::Storage;
+using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage::FileProperties;
+using namespace Windows::Storage::Search;
 
-StubRepository::StubRepository()
+StubRepository::StubRepository(shared_ptr<StubExceptionPolicy> exceptionPolicy) : m_exceptionPolicy(exceptionPolicy)
 {
-    GetMonthGroupedPhotosWithCacheAsyncCalled = false;
-    GetPhotoGroupDataForGroupWithQueryOperationAsyncCalled = false;
-    GetYearGroupedMonthsAsyncCalled = false;
-    GetPhotoCountForQueryOperationAsyncCalled = false;
-    GetPhotoForGroupWithQueryOperationAsyncCalled = false;
-
-    DataChangedEventObserved = false;
 }
 
-IAsyncOperation<IVectorView<IPhoto^>^>^ StubRepository::GetPhotosForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation)
+void StubRepository::AddObserver(const std::function<void()> callback, PageType pageType)
 {
-    GetPhotosForGroupWithQueryOperationAsyncCalled = true;
-    return create_async([this]
-    { 
-        return create_task([this] 
-        {
-            auto temp = ref new Vector<IPhoto^>();
-            if (nullptr != PhotoToReturn)
-            {
-                temp->Append(PhotoToReturn);
-            }
-            return temp->GetView();
-        });
+    (void) pageType;
+    m_addObserverCalled = true;
+}
+
+void StubRepository::RemoveObserver(PageType pageType)
+{
+    (void) pageType;
+    m_removeObserverCalled = true;
+}
+void StubRepository::NotifyAllObservers()
+{
+}
+
+task<IVectorView<IPhotoGroup^>^> StubRepository::GetMonthGroupedPhotosWithCacheAsync(std::shared_ptr<Hilo::PhotoCache> photoCache, cancellation_token token)
+{
+    (void) token;
+    m_getMonthGroupedPhotosWithCacheAsyncCalled = true;
+    return create_task([] 
+    {
+        auto temp = ref new Vector<IPhotoGroup^>();
+        return temp->GetView();
     });
 }
 
-IAsyncOperation<Hilo::PhotoGroupData^>^ StubRepository::GetPhotoGroupDataForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation)
+task<IPhoto^> StubRepository::GetSinglePhotoAsync(String^ photoPath)
 {
-    GetPhotoGroupDataForGroupWithQueryOperationAsyncCalled = true;
-    return create_async([this]
-    { 
-        return create_task([this] 
-        {
-            auto temp = ref new Vector<IPhoto^>();
-            if (nullptr != PhotoToReturn)
-            {
-                temp->Append(PhotoToReturn);
-            }
-            return ref new PhotoGroupData(temp->GetView(), temp->Size);
-        });
+    m_getSinglePhotoAsyncCalled = true;
+    return create_task([photoPath] 
+    {
+        auto photo = ref new StubPhoto();
+        photo->Path = photoPath;
+        return static_cast<IPhoto^>(photo);
     });
 }
 
-IAsyncOperation<IVectorView<IPhotoGroup^>^>^ StubRepository::GetMonthGroupedPhotosWithCacheAsync(IPhotoCache^ photoCache)
+task<unsigned int> StubRepository::GetFolderPhotoCountAsync(IStorageFolderQueryOperations^ folderQuery)
 {
-    GetMonthGroupedPhotosWithCacheAsyncCalled = true;
+    (void) folderQuery;
 
-    return create_async([]
-    { 
-        return create_task([] 
+    m_GetFolderPhotoCountAsyncHasBeenCalled = true;
+    return create_task([this] 
+    {
+        return 42U;
+    });
+}
+ 
+task<IVectorView<IPhoto^>^> StubRepository::GetPhotoDataForMonthGroup(IPhotoGroup^ photoGroup, IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems)
+{
+    (void) folderQuery;
+    (void) maxNumberOfItems;
+
+    m_getPhotoDataForMonthGroupHasBeenCalled = true;
+    return create_task([this] 
+    {
+        auto temp = ref new Vector<IPhoto^>();
+        if (nullptr != m_photoToReturn)
         {
-            auto temp = ref new Vector<IPhotoGroup^>();
-            return temp->GetView();
-        });
+            temp->Append(m_photoToReturn);
+        }
+        return temp->GetView();
     });
 }
 
-IAsyncOperation<IVectorView<IYearGroup^>^>^ StubRepository::GetYearGroupedMonthsAsync()
+task<bool> StubRepository::HasPhotosInRangeAsync(Platform::String^ dateRangeQuery, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery)
 {
-    GetYearGroupedMonthsAsyncCalled = true;
+    return create_task([]() { return true; });
+}
 
-    return create_async([]
-    { 
-        return create_task([] 
+task<IVectorView<Hilo::IPhoto^>^> StubRepository::GetPhotosForDateRangeQueryAsync(String^ dateRangeQuery)
+{
+    m_getPhotosForDateRangeQueryAsyncCalled = true;
+    return create_task([this] 
+    {
+        auto temp = ref new Vector<Hilo::IPhoto^>();
+        if (nullptr != m_photoToReturn)
         {
-            auto temp = ref new Vector<IYearGroup^>();
-            return temp->GetView();
-        });
+            temp->Append(m_photoToReturn);
+        }
+        return temp->GetView();
     });
 }
 
-IAsyncOperation<unsigned int>^ StubRepository::GetPhotoCountForQueryOperationAsync(IQueryOperation^ operation)
+task<IVectorView<Hilo::IPhoto^>^> StubRepository::GetPhotosForPictureHubGroupAsync(Hilo::IPhotoGroup^ photoGroup, unsigned int maxNumberOfItems)
 {
-    GetPhotoCountForQueryOperationAsyncCalled = true;
+    (void) maxNumberOfItems;
 
-    return create_async([]
-    { 
-        return create_task([] 
+    m_getPhotosForPictureHubgGroupAsyncCalled = true;
+    return create_task([this] 
+    {
+        auto temp = ref new Vector<Hilo::IPhoto^>();
+        if (nullptr != m_photoToReturn)
         {
-            return 42U;
-        });
+            temp->Append(m_photoToReturn);
+        }
+        return temp->GetView();
     });
 }
 
-IAsyncOperation<IPhoto^>^ StubRepository::GetPhotoForGroupWithQueryOperationAsync(IPhotoGroup^ photoGroup, IQueryOperation^ operation)
+task<IVectorView<IYearGroup^>^> StubRepository::GetYearGroupedMonthsAsync(concurrency::cancellation_token token)
 {
-    GetPhotoForGroupWithQueryOperationAsyncCalled = true;
-
-    return create_async([]
-    { 
-        return create_task([] 
-        {
-            IPhoto^ photo = ref new StubPhoto();
-            return photo;
-        });
+    (void)token;
+    m_getYearGroupedMonthsAsyncCalled = true;
+    return create_task([] 
+    {
+        auto temp = ref new Vector<IYearGroup^>();
+        return temp->GetView();
     });
 }
 
-EventRegistrationToken StubRepository::DataChanged::add(DataChangedEventHandler^ e)
+task<IVectorView<StorageFile^>^> StubRepository::GetPhotoStorageFilesAsync(Platform::String^ query, unsigned int maxNumberOfItems)
 {
-    DataChangedEventObserved = true;
-    m_observed = true;
-    return m_dataChangedEvent += e;
+    (void) query;
+    (void) maxNumberOfItems;
+
+    m_getPhotoStorageFilesAsyncCalled = true;
+    return create_task([]
+    {
+        auto temp = ref new Vector<StorageFile^>();
+        return temp->GetView();
+    });
 }
 
-void StubRepository::DataChanged::remove(EventRegistrationToken t)
+bool StubRepository::GetMonthGroupedPhotosWithCacheAsyncHasBeenCalled()
 {
-    DataChangedEventObserved = false;
-    m_observed = false;
-    m_dataChangedEvent -= t;
+    return m_getMonthGroupedPhotosWithCacheAsyncCalled;
 }
+
+bool StubRepository::GetSinglePhotoAsyncHasBeenCalled()
+{
+    return m_getSinglePhotoAsyncCalled;
+}
+
+bool StubRepository::GetFolderPhotoCountAsyncHasBeenCalled()
+{
+    return m_GetFolderPhotoCountAsyncHasBeenCalled;
+}
+
+bool StubRepository::GetPhotoDataForMonthGroupHasBeenCalled()
+{
+    return m_getPhotoDataForMonthGroupHasBeenCalled;
+}
+
+bool StubRepository::GetPhotosForDateRangeQueryAsyncHasBeenCalled()
+{
+    return m_getPhotosForDateRangeQueryAsyncCalled;
+}
+
+bool StubRepository::GetPhotosForPictureHubGroupAsyncHasBeenCalled()
+{
+    return m_getPhotosForPictureHubgGroupAsyncCalled;
+}
+
+bool StubRepository::GetYearGroupedMonthsAsyncHasBeenCalled()
+{
+    return m_getYearGroupedMonthsAsyncCalled;
+}
+
+bool StubRepository::GetPhotoStorageFilesAsyncHasBeenCalled()
+{
+    return m_getPhotoStorageFilesAsyncCalled;
+}
+
+void StubRepository::SetPhotoToReturn(Hilo::IPhoto^ photo)
+{
+    m_photoToReturn = photo;
+}
+
+bool StubRepository::GetAddObserverHasBeenCalled()
+{
+    return m_addObserverCalled;
+}
+
+bool StubRepository::GetRemoveObserverHasBeenCalled()
+{
+    return m_removeObserverCalled;
+}
+

@@ -1,14 +1,5 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
-#include "Common\BindableBase.h"
 #include "IResizable.h"
 #include "IPhoto.h"
 
@@ -17,14 +8,20 @@ namespace Hilo
     interface class IPhotoGroup;
     class ExceptionPolicy;
 
+    // The Photo class provides data used by XAML image controls.
+    // <snippet922>
     [Windows::UI::Xaml::Data::Bindable]
-    public ref class Photo sealed : public Common::BindableBase, public IResizable, public IPhoto
+    [Windows::Foundation::Metadata::WebHostHidden]
+    public ref class Photo sealed : public IResizable, public IPhoto, public Windows::UI::Xaml::Data::INotifyPropertyChanged
+    // </snippet922>
     {
     internal:
         Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
 
     public:
         virtual ~Photo();
+
+        virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
 
         property IPhotoGroup^ Group
         {
@@ -71,9 +68,9 @@ namespace Hilo
             virtual Platform::String^ get();
         }
 
-        property unsigned long long FileSize
+        property uint64 FileSize
         {
-            virtual unsigned long long get();
+            virtual uint64 get();
         }
 
         property Platform::String^ DisplayType
@@ -91,6 +88,11 @@ namespace Hilo
             virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
 
+        property bool IsInvalidThumbnail
+        {
+            virtual bool get();
+        }
+
         property int ColumnSpan 
         {
             virtual int get();
@@ -103,7 +105,6 @@ namespace Hilo
             virtual void set(int value);
         }
 
-        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
         virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
         virtual void ClearImageData();
 
@@ -112,7 +113,9 @@ namespace Hilo
 
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
+        // <snippet811>
         Platform::WeakReference m_weakPhotoGroup;
+        // </snippet811>
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Windows::Foundation::EventRegistrationToken m_thumbnailUpdatedEventToken;
@@ -120,8 +123,10 @@ namespace Hilo
         int m_columnSpan;
         int m_rowSpan;
         bool m_queryPhotoImageAsyncIsRunning;
+        bool m_isInvalidThumbnail;
 
         void OnThumbnailUpdated(Windows::Storage::BulkAccess::IStorageItemInformation^ sender, Platform::Object^ e);
         void OnImageFailedToOpen(Platform::Object^ sender, Windows::UI::Xaml::ExceptionRoutedEventArgs^ e);
+        void OnPropertyChanged(Platform::String^ propertyName);
     };
 }

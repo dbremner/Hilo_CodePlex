@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 #include "MainHubViewModel.h" // Required by generated header
@@ -13,6 +5,7 @@
 #include "ImageViewModel.h" // Required by generated header
 #include "CropImageViewModel.h" // Required by generated header
 #include "RotateImageViewModel.h" // Required by generated header
+#include "CartoonizeImageViewModel.h" // Required by generated header
 #include "HubPhotoGroup.h" // Required by generated header
 #include "Photo.h" // Required by generated header
 #include "MonthGroup.h" // Required by generated header
@@ -22,8 +15,15 @@
 namespace Hilo
 {
     class ExceptionPolicy;
+    class Repository;
 
+    // See http://go.microsoft.com/fwlink/?LinkId=267276 for info on how the ViewModelLocator 
+    // connects views (pages) with their corresponding view models (presentation logic).
+
+    // The ViewModelLocator class gives pages access to the app's presentation logic
+    // following the Model-View-ViewModel (MVVM) pattern.
     [Windows::UI::Xaml::Data::Bindable]
+    [Windows::Foundation::Metadata::WebHostHidden]
     public ref class ViewModelLocator sealed
     {
     public:
@@ -34,9 +34,11 @@ namespace Hilo
         property ImageViewModel^ ImageVM { ImageViewModel^ get(); }
         property CropImageViewModel^ CropImageVM { CropImageViewModel^ get(); }
         property RotateImageViewModel^ RotateImageVM { RotateImageViewModel^ get(); }
+        property CartoonizeImageViewModel^ CartoonizeImageVM { CartoonizeImageViewModel^ get(); }
 
     private:
         ImageBrowserViewModel^ m_imageBrowswerViewModel;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
+        std::shared_ptr<Repository> m_repository;
     };
 }

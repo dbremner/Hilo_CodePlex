@@ -1,36 +1,50 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "FileSizeConverter.h"
+#include "LocalResourceLoader.h"
 
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Interop;
+using namespace Windows::ApplicationModel::Resources;
 
+// See http://go.microsoft.com/fwlink/?LinkId=267279 for info about the FileSizeConverter class
+// and other data converters.
+
+FileSizeConverter::FileSizeConverter()
+{
+    m_loader = ref new LocalResourceLoader();
+}
+
+FileSizeConverter::FileSizeConverter(Hilo::IResourceLoader^ loader) : m_loader(loader)
+{
+}
+
+// <snippet1404>
 Object^ FileSizeConverter::Convert(Object^ value, TypeName targetType, Object^ parameter, String^)
 {
-    double size = safe_cast<double>(safe_cast<unsigned long long>(value));
-    std::array<String^, 3> units = { "B", "KB", "MB" };
+    float64 size = static_cast<float64>(safe_cast<uint64>(value));
+    std::array<String^, 3> units = 
+    { 
+        m_loader->GetString("BytesUnit"), 
+        m_loader->GetString("KilobytesUnit"), 
+        m_loader->GetString("MegabytesUnit") 
+    };
     unsigned int index = 0;
-    
+
     while (size >= 1024)
     {
         size /= 1024;
         index++;
     }
-    
+
     return ToTwoDecimalPlaces(size) + " " + units[index];
 }
 
-double FileSizeConverter::ToTwoDecimalPlaces(double value)
+float64 FileSizeConverter::ToTwoDecimalPlaces(float64 value)
 {
-    double f, intpart, fractpart;
+    float64 f;
+    float64 intpart;
+    float64 fractpart;
     fractpart = modf(value, &intpart);
     f = floor(fractpart * 100 + 0.5) / 100.0;
     return intpart + f;
@@ -40,3 +54,4 @@ Object^ FileSizeConverter::ConvertBack(Object^ value, TypeName targetType, Objec
 {
     throw ref new NotImplementedException();
 }
+// </snippet1404>

@@ -1,17 +1,11 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #pragma once
 
 namespace Hilo
 {
     interface class IPhotoGroup;
 
+    // The IPhoto class defines the signature of data used by XAML image controls.
+    [Windows::Foundation::Metadata::WebHostHidden]
     public interface class IPhoto
     {
         property IPhotoGroup^ Group
@@ -56,9 +50,9 @@ namespace Hilo
             Platform::String^ get();
         }
 
-        property unsigned long long FileSize
+        property uint64 FileSize
         {
-            unsigned long long get();
+            uint64 get();
         }
 
         property Platform::String^ DisplayType
@@ -76,9 +70,13 @@ namespace Hilo
             Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
 
+        property bool IsInvalidThumbnail
+        {
+            bool get();
+        }
+
         void ClearImageData();
 
-        Windows::Foundation::IAsyncOperation<Windows::Storage::FileProperties::ImageProperties^>^ GetImagePropertiesAsync();
         Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
     };
 }

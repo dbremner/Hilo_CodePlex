@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 
@@ -18,10 +10,7 @@ namespace HiloTests
 {
     TEST_CLASS(ExifExtensionTests)
     {
-
-
     public:
-
         TEST_METHOD_INITIALIZE(TestSetup)
         {
             errorTolerance = 0.0010f;
@@ -41,7 +30,7 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsShouldTranslateFullRectWhenRotated180)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
 
             Rect item(0.0, 0.0, 25.0, 75.0);
 
@@ -55,7 +44,7 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsShouldTranslateFullRectWhenRotated270)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
 
             Rect item(0.0, 0.0, 25.0, 75.0);
 
@@ -69,7 +58,7 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsShouldRotateRect90RelativeToBitmapDimension)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
 
             Rect originalBitmapDimensions(0.0, 0.0, 100.0, 150.0);
             Rect item(10.0, 10.0, 25.0, 50.0);
@@ -84,7 +73,7 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsShouldRotateRect180RelativeToBitmapDimension)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
 
             Rect originalBitmapDimensions(0.0, 0.0, 100.0, 150.0);
             Rect item(10.0, 10.0, 25.0, 50.0);
@@ -99,7 +88,7 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsShouldRotateRect270RelativeToBitmapDimension)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
 
             Rect originalBitmapDimensions(0.0, 0.0, 100.0, 150.0);
             Rect item(10.0, 10.0, 25.0, 50.0);
@@ -114,7 +103,8 @@ namespace HiloTests
 
         TEST_METHOD(ExifExtensionsTestsRotate270AndMinus90ShouldMatch)
         {
-            float errorTolerance = 0.0010f;	
+            float errorTolerance = 0.0010f;
+            (void)errorTolerance;
 
             Rect originalBitmapDimensions(0.0, 0.0, 100.0, 150.0);
             Rect item(10.0, 10.0, 25.0, 50.0);
@@ -127,7 +117,6 @@ namespace HiloTests
             Assert::AreEqual(rotated.Width, rotated2.Width);
             Assert::AreEqual(rotated.Height, rotated2.Height);
         }
-
 
     private:
         void AreEqual(float expected, float actual, float tolerance)

@@ -1,11 +1,3 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "ThumbnailGenerator.h"
 #include "ExceptionPolicy.h"
@@ -22,6 +14,8 @@ using namespace Windows::Storage::FileProperties;
 
 using namespace Hilo;
 
+// See http://go.microsoft.com/fwlink/?LinkId=267275 for info about Hilo's implementation of tiles.
+
 const unsigned int ThumbnailSize = 270;
 const wstring ThumbnailImagePrefix = L"thumbImage_";
 
@@ -29,7 +23,8 @@ ThumbnailGenerator::ThumbnailGenerator(std::shared_ptr<ExceptionPolicy> policy) 
 {
 }
 
-task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate( 
+// <snippet409>
+task<Vector<StorageFile^>^> ThumbnailGenerator::Generate( 
     IVector<StorageFile^>^ files, 
     StorageFolder^ thumbnailsFolder)
 {
@@ -50,6 +45,7 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
             m_exceptionPolicy));
     }
 
+    // <snippet801>
     return when_all(begin(thumbnailTasks), end(thumbnailTasks)).then(
         [](vector<StorageFile^> files)
     {
@@ -64,8 +60,11 @@ task<Platform::Collections::Vector<StorageFile^>^> ThumbnailGenerator::Generate(
 
         return result;
     });
+    // </snippet801>
 }
+// </snippet409>
 
+// <snippet410>
 task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
     StorageFolder^ folder,
     StorageFile^ imageFile,
@@ -90,12 +89,13 @@ task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
             // If we have any exceptions we won't return the results
             // of this task, but instead nullptr.  Downstream 
             // tasks will need to account for this.
-            return task_from_result<StorageFile^>(nullptr);
+            return create_task_from_result<StorageFile^>(nullptr);
         }
 
         return InternalSaveToFile(folder, createdThumbnail, localFileName);
     });
 }
+// </snippet410>
 
 task<StorageFile^> ThumbnailGenerator::InternalSaveToFile(
     StorageFolder^ thumbnailsFolder, 
@@ -130,13 +130,16 @@ task<StorageFile^> ThumbnailGenerator::InternalSaveToFile(
     });
 }
 
+// <snippet407>
 task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPictureFileAsync(
     StorageFile^ sourceFile, 
     unsigned int thumbSize)
 {
     (void)thumbSize; // Unused parameter
+    // <snippet806>
     auto decoder = make_shared<BitmapDecoder^>(nullptr);
     auto pixelProvider = make_shared<PixelDataProvider^>(nullptr);
+    // </snippet806>
     auto resizedImageStream = ref new InMemoryRandomAccessStream();
     auto createThumbnail = create_task(
         sourceFile->GetThumbnailAsync(
@@ -169,7 +172,7 @@ task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPicture
 
     }).then([pixelProvider, decoder](BitmapEncoder^ createdEncoder)
     {
-        createdEncoder->SetPixelData( BitmapPixelFormat::Rgba8,
+        createdEncoder->SetPixelData(BitmapPixelFormat::Rgba8,
             BitmapAlphaMode::Straight,
             (*decoder)->PixelWidth,
             (*decoder)->PixelHeight,
@@ -184,3 +187,4 @@ task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPicture
         return resizedImageStream;
     });
 }
+// </snippet407>

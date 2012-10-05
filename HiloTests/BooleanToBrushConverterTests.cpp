@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "..\Hilo\BooleanToBrushConverter.h"
@@ -20,7 +12,6 @@ namespace HiloTests
     TEST_CLASS(BooleanToBrushConverterTests)
     {
     public:
-
         TEST_METHOD(BooleanToBrushConverterCanConvertTrueToBrush)
         {
             auto booleanBrushConverter = ref new BooleanToBrushConverter();

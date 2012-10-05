@@ -1,12 +1,4 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#pragma once
+﻿#pragma once
 
 #include <collection.h>
 
@@ -73,10 +65,13 @@ namespace Hilo
 				_acceleratorKeyEventToken, _pointerPressedEventToken;
 			Platform::Collections::Vector<Windows::UI::Xaml::Controls::Control^>^ _layoutAwareControls;
 			void WindowSizeChanged(Platform::Object^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ e);
+			void OnLoaded(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+			void OnUnloaded(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void CoreDispatcher_AcceleratorKeyActivated(Windows::UI::Core::CoreDispatcher^ sender,
 				Windows::UI::Core::AcceleratorKeyEventArgs^ args);
 			void CoreWindow_PointerPressed(Windows::UI::Core::CoreWindow^ sender,
 				Windows::UI::Core::PointerEventArgs^ args);
+			LayoutAwarePage^ _this; // Strong reference to self, cleaned up in OnUnload
 		};
 	}
 }

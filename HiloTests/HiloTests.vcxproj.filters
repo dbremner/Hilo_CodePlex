@@ -2,46 +2,46 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>4c56e82b-04e1-4e64-87b6-3674de70d7dc</UniqueIdentifier>
+      <UniqueIdentifier>2c8b07ea-138f-4e15-9c40-b0d229826c42</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Mocks">
-      <UniqueIdentifier>{b6e881a8-8538-408f-9af8-fbfeeaa095d3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Testable">
-      <UniqueIdentifier>{0e7735ee-5a73-4650-a45a-9f2096cecca0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Testable\Common">
-      <UniqueIdentifier>{758baa74-ae42-42f1-b03f-0ca93cf51fe2}</UniqueIdentifier>
+    <Filter Include="Package">
+      <UniqueIdentifier>8ec021e4-7c3c-47c9-bcfc-6f16b9199153</UniqueIdentifier>
+      <Extensions>appxmanifest;tile;settings</Extensions>
     </Filter>
     <Filter Include="Helpers">
-      <UniqueIdentifier>cb07b892-ecfb-46da-afaf-2d0376c7fac7</UniqueIdentifier>
+      <UniqueIdentifier>{293f9e39-f923-4168-a600-75311c594d26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mocks">
+      <UniqueIdentifier>{e1730bf9-7e33-4fbe-b337-2b1a825105c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Testable">
+      <UniqueIdentifier>{42f95080-7297-4f13-8bea-da08387ecff2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Tests">
-      <UniqueIdentifier>5dbadc64-9396-4844-91fa-b5e3bf5c95f7</UniqueIdentifier>
-      <Extensions>
-      </Extensions>
+      <UniqueIdentifier>{f323eae3-7973-4c48-ac11-831f21086e98}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Package">
-      <UniqueIdentifier>72d5376e-9873-40bb-bf4f-ac8f0798eee2</UniqueIdentifier>
-      <Extensions>appxmanifest;tile;settings</Extensions>
+    <Filter Include="Testable\Common">
+      <UniqueIdentifier>{c9cd8dd7-510b-41bc-b188-dbc2c3551ac1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="targetver.h" />
     <ClInclude Include="StubExceptionPolicy.h">
+      <Filter>Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="StubPhoto.h">
       <Filter>Mocks</Filter>
     </ClInclude>
     <ClInclude Include="StubPhotoGroup.h">
       <Filter>Mocks</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\AsyncException.h">
-      <Filter>Testable</Filter>
+    <ClInclude Include="StubResourceLoader.h">
+      <Filter>Mocks</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\Photo.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\IResizable.h">
-      <Filter>Testable</Filter>
+    <ClInclude Include="StubYearGroup.h">
+      <Filter>Mocks</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\Common\BindableBase.h">
       <Filter>Testable\Common</Filter>
@@ -55,10 +55,10 @@
     <ClInclude Include="..\Hilo\DelegateCommand.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\ViewModelBase.h">
+    <ClInclude Include="..\Hilo\ExifExtensions.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\ImageBase.h">
+    <ClInclude Include="..\Hilo\FileSizeConverter.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\HubGroupType.h">
@@ -67,7 +67,34 @@
     <ClInclude Include="..\Hilo\HubPhotoGroup.h">
       <Filter>Testable</Filter>
     </ClInclude>
+    <ClInclude Include="..\Hilo\ImageBase.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
     <ClInclude Include="..\Hilo\ImageBrowserViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageNavigationData.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageViewModel.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IPhoto.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IPhotoGroup.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IResizable.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\IResourceLoader.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\LocalResourceLoader.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\MainHubViewModel.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\MonthBlock.h">
@@ -76,16 +103,19 @@
     <ClInclude Include="..\Hilo\MonthGroup.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\YearGroup.h">
+    <ClInclude Include="..\Hilo\ObservableQuery.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Hilo\Photo.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\PhotoCache.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\ImageViewModel.h">
+    <ClInclude Include="..\Hilo\PhotoPathComparer.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\MainHubViewModel.h">
+    <ClInclude Include="..\Hilo\QueryChange.h">
       <Filter>Testable</Filter>
     </ClInclude>
     <ClInclude Include="..\Hilo\RandomPhotoSelector.h">
@@ -97,85 +127,14 @@
     <ClInclude Include="..\Hilo\ThumbnailGenerator.h">
       <Filter>Testable</Filter>
     </ClInclude>
+    <ClInclude Include="..\Hilo\ViewModelBase.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
     <ClInclude Include="..\Hilo\WideFiveImageTile.h">
       <Filter>Testable</Filter>
     </ClInclude>
-    <ClInclude Include="..\Hilo\PhotoPathComparer.h">
+    <ClInclude Include="..\Hilo\YearGroup.h">
       <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\IPhotoGroup.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\IPhoto.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\PhotoQueryBuilder.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\PhotoQueryBuilderResult.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\ImageNavigationData.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubPhoto.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileSizeConverter.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubYearGroup.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="StubResourceLoader.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\IResourceLoader.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\LocalResourceLoader.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\PhotoGroupData.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FilePictureHubGroupQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\ObservableQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\PictureHubGroupQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\QueryChange.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubPictureHubGroupQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="..\Hilo\FileMonthGroupQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\MonthGroupQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubMonthGroupQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="StubMonthBlockQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileMonthBlockQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\MonthBlockQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="DispatchedEvent.h">
-      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="TestHelper.h">
       <Filter>Helpers</Filter>
@@ -183,277 +142,24 @@
     <ClInclude Include="TestImageGenerator.h">
       <Filter>Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="StubSinglePhotoQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileSinglePhotoQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\SinglePhotoQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubAllPhotosQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\AllPhotosQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileAllPhotosQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileVirtualMonthFoldersQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\FileVirtualYearFoldersQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\VirtualMonthFoldersQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\VirtualYearFoldersQuery.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="StubVirtualYearFoldersQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include=".\StubVirtualMonthFoldersQuery.h">
-      <Filter>Mocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\InverterConverter.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Hilo\ExifExtensions.h">
-      <Filter>Testable</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="AsyncExceptionTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="StubExceptionPolicy.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="StubPhotoGroup.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\AsyncException.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\Photo.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\Common\BindableBase.cpp">
-      <Filter>Testable\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="BooleanToBrushConverterTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="CropImageViewModelTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\CropImageViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\DelegateCommand.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ViewModelBase.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ImageBase.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="HubPhotoGroupTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\HubPhotoGroup.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageBrowserViewModelTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\MonthBlock.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\MonthGroup.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\YearGroup.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoCache.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageViewDataTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageViewModelTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ImageViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="MainHubViewModelTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\MainHubViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="PhotoCacheTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="RandomPhotoSelectorTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="RotateImageViewModelTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\RotateImageViewModel.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="TaskExceptionTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="ThumbnailGeneratorTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="WideTile05Tests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\WideFiveImageTile.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoPathComparer.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoQueryBuilder.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include=".\PhotoTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ImageNavigationData.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="StubPhoto.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="FileSizeConverterTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileSizeConverter.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="YearGroupTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="MonthBlockTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="StubYearGroup.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="StubResourceLoader.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\LocalResourceLoader.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="MonthGroupTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include=".\PhotoQueryBuilderTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\PhotoGroupData.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\TaskExtensions.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="DispatchedEvent.cpp">
+    <ClInclude Include="UnitTestingAssertSpecializations.h">
       <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="TestHelper.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FilePictureHubGroupQuery.cpp">
+    </ClInclude>
+    <ClInclude Include="..\Hilo\CartoonizeImageViewModel.h">
       <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="TestImageGenerator.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="DispatchedEvent.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="StubPictureHubGroupQuery.cpp">
+    </ClInclude>
+    <ClInclude Include="..\Hilo\ImageUtilities.h">
+      <Filter>Testable</Filter>
+    </ClInclude>
+    <ClInclude Include="StubRepository.h">
       <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="..\Hilo\FileMonthGroupQuery.cpp">
+    </ClInclude>
+    <ClInclude Include="..\Hilo\PageType.h">
       <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="StubMonthGroupQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="StubMonthBlockQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileMonthBlockQuery.cpp">
+    </ClInclude>
+    <ClInclude Include="..\Hilo\CalendarExtensions.h">
       <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="StubSinglePhotoQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileSinglePhotoQuery.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="StubAllPhotosQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileAllPhotosQuery.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileVirtualMonthFoldersQuery.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\FileVirtualYearFoldersQuery.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="StubVirtualYearFoldersQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include=".\StubVirtualMonthFoldersQuery.cpp">
-      <Filter>Mocks</Filter>
-    </ClCompile>
-    <ClCompile Include="TestImageGenerator.cpp">
-      <Filter>Helpers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\InverterConverter.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include=".\InverterConverterTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Hilo\ExifExtensions.cpp">
-      <Filter>Testable</Filter>
-    </ClCompile>
-    <ClCompile Include="ExifExtensionTests.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UnitTestLogo.png">
@@ -478,6 +184,174 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="HiloTests_TemporaryKey.pfx" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="BooleanToBrushConverterTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="CropImageViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ExifExtensionTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSizeConverterTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="HubPhotoGroupTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageBrowserViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewDataTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="MainHubViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthBlockTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthGroupTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoCacheTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="PhotoTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomPhotoSelectorTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="RotateImageViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskExceptionTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="WideTile05Tests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="YearGroupTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="StubExceptionPolicy.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="StubPhoto.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="StubPhotoGroup.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="StubResourceLoader.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="StubYearGroup.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\Common\BindableBase.cpp">
+      <Filter>Testable\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\BooleanToBrushConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\CropImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\DelegateCommand.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ExifExtensions.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\FileSizeConverter.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\HubPhotoGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageBase.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageBrowserViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageNavigationData.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\LocalResourceLoader.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\MainHubViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\MonthBlock.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\MonthGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\Photo.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\PhotoCache.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\PhotoPathComparer.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\RotateImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ThumbnailGenerator.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ViewModelBase.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\WideFiveImageTile.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\YearGroup.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\TaskExtensions.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="TestHelper.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="TestImageGenerator.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ThumbnailGeneratorTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="CartoonizeImageViewModelTests.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\CartoonizeImageViewModel.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\ImageUtilities.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
+    <ClCompile Include="StubRepository.cpp">
+      <Filter>Mocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Hilo\CalendarExtensions.cpp">
+      <Filter>Testable</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

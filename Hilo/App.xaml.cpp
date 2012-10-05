@@ -1,42 +1,24 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-//
-// App.xaml.cpp
-// Implementation of the App class
-//
-
-#include "pch.h"
+﻿#include "pch.h"
 #include "Common\SuspensionManager.h"
 #include "MainHubView.g.h"
 #include "TileUpdateScheduler.h"
 #include "ExceptionPolicyFactory.h"
 #include "HiloPage.h"
+#include "LocalResourceLoader.h"
+#include "FileSystemRepository.h"
 
-using namespace concurrency;
+using namespace Concurrency;
 using namespace Hilo;
 using namespace Hilo::Common;
 using namespace Platform;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;
-using namespace Windows::Foundation;
-using namespace Windows::Foundation::Collections;
-using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::Xaml::Controls::Primitives;
-using namespace Windows::UI::Xaml::Data;
-using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
-using namespace Windows::UI::Xaml::Media;
-using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::Foundation;
 
-// The Grid Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234226
+// See http://go.microsoft.com/fwlink/?LinkId=267274 for info about this app.
 
 /// <summary>
 /// Initializes the singleton application object.  This is the first line of authored code
@@ -49,7 +31,17 @@ App::App()
     RecordMainThread();
 #endif
     InitializeComponent();
+    // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
+    // <snippet1601>
     Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
+    // </snippet1601>
+    // <snippet1613>
+    Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResume);
+    // </snippet1613>
+    // <snippet2301>
+    m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
+    m_repository = std::make_shared<FileSystemRepository>(m_exceptionPolicy);
+    // </snippet2301>
 }
 
 /// <summary>
@@ -57,55 +49,90 @@ App::App()
 /// be used when the application is launched to open a specific file, to display search results,
 /// and so forth.
 /// </summary>
-/// <param name="pArgs">Details about the launch request and process.</param>
-void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
+/// <param name="args">Details about the launch request and process.</param>
+// <snippet1606>
+void App::OnLaunched(LaunchActivatedEventArgs^ args)
 {
     assert(IsMainThread());
-    m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
+    auto rootFrame = dynamic_cast<Frame^>(Window::Current->Content);
 
-    // Do not repeat app initialization when already running, just ensure that
-    // the window is active
-    if (pArgs->PreviousExecutionState == ApplicationExecutionState::Running)
+    // Do not repeat app initialization when the Window already has content,
+    // just ensure that the window is active
+    if (rootFrame == nullptr)
     {
-        Window::Current->Activate();
-        return;
+        // Create a Frame to act as the navigation context and associate it with
+        // a SuspensionManager key. See http://go.microsoft.com/fwlink/?LinkId=267280 for more info 
+        // on Hilo's implementation of suspend/resume.
+        rootFrame = ref new Frame();
+        SuspensionManager::RegisterFrame(rootFrame, "AppFrame");
+
+        auto prerequisite = task<void>([](){});
+        if (args->PreviousExecutionState == ApplicationExecutionState::Terminated)
+        {
+            // Restore the saved session state only when appropriate, scheduling the
+            // final launch steps after the restore is complete
+            prerequisite = SuspensionManager::RestoreAsync();
+        }
+        prerequisite.then([=](task<void> prerequisite)
+        {
+            try
+            {
+                prerequisite.get();
+            }
+            catch (Platform::Exception^)
+            {
+                //Something went wrong restoring state.
+                //Assume there is no state and continue
+            }
+
+            // <snippet703>
+            if (rootFrame->Content == nullptr)
+            {
+                // When the navigation stack isn't restored navigate to the first page,
+                // configuring the new page by passing required information as a navigation
+                // parameter.  See http://go.microsoft.com/fwlink/?LinkId=267278 for a walkthrough of how 
+                // Hilo creates pages and navigates to pages.
+                if (!rootFrame->Navigate(TypeName(MainHubView::typeid)))
+                {
+                    throw ref new FailureException((ref new LocalResourceLoader())->GetString("ErrorFailedToCreateInitialPage"));
+                }
+            }
+            // </snippet703>
+
+            // Place the frame in the current Window
+            Window::Current->Content = rootFrame;
+            // Ensure the current window is active
+            Window::Current->Activate();
+
+        }, task_continuation_context::use_current());
     }
-
-    // Create a Frame to act as the navigation context and associate it with
-    // a SuspensionManager key
-    auto rootFrame = ref new Frame();
-    SuspensionManager::RegisterFrame(rootFrame, "AppFrame");
-
-    auto prerequisite = create_task([]{});
-    if (pArgs->PreviousExecutionState == ApplicationExecutionState::Terminated)
+    else
     {
-        // Restore the saved session state only when appropriate, scheduling the
-        // final launch steps after the restore is complete
-        prerequisite = SuspensionManager::RestoreAsync();
-    }
-    prerequisite.then([=]()
-    {
-        TileUpdateScheduler scheduler;
-        scheduler.ScheduleUpdateAsync(m_exceptionPolicy);
-
-    }, task_continuation_context::use_arbitrary()).then([=]()
-    {
-        // When the navigation stack isn't restored navigate to the first page,
-        // configuring the new page by passing required information as a navigation
-        // parameter
         if (rootFrame->Content == nullptr)
         {
+            // When the navigation stack isn't restored navigate to the first page,
+            // configuring the new page by passing required information as a navigation
+            // parameter. See http://go.microsoft.com/fwlink/?LinkId=267278 for a walkthrough of how 
+            // Hilo creates pages and navigates to pages.
             if (!rootFrame->Navigate(TypeName(MainHubView::typeid)))
             {
-                throw ref new FailureException("Failed to create initial page");
+                throw ref new FailureException((ref new LocalResourceLoader())->GetString("ErrorFailedToCreateInitialPage"));
             }
         }
-
-        // Place the frame in the current Window and ensure that it is active
-        Window::Current->Content = rootFrame;
+        // Ensure the current window is active
         Window::Current->Activate();
-    }, task_continuation_context::use_current());
+    }
+
+    // Schedule updates to the tile. See http://go.microsoft.com/fwlink/?LinkId=267275 for
+    // info about how Hilo manages tiles.
+    // <snippet501>
+    m_tileUpdateScheduler = std::make_shared<TileUpdateScheduler>();
+    m_tileUpdateScheduler->ScheduleUpdateAsync(m_repository, m_exceptionPolicy);
+    // </snippet501>
 }
+// </snippet1606>
+
+// See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
 
 /// <summary>
 /// Invoked when application execution is being suspended.  Application state is saved
@@ -114,13 +141,13 @@ void App::OnLaunched(LaunchActivatedEventArgs^ pArgs)
 /// </summary>
 /// <param name="sender">The source of the suspend request.</param>
 /// <param name="e">Details about the suspend request.</param>
+// <snippet1602>
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
-    (void) sender;	// Unused parameter
+    (void) sender; // Unused parameter
     assert(IsMainThread());
 
     auto deferral = e->SuspendingOperation->GetDeferral();
-
     HiloPage::IsSuspending = true;
     SuspensionManager::SaveAsync().then([=](task<void> antecedent)
     {
@@ -129,3 +156,20 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
         deferral->Complete();
     });
 }
+// </snippet1602>
+
+// See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
+// <snippet1614>
+void App::OnResume(Object^ sender, Platform::Object^ e)
+{
+    (void) sender; // Unused parameter
+    (void) e;      // Unused parameter
+    assert(IsMainThread());
+
+    if (m_repository != nullptr)
+    {
+        // Hilo does not receive data change events when suspended. Create these events on resume.
+        m_repository->NotifyAllObservers();
+    }
+}
+// </snippet1614>

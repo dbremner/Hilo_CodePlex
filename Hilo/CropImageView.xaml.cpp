@@ -1,12 +1,4 @@
-//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
-#include "pch.h"
+﻿#include "pch.h"
 #include "CropImageView.xaml.h"
 #include "CropImageViewModel.h"
 
@@ -16,6 +8,8 @@ using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls::Primitives;
 using namespace Windows::UI::Xaml::Input;
 
+// See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
+
 CropImageView::CropImageView()
 {
     InitializeComponent();
@@ -23,6 +17,7 @@ CropImageView::CropImageView()
     m_sizeChangedAttached = false;
 }
 
+// <snippet708>
 void CropImageView::OnSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
 {
     m_cropImageViewModel->CalculateInitialCropOverlayPosition(
@@ -35,6 +30,7 @@ void CropImageView::OnSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
         m_sizeChangedAttached = true;
     }
 }
+// </snippet708>
 
 void CropImageView::OnThumbDragDelta(Object^ sender, DragDeltaEventArgs^ e)
 {
@@ -47,6 +43,7 @@ void CropImageView::OnThumbDragDelta(Object^ sender, DragDeltaEventArgs^ e)
     }
 }
 
+// <snippet1206>
 void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^ e)
 {
     if (!m_cropImageViewModel->InProgress)
@@ -54,3 +51,4 @@ void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^
         m_cropImageViewModel->CropImageAsync(Photo->ActualWidth);
     }
 }
+// </snippet1206>

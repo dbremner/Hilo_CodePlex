@@ -1,11 +1,3 @@
-﻿//===============================================================================
-// Microsoft patterns & practices
-// Hilo Guidance
-//===============================================================================
-// Copyright © Microsoft Corporation.  All rights reserved.
-// This code released under the terms of the 
-// Microsoft patterns & practices license (http://hilo.codeplex.com/license)
-//===============================================================================
 //
 // SuspensionManager.h
 // Declaration of the SuspensionManager class
@@ -31,8 +23,8 @@ namespace Hilo
 		internal:
 			static void RegisterFrame(Windows::UI::Xaml::Controls::Frame^ frame, Platform::String^ sessionStateKey);
 			static void UnregisterFrame(Windows::UI::Xaml::Controls::Frame^ frame);
-			static concurrency::task<void> SaveAsync(void);
-			static concurrency::task<void> RestoreAsync(void);
+			static Concurrency::task<void> SaveAsync(void);
+			static Concurrency::task<void> RestoreAsync(void);
 			static property Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ SessionState
 			{
 				Windows::Foundation::Collections::IMap<Platform::String^, Platform::Object^>^ get(void);
