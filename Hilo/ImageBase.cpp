@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "ImageBase.h"
 #include "IPhoto.h"
@@ -56,9 +62,7 @@ task<StorageFile^> ImageBase::GetFileNameFromFileSavePickerAsync(String^ fileTyp
     savePicker->FileTypeChoices->Insert("Image", fileExtension);
     savePicker->DefaultFileExtension = fileType;
 
-    // <snippet807>
     auto filePickerTask = create_task(savePicker->PickSaveFileAsync());
-    // </snippet807>
     return filePickerTask.then([](StorageFile^ file)
     {
         assert(IsMainThread());

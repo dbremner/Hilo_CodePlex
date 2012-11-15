@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "FileSystemRepository.h"
 #include "CalendarExtensions.h"
@@ -29,8 +35,6 @@ inline task<IVectorView<StorageFile^>^> FileSystemRepository::GetPhotoStorageFil
     return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems));
 }
 
-// <snippet1000>
-// <snippet1803>
 inline StorageFileQueryResult^ FileSystemRepository::CreateFileQuery(IStorageFolderQueryOperations^ folder, String^ query, IndexerOption indexerOption)
 {
     auto fileTypeFilter = ref new Vector<String^>(items);
@@ -42,8 +46,6 @@ inline StorageFileQueryResult^ FileSystemRepository::CreateFileQuery(IStorageFol
     queryOptions->Language = CalendarExtensions::ResolvedLanguage();
     return folder->CreateFileQueryWithOptions(queryOptions);
 }
-// </snippet1803>
-// </snippet1000>
 
 #pragma endregion
 
@@ -136,7 +138,6 @@ task<IVectorView<IPhotoGroup^>^> FileSystemRepository::GetMonthGroupedPhotosWith
 }
 
 // Query the file system using a pathname.
-// <snippet2306>
 task<IPhoto^> FileSystemRepository::GetSinglePhotoAsync(String^ photoPath)
 {
     String^ query = "System.ParsingPath:=\"" + photoPath + "\"";    
@@ -154,7 +155,6 @@ task<IPhoto^> FileSystemRepository::GetSinglePhotoAsync(String^ photoPath)
         return photo;
     }, task_continuation_context::use_current());
 }
-// </snippet2306>
 
 // Count the number of photos in a given folder query.
 task<unsigned int> FileSystemRepository::GetFolderPhotoCountAsync(IStorageFolderQueryOperations^ folderQuery)
@@ -212,20 +212,16 @@ task<IVectorView<IPhoto^>^> FileSystemRepository::GetPhotosForDateRangeQueryAsyn
     auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
 
-    // <snippet2308>
     m_allPhotosQueryChange = (m_imageViewModelCallback != nullptr) ? ref new QueryChange(fileQuery, m_imageViewModelCallback) : nullptr;
-    // </snippet2308>
 
     return create_task(fileInformationFactory->GetFilesAsync()).then([policy](IVectorView<FileInformation^>^ files) 
     {
-        // <snippet808>
         auto photos = ref new Vector<IPhoto^>();
         for (auto file : files)
         {
             auto photo = ref new Photo(file, ref new NullPhotoGroup(), policy);
             photos->Append(photo);
         }
-        // </snippet808>
         return photos->GetView();
     }, task_continuation_context::use_current());
 }

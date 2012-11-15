@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #pragma once
 
 #include "IResizable.h"
@@ -9,11 +15,9 @@ namespace Hilo
     class ExceptionPolicy;
 
     // The Photo class provides data used by XAML image controls.
-    // <snippet922>
     [Windows::UI::Xaml::Data::Bindable]
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class Photo sealed : public IResizable, public IPhoto, public Windows::UI::Xaml::Data::INotifyPropertyChanged
-    // </snippet922>
     {
     internal:
         Photo(Windows::Storage::BulkAccess::FileInformation^ file, IPhotoGroup^ photoGroup, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
@@ -113,9 +117,7 @@ namespace Hilo
 
     private:
         Windows::Storage::BulkAccess::FileInformation^ m_fileInfo;
-        // <snippet811>
         Platform::WeakReference m_weakPhotoGroup;
-        // </snippet811>
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_image;
         std::shared_ptr<ExceptionPolicy> m_exceptionPolicy;
         Windows::Foundation::EventRegistrationToken m_thumbnailUpdatedEventToken;

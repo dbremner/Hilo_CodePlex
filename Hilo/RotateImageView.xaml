@@ -1,3 +1,11 @@
+<!--
+ THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+ ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+ PARTICULAR PURPOSE.
+
+ Copyright (c) Microsoft Corporation. All rights reserved
+-->
 <local:HiloPage
     x:Name="pageRoot"
     x:Uid="Page"
@@ -22,7 +30,6 @@
         <!-- Rotate Image -->
         <Grid x:Name="RotateImageGrid"
               Margin="50,50,50,110">
-            <!-- <snippet1212> -->
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl" 
                    HorizontalAlignment="Center"
@@ -31,14 +38,11 @@
                    RenderTransformOrigin="0.5, 0.5"
                    Source="{Binding Photo.Image}"  
                    VerticalAlignment="Center">
-                <!-- </snippet1212> -->
-                <!-- <snippet1215> -->
                 <Image.RenderTransform>
                     <RotateTransform 
                         x:Name="ImageRotateTransform"  
                         Angle="{Binding RotationAngle}" />
                 </Image.RenderTransform>
-                <!-- </snippet1215> -->
             </Image>
             <ProgressRing IsActive="{Binding InProgress}" 
                           Foreground="{StaticResource HiloHighlightBrush}"
@@ -204,13 +208,11 @@
                             <ToolTip x:Uid="CancelRotateAppBarButtonToolTip" />
                         </ToolTipService.ToolTip>
                     </Button>
-                    <!--<snippet601>-->
                     <Button x:Name="SaveButton"
                             x:Uid="AcceptAppBarButton"
                             Command="{Binding SaveCommand}" 
                             Style="{StaticResource AcceptAppBarButtonStyle}"
                             Tag="Save" />
-                    <!--</snippet601>-->
                     <Button x:Name="SaveButtonNoLabel"
                             Command="{Binding SaveCommand}"
                             Style="{StaticResource AcceptAppBarButtonNoLabelStyle}"

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "TileUpdateScheduler.h"
 #include "ThumbnailGenerator.h"
@@ -34,7 +40,6 @@ TileUpdateScheduler::TileUpdateScheduler()
 
 // Select random pictures from the Pictures library and copy them 
 // to a local app folder and then update the tile.
-// <snippet502>
 task<void> TileUpdateScheduler::ScheduleUpdateAsync(std::shared_ptr<Repository> repository, std::shared_ptr<ExceptionPolicy> policy)
 {
     // The storage folder that holds the thumbnails.
@@ -83,9 +88,7 @@ task<void> TileUpdateScheduler::ScheduleUpdateAsync(std::shared_ptr<Repository> 
         UpdateTile(files);
     }, concurrency::task_continuation_context::use_arbitrary()).then(ObserveException<void>(policy));
 }
-// </snippet502>
 
-// <snippet503>
 void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
 {
     // Create a tile updater.
@@ -121,4 +124,3 @@ void TileUpdateScheduler::UpdateTile(IVector<StorageFile^>^ files)
         tileUpdater->Update(notification);
     }
 }
-// </snippet503>

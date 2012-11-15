@@ -14,21 +14,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CartoonEffect", "CartoonEffect\CartoonEffect.vcxproj", "{E84699D7-668B-4A99-AE78-CC86DE8E26D6}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://rd18-tfs:8080/tfs/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Hilo\\Hilo.vcxproj
-		SccProjectName1 = Hilo
-		SccLocalPath1 = Hilo
-		SccProjectUniqueName2 = HiloTests\\HiloTests.vcxproj
-		SccProjectName2 = HiloTests
-		SccLocalPath2 = HiloTests
-		SccProjectUniqueName3 = CartoonEffect\\CartoonEffect.vcxproj
-		SccProjectName3 = CartoonEffect
-		SccLocalPath3 = CartoonEffect
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
 		Debug|Win32 = Debug|Win32

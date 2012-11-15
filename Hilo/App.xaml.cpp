@@ -1,4 +1,10 @@
-﻿#include "pch.h"
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+#include "pch.h"
 #include "Common\SuspensionManager.h"
 #include "MainHubView.g.h"
 #include "TileUpdateScheduler.h"
@@ -32,16 +38,10 @@ App::App()
 #endif
     InitializeComponent();
     // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-    // <snippet1601>
     Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
-    // </snippet1601>
-    // <snippet1613>
     Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResume);
-    // </snippet1613>
-    // <snippet2301>
     m_exceptionPolicy = ExceptionPolicyFactory::GetCurrentPolicy();
     m_repository = std::make_shared<FileSystemRepository>(m_exceptionPolicy);
-    // </snippet2301>
 }
 
 /// <summary>
@@ -50,7 +50,6 @@ App::App()
 /// and so forth.
 /// </summary>
 /// <param name="args">Details about the launch request and process.</param>
-// <snippet1606>
 void App::OnLaunched(LaunchActivatedEventArgs^ args)
 {
     assert(IsMainThread());
@@ -85,7 +84,6 @@ void App::OnLaunched(LaunchActivatedEventArgs^ args)
                 //Assume there is no state and continue
             }
 
-            // <snippet703>
             if (rootFrame->Content == nullptr)
             {
                 // When the navigation stack isn't restored navigate to the first page,
@@ -97,7 +95,6 @@ void App::OnLaunched(LaunchActivatedEventArgs^ args)
                     throw ref new FailureException((ref new LocalResourceLoader())->GetString("ErrorFailedToCreateInitialPage"));
                 }
             }
-            // </snippet703>
 
             // Place the frame in the current Window
             Window::Current->Content = rootFrame;
@@ -125,12 +122,9 @@ void App::OnLaunched(LaunchActivatedEventArgs^ args)
 
     // Schedule updates to the tile. See http://go.microsoft.com/fwlink/?LinkId=267275 for
     // info about how Hilo manages tiles.
-    // <snippet501>
     m_tileUpdateScheduler = std::make_shared<TileUpdateScheduler>();
     m_tileUpdateScheduler->ScheduleUpdateAsync(m_repository, m_exceptionPolicy);
-    // </snippet501>
 }
-// </snippet1606>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
 
@@ -141,7 +135,6 @@ void App::OnLaunched(LaunchActivatedEventArgs^ args)
 /// </summary>
 /// <param name="sender">The source of the suspend request.</param>
 /// <param name="e">Details about the suspend request.</param>
-// <snippet1602>
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
     (void) sender; // Unused parameter
@@ -156,10 +149,8 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
         deferral->Complete();
     });
 }
-// </snippet1602>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1614>
 void App::OnResume(Object^ sender, Platform::Object^ e)
 {
     (void) sender; // Unused parameter
@@ -172,4 +163,3 @@ void App::OnResume(Object^ sender, Platform::Object^ e)
         m_repository->NotifyAllObservers();
     }
 }
-// </snippet1614>

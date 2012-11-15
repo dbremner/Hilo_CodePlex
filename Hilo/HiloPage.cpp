@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "HiloPage.h"
 #include "Common\SuspensionManager.h"
@@ -99,7 +105,6 @@ void HiloPage::NavigateToPage(PageType page, Platform::Object^ parameter)
     }
 }
 
-// <snippet1607>
 void HiloPage::OnNavigatedTo(NavigationEventArgs^ e)
 {
     
@@ -112,10 +117,8 @@ void HiloPage::OnNavigatedTo(NavigationEventArgs^ e)
 
     LayoutAwarePage::OnNavigatedTo(e);
 }
-// </snippet1607>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1603>
 void Hilo::HiloPage::OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e)
 {
     ViewModelBase^ viewModel = dynamic_cast<ViewModelBase^>(DataContext);
@@ -128,10 +131,8 @@ void Hilo::HiloPage::OnNavigatedFrom(Windows::UI::Xaml::Navigation::NavigationEv
 
    LayoutAwarePage::OnNavigatedFrom(e);
 }
-// </snippet1603>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1609>
 void HiloPage::LoadState(Object^ navigationParameter, IMap<String^, Object^>^ pageState)
 {
     auto vm = dynamic_cast<ViewModelBase^>(DataContext);
@@ -143,10 +144,8 @@ void HiloPage::LoadState(Object^ navigationParameter, IMap<String^, Object^>^ pa
         vm->LoadState(state);
     }
 }
-// </snippet1609>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1604>
 void HiloPage::SaveState(IMap<String^, Object^>^ pageState)
 {
     auto vm = dynamic_cast<ViewModelBase^>(DataContext);
@@ -158,7 +157,6 @@ void HiloPage::SaveState(IMap<String^, Object^>^ pageState)
         pageState->Insert(viewModelStateKey, vmStateMap);
     }
 }
-// </snippet1604>
 
 void HiloPage::AttachNavigationHandlers(ViewModelBase^ viewModel) 
 {
@@ -168,10 +166,8 @@ void HiloPage::AttachNavigationHandlers(ViewModelBase^ viewModel)
 
     if (!m_hasHandlers)
     {
-        // <snippet813>
         m_navigateBackEventToken = viewModel->NavigateBack::add(ref new NavigateEventHandler(this, &HiloPage::NavigateBack));
         m_navigateHomeEventToken = viewModel->NavigateHome::add(ref new NavigateEventHandler(this, &HiloPage::NavigateHome));
-        // </snippet813>
         m_navigateToPageEventToken = viewModel->NavigateToPage::add(ref new PageNavigateEventHandler(this, &HiloPage::NavigateToPage));
         m_hasHandlers = true;
     }

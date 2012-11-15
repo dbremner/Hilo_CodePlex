@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 
 #include "CropImageViewModel.h"
@@ -99,7 +105,6 @@ void CropImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
     Initialize(navigationData.GetFilePath());
 }
 
-// <snippet401>
 void CropImageViewModel::Initialize(String^ photoPath)
 {
     assert(IsMainThread());
@@ -140,7 +145,6 @@ void CropImageViewModel::Initialize(String^ photoPath)
 
     }).then(ObserveException<void>(m_exceptionPolicy));
 }
-// </snippet401>
 
 task<IPhoto^> CropImageViewModel::GetImagePhotoAsync()
 {
@@ -218,11 +222,6 @@ task<IRandomAccessStream^> CropImageViewModel::EncodeImageAsync(IRandomAccessStr
             // Adjust crop back to original.
             auto adjustedCrop = ExifExtensions::RotateClockwise((*cropRect), unrotatedDimensions, -exifAppliedRotation);
             (*cropRect) = adjustedCrop;
-
-            assert(adjustedCrop.X >= 0 && adjustedCrop.X <= originalDimensions.Right);
-            assert(adjustedCrop.Y >= 0 && adjustedCrop.X <= originalDimensions.Bottom);
-            assert(adjustedCrop.Right >= 0 && adjustedCrop.Right <= originalDimensions.Right);
-            assert(adjustedCrop.Bottom >= 0 && adjustedCrop.Bottom <= originalDimensions.Bottom);
         }
     }, backgroundContext).then([ras, bitmapDecoder]
     {
@@ -437,8 +436,6 @@ void CropImageViewModel::UpdateCropOverlayPostion(Thumb ^thumb, float64 vertical
     }
 }
 
-// <snippet850>
-// <snippet1802>
 void CropImageViewModel::DoCrop(uint32_t xOffset, uint32_t yOffset, uint32_t newHeight, uint32_t newWidth, uint32_t oldWidth, byte* pSrcPixels, byte* pDestPixels)
 {    
     assert(IsBackgroundThread());
@@ -457,12 +454,7 @@ void CropImageViewModel::DoCrop(uint32_t xOffset, uint32_t yOffset, uint32_t new
         }
     });        
 }
-// </snippet1802>
-// </snippet850>
 
-// <snippet408>
-// <snippet1207>
-// <snippet1801>
 task<void> CropImageViewModel::CropImageAsync(float64 actualWidth)
 {
     assert(IsMainThread());
@@ -506,7 +498,4 @@ task<void> CropImageViewModel::CropImageAsync(float64 actualWidth)
         ChangeInProgress(false);
     }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
 }
-// </snippet1801>
-// </snippet1207>
-// </snippet408>
 

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "Photo.h"
 #include "ExceptionPolicy.h"
@@ -61,12 +67,10 @@ void Photo::OnThumbnailUpdated(IStorageItemInformation^ sender, Object^ e)
     }));
 }
 
-// <snippet812>
 IPhotoGroup^ Photo::Group::get()
 {
     return m_weakPhotoGroup.Resolve<IPhotoGroup>();
 }
-// </snippet812>
 
 String^ Photo::Name::get()
 {
@@ -167,7 +171,6 @@ bool Photo::IsInvalidThumbnail::get()
     return m_isInvalidThumbnail;
 }
 
-// <snippet851>
 task<void> Photo::QueryPhotoImageAsync()
 {
     auto imageStreamTask = create_task(m_fileInfo->OpenReadAsync());
@@ -175,10 +178,8 @@ task<void> Photo::QueryPhotoImageAsync()
     {
         assert(IsMainThread());
         IRandomAccessStreamWithContentType^ imageData = priorTask.get();
-        // <snippet709>
         m_image = ref new BitmapImage();
         m_imageFailedEventToken = m_image->ImageFailed::add(ref new ExceptionRoutedEventHandler(this, &Photo::OnImageFailedToOpen));
-        // </snippet709>
         return create_task(m_image->SetSourceAsync(imageData));
     }).then([this](task<void> priorTask) {
         assert(IsMainThread());
@@ -192,9 +193,7 @@ task<void> Photo::QueryPhotoImageAsync()
         }
     });
 }
-// </snippet851>
 
-// <snippet710>
 void Photo::OnImageFailedToOpen(Object^ sender, ExceptionRoutedEventArgs^ e)
 {
     assert(IsMainThread());
@@ -202,7 +201,6 @@ void Photo::OnImageFailedToOpen(Object^ sender, ExceptionRoutedEventArgs^ e)
     // Load a default image.
     m_image = ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));  
 }
-// </snippet710>
 
 void Photo::ClearImageData()
 {

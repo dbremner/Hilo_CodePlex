@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "ImageUtilities.h"
 
@@ -8,7 +14,6 @@ using namespace Microsoft::WRL;
 using namespace Platform;
 using namespace Windows::Storage::Streams;
 
-// <snippet810>
 inline void ThrowIfFailed(HRESULT hr)
 {
     if (FAILED(hr))
@@ -16,9 +21,7 @@ inline void ThrowIfFailed(HRESULT hr)
         throw Exception::CreateException(hr);
     }
 }
-// </snippet810>
 
-// <snippet809>
 // Retrieves the raw pixel data from the provided IBuffer object.
 byte* GetPointerToPixelData(IBuffer^ buffer)
 {
@@ -35,4 +38,3 @@ byte* GetPointerToPixelData(IBuffer^ buffer)
     ThrowIfFailed(bufferByteAccess->Buffer(&pixels));
     return pixels;
 }
-// </snippet809>

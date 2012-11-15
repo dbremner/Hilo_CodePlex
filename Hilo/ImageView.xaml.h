@@ -1,9 +1,13 @@
-﻿#pragma once
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+#pragma once
 
-// <snippet918>
 #include "FileSizeConverter.h" // Required by generated header
 #include "ImageView.g.h"
-// </snippet918>
     // See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
 
     // See http://go.microsoft.com/fwlink/?LinkId=267276 for info on how view classes interact 

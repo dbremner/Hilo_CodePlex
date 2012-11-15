@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "FileSizeConverter.h"
 #include "LocalResourceLoader.h"
@@ -19,7 +25,6 @@ FileSizeConverter::FileSizeConverter(Hilo::IResourceLoader^ loader) : m_loader(l
 {
 }
 
-// <snippet1404>
 Object^ FileSizeConverter::Convert(Object^ value, TypeName targetType, Object^ parameter, String^)
 {
     float64 size = static_cast<float64>(safe_cast<uint64>(value));
@@ -54,4 +59,3 @@ Object^ FileSizeConverter::ConvertBack(Object^ value, TypeName targetType, Objec
 {
     throw ref new NotImplementedException();
 }
-// </snippet1404>

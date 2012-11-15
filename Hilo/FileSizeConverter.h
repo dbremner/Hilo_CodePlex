@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #pragma once
 
 namespace Hilo
@@ -7,7 +13,6 @@ namespace Hilo
     // See http://go.microsoft.com/fwlink/?LinkId=267279 for info about the FileSizeConverter class
     // and other data converters.
 
-    // <snippet916>
     [Windows::Foundation::Metadata::WebHostHidden]
     public ref class FileSizeConverter sealed : public Windows::UI::Xaml::Data::IValueConverter
     {
@@ -22,5 +27,4 @@ namespace Hilo
         float64 ToTwoDecimalPlaces(float64 value);
         IResourceLoader^ m_loader;
     };
-    // </snippet916>
 }

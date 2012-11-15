@@ -1,4 +1,11 @@
-﻿<!-- <snippet901> -->
+<!--
+ THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+ ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+ PARTICULAR PURPOSE.
+
+ Copyright (c) Microsoft Corporation. All rights reserved
+-->
 <local:HiloPage
     x:Name="pageRoot"
     x:Uid="Page"
@@ -10,9 +17,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=ImageVM}">
-<!-- </snippet901> -->
 
-    <!-- <snippet917> -->
     <Page.Resources>
         <local:FileSizeConverter x:Key="FileSizeConverter" />
         <Style x:Key="FilmStripGridViewItemStyle" 
@@ -21,7 +26,6 @@
             <Setter Property="Margin" Value="0,0,2,4" />
         </Style>
     </Page.Resources>
-    <!-- </snippet917> -->
 
     <local:HiloPage.TopAppBar>
         <AppBar x:Name="ImageViewTopAppBar"
@@ -33,7 +37,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <!-- <snippet705> -->
                 <Button x:Name="FilmStripBackButton" 
                         AutomationProperties.AutomationId="FilmStripBackButton" 
                         Click="GoBack" 
@@ -41,9 +44,6 @@
                         Margin="26,53,36,36"
                         Style="{StaticResource BackButtonStyle}"
                         VerticalAlignment="Top"/>
-                <!-- </snippet705> -->
-                <!-- <snippet1208> -->
-                <!-- <snippet903> -->
                 <GridView x:Name="PhotosFilmStripGridView"
                           Grid.Column="1"
                           AutomationProperties.AutomationId="PhotosFilmStripGridView"
@@ -53,13 +53,11 @@
                           SelectedItem="{Binding Path=SelectedItem, Mode=TwoWay}"
                           SelectionMode="Single"
                           VerticalAlignment="Center">
-                    <!-- </snippet903> -->
                     <GridView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel Height="138" Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </GridView.ItemsPanel>
-                    <!-- <snippet902> -->
                     <GridView.ItemTemplate>
                         <DataTemplate>
                             <Border>
@@ -70,9 +68,7 @@
                             </Border>
                         </DataTemplate>
                     </GridView.ItemTemplate>
-                    <!-- </snippet902> -->
                 </GridView>
-                <!-- </snippet1208> -->
             </Grid>
         </AppBar>
     </local:HiloPage.TopAppBar>
@@ -102,7 +98,6 @@
         </Grid>
         <Grid x:Name="PhotoGrid"
               Grid.Row="1">
-            <!-- <snippet1400> -->
             <Popup x:Name="ImageViewFileInformationPopup"
                    AutomationProperties.AutomationId="ImageViewFileInformationPopup">
                 <Popup.Child>
@@ -135,10 +130,8 @@
                                                Margin="4,0,0,0"
                                                Text="{Binding Path=SelectedItem.FormattedTimeTaken}" />
                                 </StackPanel>
-                                <!-- <snippet930> -->
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}" 
                                            Text="{Binding Path=SelectedItem.FileSize, Converter={StaticResource FileSizeConverter}}" />
-                                <!-- </snippet930> -->
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}"
                                            Margin="0,20,0,0"
                                            Text="{Binding Path=SelectedItem.FormattedPath}" />
@@ -147,7 +140,6 @@
                     </Border>
                 </Popup.Child>
             </Popup>
-            <!-- </snippet1400> -->
             <Border Margin="0,-3,0,0">
                 <Image AutomationProperties.AutomationId="ImageControl"
                        HorizontalAlignment="Center"
@@ -160,7 +152,6 @@
             </Border>
         </Grid>
 
-        <!-- <snippet909> -->
         <ListView x:Name="SnappedPhotosFilmStripListView"
                   Grid.Row="1"
                   AutomationProperties.AutomationId="SnappedPhotosFilmStripListView"
@@ -186,7 +177,6 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <!-- </snippet909> -->
 
         <VisualStateManager.VisualStateGroups>
             <!-- Visual states reflect the application's view state -->
@@ -247,7 +237,6 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="{StaticResource SnappedPageHeaderTextStyle}"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <!-- <snippet910> -->
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PhotoGrid" 
                                                        Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" 
@@ -258,7 +247,6 @@
                             <DiscreteObjectKeyFrame KeyTime="0" 
                                                     Value="Visible"/>
                         </ObjectAnimationUsingKeyFrames>
-                        <!-- </snippet910> -->
                         <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ImageViewTopAppBar" 
                                                        Storyboard.TargetProperty="Visibility">
                             <DiscreteObjectKeyFrame KeyTime="0" 
@@ -300,7 +288,6 @@
         </VisualStateManager.VisualStateGroups>
     </Grid>
 
-    <!-- <snippet911> -->
     <local:HiloPage.BottomAppBar>
         <AppBar x:Name="ImageViewBottomAppBar"
                 x:Uid="AppBar"
@@ -355,5 +342,4 @@
             </Grid>
         </AppBar>
     </local:HiloPage.BottomAppBar>
-    <!-- </snippet911> -->
 </local:HiloPage>

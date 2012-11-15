@@ -1,4 +1,12 @@
-﻿<local:HiloPage
+<!--
+ THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+ ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+ PARTICULAR PURPOSE.
+
+ Copyright (c) Microsoft Corporation. All rights reserved
+-->
+<local:HiloPage
     x:Class="Hilo.CropImageView"
     x:Uid="Page"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -12,7 +20,6 @@
 
     <Page.Resources>
         <common:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
-        <!-- <snippet907> -->
         <ControlTemplate x:Key="HiloCroppingOverlayTemplate" TargetType="ContentControl">
             <Grid>
                 <Thumb Canvas.ZIndex="1"
@@ -58,7 +65,6 @@
                 <ContentPresenter Content="{TemplateBinding ContentControl.Content}" />
             </Grid>
         </ControlTemplate>
-        <!-- </snippet907> -->
     </Page.Resources>
 
     <Grid x:Name="ContentRoot"
@@ -72,21 +78,18 @@
                        Style="{StaticResource SnappedPageHeaderTextStyle}"
                        VerticalAlignment="Top"
                        Visibility="Collapsed"/>
-            <!-- <snippet707> -->
             <Image x:Name="Photo" 
                    AutomationProperties.AutomationId="ImageControl"
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center" 
                    SizeChanged="OnSizeChanged"
                    Source="{Binding Image}"/>
-            <!-- </snippet707> -->
             <ProgressRing IsActive="{Binding InProgress}" 
                           Foreground="{StaticResource HiloHighlightBrush}"
                           Height="60"
                           Width="60"/>
             <!-- Note: Hilo's crop overlay control does not support keyboard accessibility. To implement keyboard accessibility for your -->
             <!-- own controls, see http://msdn.microsoft.com/en-us/library/windows/apps/xaml/Hh868161(v=win.10).aspx -->
-            <!-- <snippet906> -->
             <Canvas x:Name="CropCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
                 <ContentControl x:Name="CropOverlay"
                                 Canvas.Left="{Binding CropOverlayLeft}"
@@ -97,18 +100,14 @@
                                 Template="{StaticResource HiloCroppingOverlayTemplate}"
                                 Visibility="{Binding Path=IsCropOverlayVisible, Converter={StaticResource BoolToVisConverter}}"
                                 Width="{Binding CropOverlayWidth}">
-                    <!--<snippet1205>-->
                     <Grid Background="Transparent"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Tapped="OnCropRectangleTapped">
                     </Grid>
-                    <!--</snippet1205>-->
                 </ContentControl>
             </Canvas>
-            <!-- </snippet906> -->
         </Grid>
-        <!--<snippet706>-->
         <VisualStateManager.VisualStateGroups>
             <!-- Visual states reflect the application's view state -->
             <VisualStateGroup x:Name="ApplicationViewStates">
@@ -179,10 +178,8 @@
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
-        <!--</snippet706>-->
     </Grid>
 
-    <!-- <snippet1216> -->
     <local:HiloPage.BottomAppBar>
         <AppBar x:Name="CropImageBottomAppBar" 
                 x:Uid="AppBar"
@@ -237,5 +234,4 @@
             </Grid>
         </AppBar>
     </local:HiloPage.BottomAppBar>
-    <!-- </snippet1216> -->
 </local:HiloPage>

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "ThumbnailGenerator.h"
 #include "ExceptionPolicy.h"
@@ -23,7 +29,6 @@ ThumbnailGenerator::ThumbnailGenerator(std::shared_ptr<ExceptionPolicy> policy) 
 {
 }
 
-// <snippet409>
 task<Vector<StorageFile^>^> ThumbnailGenerator::Generate( 
     IVector<StorageFile^>^ files, 
     StorageFolder^ thumbnailsFolder)
@@ -45,7 +50,6 @@ task<Vector<StorageFile^>^> ThumbnailGenerator::Generate(
             m_exceptionPolicy));
     }
 
-    // <snippet801>
     return when_all(begin(thumbnailTasks), end(thumbnailTasks)).then(
         [](vector<StorageFile^> files)
     {
@@ -60,11 +64,8 @@ task<Vector<StorageFile^>^> ThumbnailGenerator::Generate(
 
         return result;
     });
-    // </snippet801>
 }
-// </snippet409>
 
-// <snippet410>
 task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
     StorageFolder^ folder,
     StorageFile^ imageFile,
@@ -95,7 +96,6 @@ task<StorageFile^> ThumbnailGenerator::CreateLocalThumbnailAsync(
         return InternalSaveToFile(folder, createdThumbnail, localFileName);
     });
 }
-// </snippet410>
 
 task<StorageFile^> ThumbnailGenerator::InternalSaveToFile(
     StorageFolder^ thumbnailsFolder, 
@@ -130,16 +130,13 @@ task<StorageFile^> ThumbnailGenerator::InternalSaveToFile(
     });
 }
 
-// <snippet407>
 task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPictureFileAsync(
     StorageFile^ sourceFile, 
     unsigned int thumbSize)
 {
     (void)thumbSize; // Unused parameter
-    // <snippet806>
     auto decoder = make_shared<BitmapDecoder^>(nullptr);
     auto pixelProvider = make_shared<PixelDataProvider^>(nullptr);
-    // </snippet806>
     auto resizedImageStream = ref new InMemoryRandomAccessStream();
     auto createThumbnail = create_task(
         sourceFile->GetThumbnailAsync(
@@ -187,4 +184,3 @@ task<InMemoryRandomAccessStream^> ThumbnailGenerator::CreateThumbnailFromPicture
         return resizedImageStream;
     });
 }
-// </snippet407>

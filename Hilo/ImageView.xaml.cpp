@@ -1,4 +1,10 @@
-﻿#include "pch.h"
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+#include "pch.h"
 #include "ImageView.xaml.h"
 #include "ImageViewModel.h"
 
@@ -15,7 +21,6 @@ ImageView::ImageView() : m_pointerPressed(false)
     m_filmStripLoadedToken = PhotosFilmStripGridView->Loaded::add(ref new RoutedEventHandler(this, &ImageView::OnFilmStripLoaded));
 }
 
-// <snippet821>
 ImageView::~ImageView()
 {
     if (nullptr != PhotosFilmStripGridView)
@@ -30,9 +35,7 @@ ImageView::~ImageView()
         });
     }
 }
-// </snippet821>
 
-// <snippet900>
 // Scrolls the selected item into view after the collection is likely to have loaded.
 void ImageView::OnFilmStripLoaded(Object^ sender, RoutedEventArgs^ e)
 {
@@ -44,9 +47,7 @@ void ImageView::OnFilmStripLoaded(Object^ sender, RoutedEventArgs^ e)
 
     PhotosFilmStripGridView->Loaded::remove(m_filmStripLoadedToken);
 }
-// </snippet900>
 
-// <snippet1401>
 void Hilo::ImageView::OnImagePointerPressed(Object^ sender, PointerRoutedEventArgs^ e)
 {
     m_pointerPressed = true;
@@ -59,9 +60,7 @@ void Hilo::ImageView::OnImagePointerPressed(Object^ sender, PointerRoutedEventAr
         ImageViewFileInformationPopup->IsOpen = true;
     }
 }
-// </snippet1401>
 
-// <snippet1402>
 void Hilo::ImageView::OnImagePointerReleased(Object^ sender, PointerRoutedEventArgs^ e)
 {
     if (m_pointerPressed)
@@ -70,9 +69,7 @@ void Hilo::ImageView::OnImagePointerReleased(Object^ sender, PointerRoutedEventA
         m_pointerPressed = false;
     }
 }
-// </snippet1402>
 
-// <snippet1403>
 void Hilo::ImageView::OnImagePointerMoved(Object^ sender, PointerRoutedEventArgs^ e)
 {
     if (m_pointerPressed)
@@ -84,4 +81,3 @@ void Hilo::ImageView::OnImagePointerMoved(Object^ sender, PointerRoutedEventArgs
         }
     }
 }
-// </snippet1403>

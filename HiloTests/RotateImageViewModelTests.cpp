@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "UnitTestingAssertSpecializations.h"
@@ -185,7 +191,6 @@ namespace HiloTests
 
         }
 
-        // <snippet2001>
         TEST_METHOD(RotateImageViewModelShouldSaveAndLoadRotationAngle)
         {
             auto vm = std::make_shared<RotateImageViewModel^>(nullptr);
@@ -204,7 +209,6 @@ namespace HiloTests
 
             Assert::AreEqual((*vm)->RotationAngle,  (*newVm)->RotationAngle);
         }
-        // </snippet2001>
 
         TEST_METHOD(RotateImageViewModelShouldSaveAndLoadMargin)
         {

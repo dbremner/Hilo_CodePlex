@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 //
 // SuspensionManager.cpp
 // Implementation of the SuspensionManager class
@@ -366,7 +372,6 @@ namespace
 		}
 	}
 
-    // <snippet800>
 	void WriteStringToObjectMap(DataWriter^ writer, IMap<String^, Object^>^ map)
 	{
 		writer->WriteByte(StringToObjectMapType);
@@ -378,7 +383,6 @@ namespace
 		}
 		writer->WriteByte(MapEndMarker);
 	}
-    // </snippet800>
 
 	void WriteObject(DataWriter^ writer, Object^ object)
 	{

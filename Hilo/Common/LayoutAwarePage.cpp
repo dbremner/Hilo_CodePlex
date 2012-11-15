@@ -1,4 +1,10 @@
-﻿#include "pch.h"
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+#include "pch.h"
 #include "LayoutAwarePage.h"
 #include "SuspensionManager.h"
 
@@ -371,7 +377,6 @@ void LayoutAwarePage::InvalidateVisualState()
 /// </summary>
 /// <param name="e">Event data that describes how this page was reached.  The Parameter
 /// property provides the group to be displayed.</param>
-// <snippet1612>
 void LayoutAwarePage::OnNavigatedTo(NavigationEventArgs^ e)
 {
 	// Returning to a cached page through navigation shouldn't trigger state loading
@@ -404,14 +409,12 @@ void LayoutAwarePage::OnNavigatedTo(NavigationEventArgs^ e)
 		LoadState(e->Parameter, safe_cast<IMap<String^, Object^>^>(frameState->Lookup(_pageKey)));
 	}
 }
-// </snippet1612>
 
 /// <summary>
 /// Invoked when this page will no longer be displayed in a Frame.
 /// </summary>
 /// <param name="e">Event data that describes how this page was reached.  The Parameter
 /// property provides the group to be displayed.</param>
-// <snippet1611>
 void LayoutAwarePage::OnNavigatedFrom(NavigationEventArgs^ e)
 {
 	auto frameState = SuspensionManager::SessionStateForFrame(Frame);
@@ -419,7 +422,6 @@ void LayoutAwarePage::OnNavigatedFrom(NavigationEventArgs^ e)
 	SaveState(pageState);
 	frameState->Insert(_pageKey, pageState);
 }
-// </snippet1611>
 
 /// <summary>
 /// Populates the page with content passed during navigation.  Any saved state is also

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "ImageNavigationData.h"
 #include "ImageViewModel.h"
@@ -36,7 +42,6 @@ ImageViewModel::ImageViewModel(shared_ptr<Repository> repository, shared_ptr<Exc
         ref new ExecuteDelegate(this, &ImageViewModel::CartoonizeImage),
         ref new CanExecuteDelegate(this, &ImageViewModel::CanProcessImage));
 
-    // <snippet2307>
     auto wr = WeakReference(this);
     function<void()> callback = [wr] {
         auto vm = wr.Resolve<ImageViewModel>();
@@ -46,7 +51,6 @@ ImageViewModel::ImageViewModel(shared_ptr<Repository> repository, shared_ptr<Exc
         }
     };
     m_repository->AddObserver(callback, PageType::Image);
-    // </snippet2307>
 }
 
 ImageViewModel::~ImageViewModel()
@@ -91,7 +95,6 @@ task<void> ImageViewModel::QueryPhotosAsync()
 
     m_photosCts = cancellation_token_source();
     cancellation_token token = m_photosCts.get_token();
-    // <snippet1804>
     auto t = m_repository->GetPhotosForDateRangeQueryAsync(m_query);
     return t.then([this](IVectorView<IPhoto^>^ photos)
     {
@@ -130,7 +133,6 @@ task<void> ImageViewModel::QueryPhotosAsync()
             m_photos = nullptr;
         };
     });
-    // </snippet1804>
 }
 
 Object^ ImageViewModel::SelectedItem::get()
@@ -168,15 +170,12 @@ void ImageViewModel::SelectedItem::set(Object^ value)
     }
 }
 
-// <snippet803>
 String^ ImageViewModel::MonthAndYear::get()
 {
     return CalendarExtensions::GetLocalizedMonthAndYear(m_fileDate);
 }
-// </snippet803>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1605>
 void ImageViewModel::SaveState(IMap<String^, Object^>^ stateMap)
 {
     if (m_photo != nullptr)
@@ -189,10 +188,8 @@ void ImageViewModel::SaveState(IMap<String^, Object^>^ stateMap)
         stateMap->Insert(QueryMapKey, m_query);
     }
 }
-// </snippet1605>
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1610>
 void ImageViewModel::LoadState(IMap<String^, Object^>^ stateMap)
 {
     if (stateMap != nullptr)
@@ -208,7 +205,6 @@ void ImageViewModel::LoadState(IMap<String^, Object^>^ stateMap)
         Initialize(filePath, fileDate, query);
     }
 }
-// </snippet1610>
 
 task<void> ImageViewModel::QuerySinglePhotoAsync()
 {
@@ -245,14 +241,12 @@ task<void> ImageViewModel::QuerySinglePhotoAsync()
 }
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
-// <snippet1608>
 void ImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 {
     auto data = dynamic_cast<String^>(e->Parameter);
     ImageNavigationData imageData(data);
     Initialize(imageData.GetFilePath(), imageData.GetFileDate(), imageData.GetDateQuery());
 }
-// </snippet1608>
 
 void ImageViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
 {

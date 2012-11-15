@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 
 #include <amp.h>
@@ -151,7 +157,6 @@ void CartoonizeImageViewModel::EvaluateCommands()
     m_saveCommand->CanExecute(IsCartoonizing(nullptr));
 }
 
-// <snippet1700>
 void CartoonizeImageViewModel::CartoonizeImage(Object^ parameter)
 {
     assert(IsMainThread());
@@ -188,7 +193,6 @@ void CartoonizeImageViewModel::CartoonizeImage(Object^ parameter)
         priorTask.get();
     }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
 }
-// </snippet1700>
 
 void CartoonizeImageViewModel::Unsnap(Object^ parameter)
 {

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "ImageBrowserViewModel.h"
 #include "IPhoto.h"
@@ -32,9 +38,7 @@ ImageBrowserViewModel::ImageBrowserViewModel(shared_ptr<Repository> repository, 
     m_hasFileUpdateTask(false),
     m_runningMonthQuery(false), m_runningYearQuery(false)
 {
-    // <snippet914>
     m_groupCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &ImageBrowserViewModel::NavigateToGroup), nullptr);
-    // </snippet914>
     m_cropImageCommand = ref new DelegateCommand(
         ref new ExecuteDelegate(this, &ImageBrowserViewModel::CropImage),
         ref new CanExecuteDelegate(this, &ImageBrowserViewModel::CanProcessImage));
@@ -185,7 +189,6 @@ void ImageBrowserViewModel::OnDataChanged()
 }
 #pragma endregion
 
-// <snippet915>
 void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
 {
     auto group = dynamic_cast<IPhotoGroup^>(parameter);
@@ -198,7 +201,6 @@ void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
         ViewModelBase::GoToPage(PageType::Image, imageData.SerializeToString());
     }
 }
-// </snippet915>
 
 void ImageBrowserViewModel::CropImage(Object^ parameter)
 {
@@ -242,7 +244,6 @@ bool ImageBrowserViewModel::CanProcessImage(Object^ parameter)
 //    ObserveFileChange - occurs when file system changes invalidate the result of the current query
 //    FinishMonthAndYearQueries - occurs when current month and year queries are both complete
 
-// <snippet403>
 // State transition occurs when view model becomes inactive (no longer visible).
 void ImageBrowserViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
 {
@@ -267,7 +268,6 @@ void ImageBrowserViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
         break;
     }
 }
-// </snippet403>
 
 // State transition occurs when view model becomes active (visible).
 void ImageBrowserViewModel::OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e)
@@ -294,7 +294,6 @@ void ImageBrowserViewModel::OnNavigatedTo(Windows::UI::Xaml::Navigation::Navigat
     }
 }
 
-// <snippet414>
 // State transition occurs when file system changes invalidate the result of the current query.
 void ImageBrowserViewModel::ObserveFileChange()
 {
@@ -322,7 +321,6 @@ void ImageBrowserViewModel::ObserveFileChange()
         break;
     }
 }
-// </snippet414>
 
 // State transition occurs when both month and year queries have finished running. 
 void ImageBrowserViewModel::FinishMonthAndYearQueries()
@@ -381,8 +379,6 @@ void ImageBrowserViewModel::StartMonthAndYearQueries()
     StartYearQuery(m_currentQueryId, token);
 }
 
-// <snippet402>
-// <snippet804>
 void ImageBrowserViewModel::StartMonthQuery(int queryId, cancellation_token token)
 {
     m_runningMonthQuery = true;
@@ -428,8 +424,6 @@ void ImageBrowserViewModel::StartMonthQuery(int queryId, cancellation_token toke
         }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
     });
 }
-// </snippet804>
-// </snippet402>
 
 void ImageBrowserViewModel::StartYearQuery(int queryId, cancellation_token token)
 {

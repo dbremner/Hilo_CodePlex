@@ -1,4 +1,10 @@
-﻿#include "pch.h"
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
+#include "pch.h"
 #include "CropImageView.xaml.h"
 #include "CropImageViewModel.h"
 
@@ -17,7 +23,6 @@ CropImageView::CropImageView()
     m_sizeChangedAttached = false;
 }
 
-// <snippet708>
 void CropImageView::OnSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
 {
     m_cropImageViewModel->CalculateInitialCropOverlayPosition(
@@ -30,7 +35,6 @@ void CropImageView::OnSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
         m_sizeChangedAttached = true;
     }
 }
-// </snippet708>
 
 void CropImageView::OnThumbDragDelta(Object^ sender, DragDeltaEventArgs^ e)
 {
@@ -43,7 +47,6 @@ void CropImageView::OnThumbDragDelta(Object^ sender, DragDeltaEventArgs^ e)
     }
 }
 
-// <snippet1206>
 void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^ e)
 {
     if (!m_cropImageViewModel->InProgress)
@@ -51,4 +54,3 @@ void CropImageView::OnCropRectangleTapped(Object^ sender, TappedRoutedEventArgs^
         m_cropImageViewModel->CropImageAsync(Photo->ActualWidth);
     }
 }
-// </snippet1206>

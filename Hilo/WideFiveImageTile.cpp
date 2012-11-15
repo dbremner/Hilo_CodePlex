@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "LocalResourceLoader.h"
 #include "WideFiveImageTile.h"
@@ -29,7 +35,6 @@ TileNotification^ WideFiveImageTile::GetTileNotification()
     return ref new TileNotification(content);
 }
 
-// <snippet1903>
 void WideFiveImageTile::SetImageFilePaths(const vector<wstring>& fileNames)
 {
     if (fileNames.size() > MaxTemplateImages)
@@ -39,9 +44,7 @@ void WideFiveImageTile::SetImageFilePaths(const vector<wstring>& fileNames)
 
     m_fileNames = fileNames;
 }
-// </snippet1903>
 
-// <snippet504>
 void WideFiveImageTile::UpdateContentWithValues(XmlDocument^ content)
 {
     if (m_fileNames.size() == 0) return;
@@ -65,4 +68,3 @@ void WideFiveImageTile::UpdateContentWithValues(XmlDocument^ content)
     auto node = content->ImportNode(squareTileXml->GetElementsByTagName("binding")->First()->Current, true);
     content->GetElementsByTagName("visual")->First()->Current->AppendChild(node);
 }
-// </snippet504>

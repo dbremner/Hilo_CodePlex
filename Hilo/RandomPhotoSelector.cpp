@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "RandomPhotoSelector.h"
 #include <numeric>
@@ -30,7 +36,6 @@ task<IVector<StorageFile^>^> RandomPhotoSelector::SelectFilesAsync(IVectorView<S
     });
 }
 
-// <snippet802>
 vector<unsigned int> RandomPhotoSelector::CreateRandomizedVector(unsigned int vectorSize, unsigned int sampleSize)
 {
     // Seed the rand() function, which is used by random_shuffle.
@@ -53,4 +58,3 @@ vector<unsigned int> RandomPhotoSelector::CreateRandomizedVector(unsigned int ve
 
     return result;
 }
-// </snippet802>

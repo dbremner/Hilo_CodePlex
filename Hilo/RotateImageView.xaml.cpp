@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "RotateImageView.xaml.h"
 #include "ImageBrowserViewModel.h"
@@ -15,7 +21,6 @@ RotateImageView::RotateImageView()
     m_viewModel = dynamic_cast<Hilo::RotateImageViewModel^>(DataContext);
 }
 
-// <snippet1213>
 void RotateImageView::OnManipulationDelta(ManipulationDeltaRoutedEventArgs^ e)
 {
     m_viewModel->RotationAngle += e->Delta.Rotation;
@@ -25,4 +30,3 @@ void RotateImageView::OnManipulationCompleted(ManipulationCompletedRoutedEventAr
 {
     m_viewModel->EndRotation();
 }
-// </snippet1213>

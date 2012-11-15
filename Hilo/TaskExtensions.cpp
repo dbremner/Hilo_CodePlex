@@ -1,9 +1,14 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 
 namespace Hilo 
 {
     // The run_async_non_interactive function allows lower priority (noninteractive) work to be scheduled on the main thread.
-    // <snippet412>
     void run_async_non_interactive(std::function<void ()>&& action)
     {
         Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
@@ -16,7 +21,6 @@ namespace Hilo
             action();
         })); 
     } 
-    // </snippet412>
 }
 
 #ifndef NDEBUG

@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "CalendarExtensions.h"
 
@@ -67,7 +73,6 @@ wstring CalendarExtensions::GetAqsFormattedDate(const DateTime date)
 // private helper-- creates an AQS date-range expression that spans the month that contains the given date in the given calendar system.
 String^ CalendarExtensions::CreateMonthRangeFromDate(Calendar^ cal)
 {
-    // <snippet805>
     wstringstream dateRange;
     dateRange << L"System.ItemDate:" ;
 
@@ -90,7 +95,6 @@ String^ CalendarExtensions::CreateMonthRangeFromDate(Calendar^ cal)
     dateRange << GetAqsFormattedDate(cal->GetDateTime()); 
 
     return ref new String(dateRange.str().c_str());
-    // </snippet805>
 }
 
 Calendar^ CalendarExtensions::GetCalendar()

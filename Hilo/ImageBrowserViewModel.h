@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #pragma once
 
 #include "ViewModelBase.h"
@@ -76,7 +82,6 @@ namespace Hilo
         }
 
     private:
-        // <snippet413>
         enum class Mode {
             Default,        /* (0, 0, 0): no pending data changes, not updating, not visible */
             Active,         /* (0, 0, 1): no pending data changes, not updating, visible */
@@ -84,7 +89,6 @@ namespace Hilo
             Running,        /* (0, 1, 1): no pending data changes, updating, visible  */    
             NotAllowed      /* error state */
         };
-        // </snippet413>
 
         Platform::Collections::Vector<IPhotoGroup^>^ m_monthGroups;
         Platform::Collections::Vector<IYearGroup^>^ m_yearGroups;

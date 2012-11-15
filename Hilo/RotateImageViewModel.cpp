@@ -1,3 +1,9 @@
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A
+// PARTICULAR PURPOSE.
+//
+// Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "RotateImageViewModel.h"
 #include "DelegateCommand.h"
@@ -30,17 +36,13 @@ Platform::String^ const MarginTopStateKey = "margin-top";
 Platform::String^ const MarginRightStateKey = "margin-right";
 Platform::String^ const MarginBottomStateKey = "margin-bottom";
 
-// <snippet2304>
 RotateImageViewModel::RotateImageViewModel(shared_ptr<Repository> repository, shared_ptr<ExceptionPolicy> exceptionPolicy) : 
     ImageBase(exceptionPolicy), m_repository(repository), m_imageMargin(Thickness(0.0)), m_getPhotoAsyncIsRunning(false),
     m_inProgress(false), m_isSaving(false), m_rotationAngle(0.0)
-// </snippet2304>
 {
     m_rotateCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::Rotate90), nullptr);
     m_resumeRotateCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::Unsnap), nullptr);
-    // <snippet603>
     m_saveCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::SaveImage), nullptr);
-    // </snippet603>
     m_cancelCommand = ref new DelegateCommand(ref new ExecuteDelegate(this, &RotateImageViewModel::CancelRotate), nullptr);
 
     ViewModelBase::m_isAppBarSticky = true;
@@ -56,12 +58,10 @@ ICommand^ RotateImageViewModel::ResumeRotateCommand::get()
     return m_resumeRotateCommand;
 }
 
-// <snippet602>
 ICommand^ RotateImageViewModel::SaveCommand::get()
 {
     return m_saveCommand;
 }
-// </snippet602>
 
 ICommand^ RotateImageViewModel::CancelCommand::get()
 {
@@ -83,7 +83,6 @@ float64 RotateImageViewModel::RotationAngle::get()
     return m_rotationAngle;
 }
 
-// <snippet604>
 void RotateImageViewModel::RotationAngle::set(float64 value)
 {
     m_rotationAngle = value;
@@ -102,9 +101,7 @@ void RotateImageViewModel::RotationAngle::set(float64 value)
     OnPropertyChanged("ImageMargin");
     OnPropertyChanged("RotationAngle");
 }
-// </snippet604>
 
-// <snippet404>
 IPhoto^ RotateImageViewModel::Photo::get()
 {
     if (nullptr == m_photo && !m_getPhotoAsyncIsRunning)
@@ -128,7 +125,6 @@ IPhoto^ RotateImageViewModel::Photo::get()
 
     return m_photo;
 }
-// </snippet404>
 
 void RotateImageViewModel::Rotate90(Object^ parameter)
 {   
@@ -194,7 +190,6 @@ unsigned int RotateImageViewModel::CheckRotationAngle(unsigned int angle)
     return (angle > 360) ? angle - 360 : angle;
 }
 
-// <snippet405>
 concurrency::task<BitmapEncoder^> RotateImageViewModel::SetEncodingRotation(BitmapEncoder^ encoder, shared_ptr<ImageEncodingInformation> encodingInfo, float64 rotationAngle, concurrency::task_continuation_context backgroundContext)
 {
     // If the file format supports Exif orientation then update the orientation flag
@@ -252,7 +247,6 @@ concurrency::task<BitmapEncoder^> RotateImageViewModel::SetEncodingRotation(Bitm
         return encoder;
     });
 }
-// </snippet405>
 
 concurrency::task<IRandomAccessStream^> RotateImageViewModel::EncodeRotateImageToStream(
     ImageEncodingInformation encodingInformation, 
@@ -432,7 +426,6 @@ void RotateImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 }
 
 
-// <snippet704>
 void RotateImageViewModel::Initialize(String^ photoPath)
 {
     assert(IsMainThread());
@@ -449,23 +442,18 @@ void RotateImageViewModel::Initialize(String^ photoPath)
         }
     });
 }
-// </snippet704>
 
-// <snippet2305>
 concurrency::task<IPhoto^> RotateImageViewModel::GetImagePhotoAsync()
 {
     assert(IsMainThread());
     return m_repository->GetSinglePhotoAsync(m_photoPath);
 }
-// </snippet2305>
 
-// <snippet1214>
 void RotateImageViewModel::EndRotation()
 {
     auto quarterTurns = (RotationAngle / 90);
     auto nearestQuarter = (int)floor(quarterTurns + 0.5) % 4;
     RotationAngle = (float64)nearestQuarter * 90;
 }
-// </snippet1214>
 
 

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- <snippet500> -->
+<!-- Image assets, including the Hilo logo, are placeholders and meant for training purposes only. They cannot be used as a trademark or for other commercial purposes. -->
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
   <Identity Name="Microsoft.SDKSamples.Hilo.CPP" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.0.0.0" />
   <Properties>
