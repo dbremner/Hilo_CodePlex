@@ -14,6 +14,7 @@
 #include "CartoonizeImageViewModel.h" // Required by generated header
 #include "HubPhotoGroup.h" // Required by generated header
 #include "Photo.h" // Required by generated header
+#include "PhotoImage.h"
 #include "MonthGroup.h" // Required by generated header
 #include "YearGroup.h" // Required by generated header
 #include "MonthBlock.h" // Required by generated header

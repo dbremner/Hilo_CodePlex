@@ -7,6 +7,7 @@
 #pragma once
 
 #include "..\Hilo\IPhoto.h"
+#include "..\Hilo\IPhotoImage.h"
 
 namespace HiloTests
 {
@@ -24,60 +25,14 @@ namespace HiloTests
         { 
             virtual Platform::String^ get(); 
         }
-        
+
         property Platform::String^ Path
         {
             virtual Platform::String^ get();
             void set(Platform::String^ value);
         }
 
-        property Platform::String^ FormattedPath
-        {
-            virtual Platform::String^ get();
-        }
-        
-        property Platform::String^ FileType
-        {
-            virtual Platform::String^ get();
-        }
-
-        property Windows::Foundation::DateTime DateTaken
-        {
-            virtual Windows::Foundation::DateTime get();
-            void set(Windows::Foundation::DateTime value);
-        }
-
-        property Platform::String^ FormattedDateTaken
-        {
-            virtual Platform::String^ get();
-        }
-
-        property Platform::String^ FormattedTimeTaken
-        {
-            virtual Platform::String^ get();
-        }
-
-        property Platform::String^ Resolution
-        {
-            virtual Platform::String^ get();
-        }
-
-        property uint64 FileSize
-        {
-            virtual uint64 get();
-        }
-
-        property Platform::String^ DisplayType
-        {
-            virtual Platform::String^ get();
-        }
-
         property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Thumbnail 
-        { 
-            virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
-        }
-
-        property Windows::UI::Xaml::Media::Imaging::BitmapImage^ Image
         { 
             virtual Windows::UI::Xaml::Media::Imaging::BitmapImage^ get();
         }
@@ -87,8 +42,22 @@ namespace HiloTests
             virtual bool get();
         }
 
-        virtual Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::IRandomAccessStreamWithContentType^>^ OpenReadAsync();
-        virtual void ClearImageData();
+        property int ColumnSpan 
+        {
+            virtual int get();
+            virtual void set(int value);
+        }
+
+        property int RowSpan
+        {
+            virtual int get();
+            virtual void set(int value);
+        }
+        
+        virtual Hilo::IPhotoImage^ GetPhotoImage();
+        virtual Windows::Foundation::IAsyncOperation<Windows::Foundation::DateTime>^ GetDateTakenAsync();
+
+        void SetDateTaken(Windows::Foundation::DateTime value);
 
     private:
         Platform::String^ m_name;
@@ -102,5 +71,7 @@ namespace HiloTests
         Windows::UI::Xaml::Media::Imaging::BitmapImage^ m_thumbnail;
         Windows::Storage::Streams::IRandomAccessStreamWithContentType^ m_randomAccessStream;
         bool m_isInvalidThumbnail;
+        int m_columnSpan;
+        int m_rowSpan;
     };
 }

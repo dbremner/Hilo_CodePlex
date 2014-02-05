@@ -33,13 +33,13 @@ namespace HiloTests
             cal->Year = 2012;
             cal->Month = 5;
             cal->Day = 5;
-            photo->DateTaken = cal->GetDateTime();
+            photo->SetDateTaken(cal->GetDateTime());
 
-            photoCache.InsertPhoto(photo);
-            auto actual = photoCache.GetForYearAndMonth(cal->Year, cal->Month);
-            auto name = actual->Name;
+            photoCache.InsertPhoto(photo, cal->GetDateTime());
+            IPhoto^ actual = photoCache.GetForYearAndMonth(cal->Year, cal->Month);
+            IPhoto^ expected = photo;
 
-            Assert::AreEqual(photo->Name, actual->Name);
+            Assert::AreEqual(expected, actual); 
         }
 
     private:

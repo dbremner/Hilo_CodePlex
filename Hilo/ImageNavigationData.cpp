@@ -16,10 +16,12 @@ using namespace std;
 using namespace Windows::Foundation;
 
 
-ImageNavigationData::ImageNavigationData(IPhoto^ photo)
+ImageNavigationData::ImageNavigationData(String^ path, DateTime monthGroupDate)
 {
-    m_fileDate = photo->DateTaken;
-    m_filePath = photo->Path;
+    assert(path != nullptr);
+
+    m_monthGroupDate = monthGroupDate;
+    m_filePath = path;
 }
 
 ImageNavigationData::ImageNavigationData(String^ serializedData)
@@ -30,16 +32,16 @@ ImageNavigationData::ImageNavigationData(String^ serializedData)
 
     auto path = data.substr(0, index);
     auto date = data.substr(index+1, data.length());
-    DateTime fileDate;
-    fileDate.UniversalTime = _wtoi64(date.c_str());
+    DateTime monthGroupDate;
+    monthGroupDate.UniversalTime = _wtoi64(date.c_str());
 
     m_filePath = ref new String(path.c_str());
-    m_fileDate = fileDate;
+    m_monthGroupDate = monthGroupDate;
 }
 
-DateTime ImageNavigationData::GetFileDate() const
+DateTime ImageNavigationData::GetMonthGroupDate() const
 {
-    return m_fileDate;
+    return m_monthGroupDate;
 }
 
 String^ ImageNavigationData::GetFilePath() const
@@ -51,7 +53,7 @@ String^ ImageNavigationData::GetDateQuery()
 {
     if (nullptr == m_dateQuery)
     {
-        m_dateQuery = CalendarExtensions::CreateMonthRangeFromDate(m_fileDate);
+        m_dateQuery = CalendarExtensions::CreateMonthRangeFromDate(m_monthGroupDate);
     }
     return m_dateQuery;
 }
@@ -59,6 +61,6 @@ String^ ImageNavigationData::GetDateQuery()
 String^ ImageNavigationData::SerializeToString()
 {
     wstringstream stringStream;
-    stringStream << m_filePath->Data() << L"|" << m_fileDate.UniversalTime ;
+    stringStream << m_filePath->Data() << L"|" << m_monthGroupDate.UniversalTime ;
     return ref new String(stringStream.str().c_str());
 }

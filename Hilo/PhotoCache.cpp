@@ -12,16 +12,16 @@
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::Globalization;
+using namespace Windows::Foundation;
 
 void PhotoCache::Clear()
 {
     m_photoCache.clear();
 }
 
-void PhotoCache::InsertPhoto(IPhoto^ photo)
+void PhotoCache::InsertPhoto(IPhoto^ photo, DateTime monthDate)
 {
     int year, month;
-    auto monthDate = photo->DateTaken;
 
     CalendarExtensions::WriteLocalizedYearAndMonth(monthDate, year, month);
     auto &yearPair = m_photoCache[year];

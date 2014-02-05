@@ -7,7 +7,7 @@
 #include "pch.h"
 #include "RotateImageViewModel.h"
 #include "DelegateCommand.h"
-#include "IPhoto.h"
+#include "IPhotoImage.h"
 #include "ImageNavigationData.h"
 #include "TaskExceptionsExtensions.h"
 #include "Repository.h"
@@ -102,14 +102,14 @@ void RotateImageViewModel::RotationAngle::set(float64 value)
     OnPropertyChanged("RotationAngle");
 }
 
-IPhoto^ RotateImageViewModel::Photo::get()
+IPhotoImage^ RotateImageViewModel::Photo::get()
 {
     if (nullptr == m_photo && !m_getPhotoAsyncIsRunning)
     {
         m_getPhotoAsyncIsRunning = true;
         run_async_non_interactive([this]()
         {
-            GetImagePhotoAsync().then([this] (task<IPhoto^> photoTask)
+            GetImagePhotoAsync().then([this] (task<IPhotoImage^> photoTask)
             {
                 assert(IsMainThread());
                 m_getPhotoAsyncIsRunning = false;
@@ -432,7 +432,7 @@ void RotateImageViewModel::Initialize(String^ photoPath)
     m_photo = nullptr;
     m_photoPath = photoPath;
 
-    GetImagePhotoAsync().then([this](IPhoto^ photo)
+    GetImagePhotoAsync().then([this](IPhotoImage^ photo)
     {
         assert(IsMainThread());
         // Return to the hub page if the photo is no longer present
@@ -443,7 +443,7 @@ void RotateImageViewModel::Initialize(String^ photoPath)
     });
 }
 
-concurrency::task<IPhoto^> RotateImageViewModel::GetImagePhotoAsync()
+concurrency::task<IPhotoImage^> RotateImageViewModel::GetImagePhotoAsync()
 {
     assert(IsMainThread());
     return m_repository->GetSinglePhotoAsync(m_photoPath);

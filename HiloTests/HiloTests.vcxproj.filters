@@ -160,6 +160,7 @@
     <ClInclude Include="..\Hilo\CalendarExtensions.h">
       <Filter>Testable</Filter>
     </ClInclude>
+    <ClInclude Include="StubPhotoImage.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UnitTestLogo.png">
@@ -353,5 +354,7 @@
     <ClCompile Include="..\Hilo\CalendarExtensions.cpp">
       <Filter>Testable</Filter>
     </ClCompile>
+    <ClCompile Include="StubPhotoImage.cpp" />
+    <ClCompile Include="..\Hilo\PhotoImage.cpp" />
   </ItemGroup>
 </Project>

@@ -30,13 +30,13 @@ namespace HiloTests
         {
             StubPhoto^ photo = ref new StubPhoto();
             photo->Path = "Foo";
-            photo->DateTaken = GetDateTaken();
+            photo->SetDateTaken(GetDateTaken());
             String^ expectedPath = "Foo";
             DateTime expectedDate = GetDateTaken();
 
-            ImageNavigationData data(photo);
+            ImageNavigationData data(photo->Path, GetDateTaken());
 
-            Assert::AreEqual(expectedDate.UniversalTime, data.GetFileDate().UniversalTime);
+            Assert::AreEqual(expectedDate.UniversalTime, data.GetMonthGroupDate().UniversalTime);
             Assert::AreEqual(expectedPath, data.GetFilePath());
         }
 
@@ -45,12 +45,12 @@ namespace HiloTests
         {
             StubPhoto^ photo = ref new StubPhoto();
             photo->Path = "Foo";
-            photo->DateTaken = GetDateTaken();
+            photo->SetDateTaken(GetDateTaken());
             String^ expectedPath = "Foo";
             DateTime expectedDate = GetDateTaken();
             String^ expectedDateQuery = CalendarExtensions::CreateMonthRangeFromDate(expectedDate);
 
-            ImageNavigationData data(photo);
+            ImageNavigationData data(photo->Path, GetDateTaken());
 
             auto query = data.GetDateQuery();
 

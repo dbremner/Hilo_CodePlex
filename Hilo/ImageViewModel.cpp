@@ -8,6 +8,7 @@
 #include "ImageNavigationData.h"
 #include "ImageViewModel.h"
 #include "IPhoto.h"
+#include "IPhotoImage.h"
 #include "IPhotoGroup.h"
 #include "DelegateCommand.h"
 #include "TaskExceptionsExtensions.h"
@@ -117,7 +118,8 @@ task<void> ImageViewModel::QueryPhotosAsync()
         }
         else
         {
-            m_photo = nullptr;
+            m_selectedItem = nullptr;
+            m_currentPhotoImage = nullptr;
         }
 
     }).then([this](task<void> priorTask)
@@ -137,7 +139,53 @@ task<void> ImageViewModel::QueryPhotosAsync()
 
 Object^ ImageViewModel::SelectedItem::get()
 {
-    if (nullptr == m_photo && !m_runningQuerySinglePhotoAsync)
+    return m_selectedItem;
+}
+
+// Helper: compares file paths.
+bool CompareImagePaths(IPhotoImage^ left, IPhoto^ right) 
+{
+    if (left == nullptr) return (right == nullptr);
+    if (right == nullptr) return false;
+    return (left->Path == right->Path);
+}
+
+void ImageViewModel::SelectedItem::set(Object^ value)
+{
+    assert(IsMainThread());
+    IPhoto^ newSelectedItem = dynamic_cast<IPhoto^>(value);
+
+    bool equal = CompareImagePaths(m_currentPhotoImage, newSelectedItem);
+    if (!equal && nullptr != newSelectedItem && !m_runningQuerySinglePhotoAsync)
+    {
+        IPhotoImage^ oldPhotoImage = m_currentPhotoImage;
+        if (oldPhotoImage != nullptr)
+        {
+            // release prior event handlers
+            oldPhotoImage->ClearImageData();
+        }
+        auto newPhotoImage = newSelectedItem->GetPhotoImage();
+        m_currentPhotoImage = newPhotoImage;
+        m_selectedItem = newSelectedItem;
+        create_task(newPhotoImage->InitializeAsync()).then([this](task<void> priorTask)
+        {
+            // set command enabledness regardless of prior task exception status
+            bool result = CanProcessImage(nullptr);
+            m_rotateImageCommand->CanExecute(result);
+            m_cropImageCommand->CanExecute(result);
+            m_cartoonizeImageCommand->CanExecute(result);
+            // propagate exception from prior task, if present
+            priorTask.get(); 
+        }).then(ObserveException<void>(m_exceptionPolicy));
+
+       OnPropertyChanged("SelectedItem");
+       OnPropertyChanged("CurrentPhotoImage");
+    }
+}
+
+IPhotoImage^ ImageViewModel::CurrentPhotoImage::get()
+{
+    if (nullptr == m_currentPhotoImage && !m_runningQuerySinglePhotoAsync)
     {
         m_runningQuerySinglePhotoAsync = true;
 
@@ -146,44 +194,26 @@ Object^ ImageViewModel::SelectedItem::get()
             assert(IsMainThread());
             m_runningQuerySinglePhotoAsync = false;
             priorTask.get();
-            OnPropertyChanged("SelectedItem");
+            OnPropertyChanged("CurrentPhotoImage");
         }).then(ObserveException<void>(m_exceptionPolicy));
     }
-    return m_photo;
-}
-
-void ImageViewModel::SelectedItem::set(Object^ value)
-{
-    IPhoto^ newPhoto = dynamic_cast<IPhoto^>(value);
-    PhotoPathComparer compare;
-    bool equal = compare(m_photo, newPhoto);
-
-    if (!equal && nullptr != newPhoto && !m_runningQuerySinglePhotoAsync)
-    {
-        ClearCachedData();
-        m_photo = newPhoto;
-        bool result = CanProcessImage(nullptr);
-        m_rotateImageCommand->CanExecute(result);
-        m_cropImageCommand->CanExecute(result);
-        m_cartoonizeImageCommand->CanExecute(result);
-        OnPropertyChanged("SelectedItem");
-    }
+   return m_currentPhotoImage;            
 }
 
 String^ ImageViewModel::MonthAndYear::get()
 {
-    return CalendarExtensions::GetLocalizedMonthAndYear(m_fileDate);
+    return CalendarExtensions::GetLocalizedMonthAndYear(m_monthDate);
 }
 
 // See http://go.microsoft.com/fwlink/?LinkId=267280 for more info on Hilo's implementation of suspend/resume.
 void ImageViewModel::SaveState(IMap<String^, Object^>^ stateMap)
 {
-    if (m_photo != nullptr)
+    if (m_currentPhotoImage != nullptr)
     {
         std::wstringstream stringSerialization;
-        stringSerialization << m_photo->DateTaken.UniversalTime ;
+        stringSerialization << m_monthDate.UniversalTime ;
 
-        stateMap->Insert(FilePathMapKey, m_photo->Path);
+        stateMap->Insert(FilePathMapKey, m_currentPhotoImage->Path);
         stateMap->Insert(FileDateMapKey, ref new String(stringSerialization.str().c_str()));
         stateMap->Insert(QueryMapKey, m_query);
     }
@@ -217,7 +247,7 @@ task<void> ImageViewModel::QuerySinglePhotoAsync()
     if (m_filePath == nullptr) return create_empty_task();
 
     auto photoTask = m_repository->GetSinglePhotoAsync(m_filePath);
-    return photoTask.then([this](IPhoto^ photo)
+    return photoTask.then([this](IPhotoImage^ photo)
     {
         assert(IsMainThread());
         if (photo == nullptr)
@@ -225,7 +255,7 @@ task<void> ImageViewModel::QuerySinglePhotoAsync()
             GoHome();
             cancel_current_task();
         }
-        m_photo = photo;
+        m_currentPhotoImage = photo;
     }).then([this](task<void> priorTask)
     {
         assert(IsMainThread());
@@ -235,7 +265,7 @@ task<void> ImageViewModel::QuerySinglePhotoAsync()
         }
         catch (const concurrency::task_canceled&)
         {
-            m_photo = nullptr;
+            m_currentPhotoImage = nullptr;
         }
     });
 }
@@ -245,23 +275,29 @@ void ImageViewModel::OnNavigatedTo(NavigationEventArgs^ e)
 {
     auto data = dynamic_cast<String^>(e->Parameter);
     ImageNavigationData imageData(data);
-    Initialize(imageData.GetFilePath(), imageData.GetFileDate(), imageData.GetDateQuery());
+    Initialize(imageData.GetFilePath(), imageData.GetMonthGroupDate(), imageData.GetDateQuery());
 }
 
 void ImageViewModel::OnNavigatedFrom(NavigationEventArgs^ e)
 {
+    assert(IsMainThread());
     m_photoCts.cancel();
     m_photosCts.cancel();
-    ClearCachedData();
+    if (m_currentPhotoImage != nullptr)
+    {
+        // release prior event handlers
+        m_currentPhotoImage->ClearImageData();
+    }
 }
 
 void ImageViewModel::Initialize(String^ filePath, DateTime fileDate, String^ query)
 {
     m_filePath = filePath;
-    m_fileDate = fileDate;
+    m_monthDate = fileDate;
     m_query = query;
     m_photos = nullptr;
-    m_photo = nullptr;
+    m_selectedItem = nullptr;
+    m_currentPhotoImage = nullptr;
     m_runningQuerySinglePhotoAsync = false;
     m_runningQueryPhotosAsync = false;
 }
@@ -278,30 +314,30 @@ String^ ImageViewModel::GetStateQuery()
 
 DateTime ImageViewModel::GetStateFileDate()
 {
-    return m_fileDate;
+    return m_monthDate;
 }
 
 void ImageViewModel::CropImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
+    ImageNavigationData data(m_currentPhotoImage->Path, m_monthDate);
     ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
 }
 
 void ImageViewModel::RotateImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
+    ImageNavigationData data(m_currentPhotoImage->Path, m_monthDate);
     ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
 }
 
 void ImageViewModel::CartoonizeImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
+    ImageNavigationData data(m_currentPhotoImage->Path, m_monthDate);
     ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
 }
 
 bool ImageViewModel::CanProcessImage(Object^ parameter)
 {
-    return (m_photo != nullptr && !m_photo->IsInvalidThumbnail);
+    return (m_currentPhotoImage != nullptr && !m_currentPhotoImage->IsInvalidThumbnail);
 }
 
 void ImageViewModel::OnDataChanged()
@@ -334,15 +370,5 @@ void ImageViewModel::OnDataChanged()
                 }
             }).then(ObserveException<void>(m_exceptionPolicy));
         });
-    }
-}
-
-void ImageViewModel::ClearCachedData()
-{
-    assert(IsMainThread());
-
-    if (m_photo != nullptr)
-    {
-        m_photo->ClearImageData();
     }
 }

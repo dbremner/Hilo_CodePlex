@@ -5,13 +5,16 @@
 //
 // Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
-#include "ImageBrowserViewModel.h"
+#include "ExceptionPolicyFactory.h"
 #include "ImageNavigationData.h"
 #include "ImageBrowserView.xaml.h"
+
 
 using namespace Hilo;
 using namespace Platform;
 using namespace Windows::UI::Xaml::Controls;
+using namespace Windows::Foundation;
+using namespace concurrency;
 
 // See http://go.microsoft.com/fwlink/?LinkId=267278 for info on how Hilo creates pages and navigates to pages.
 
@@ -23,11 +26,15 @@ ImageBrowserView::ImageBrowserView()
 
 void ImageBrowserView::OnPhotoItemClicked(Object^ sender, ItemClickEventArgs^ e)
 {
-    auto photo = dynamic_cast<Photo^>(e->ClickedItem);
+    auto photo = dynamic_cast<IPhoto^>(e->ClickedItem);
+
     if (nullptr !=  photo)
     {
-        ImageNavigationData imageData(photo);
-        HiloPage::NavigateToPage(PageType::Image, imageData.SerializeToString());
+        create_task(photo->GetDateTakenAsync()).then([photo, this](DateTime dateTime) 
+        {
+            ImageNavigationData imageData(photo->Path, dateTime);
+            HiloPage::NavigateToPage(PageType::Image, imageData.SerializeToString());
+        }).then(ObserveException<void>(ExceptionPolicyFactory::GetCurrentPolicy())); 
     }
 }
 

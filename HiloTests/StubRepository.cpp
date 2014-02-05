@@ -7,6 +7,7 @@
 #include "pch.h"
 #include "StubRepository.h"
 #include "StubPhoto.h"
+#include "StubPhotoImage.h"
 #include "..\Hilo\IPhotoGroup.h"
 #include "..\Hilo\PhotoCache.h"
 #include "..\Hilo\IYearGroup.h"
@@ -19,7 +20,6 @@ using namespace Platform;
 using namespace Platform::Collections;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Search;
 
@@ -53,14 +53,14 @@ task<IVectorView<IPhotoGroup^>^> StubRepository::GetMonthGroupedPhotosWithCacheA
     });
 }
 
-task<IPhoto^> StubRepository::GetSinglePhotoAsync(String^ photoPath)
+task<IPhotoImage^> StubRepository::GetSinglePhotoAsync(String^ photoPath)
 {
     m_getSinglePhotoAsyncCalled = true;
     return create_task([photoPath] 
     {
-        auto photo = ref new StubPhoto();
+        auto photo = ref new StubPhotoImage();
         photo->Path = photoPath;
-        return static_cast<IPhoto^>(photo);
+        return static_cast<IPhotoImage^>(photo);
     });
 }
 

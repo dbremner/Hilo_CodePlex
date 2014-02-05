@@ -10,7 +10,7 @@
 
 namespace Hilo
 {
-    interface class IPhoto;
+    interface class IPhotoImage;
     class ExceptionPolicy;
 
     // The ImageBase class provides load and save functionality for image files.
@@ -19,7 +19,7 @@ namespace Hilo
     {
 
     private protected:
-        IPhoto^ m_photo;
+        IPhotoImage^ m_photo;
 
     internal:
         ImageBase(std::shared_ptr<ExceptionPolicy> exceptionPolicy);

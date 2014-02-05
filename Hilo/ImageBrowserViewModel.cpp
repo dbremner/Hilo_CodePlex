@@ -21,6 +21,8 @@ using namespace Hilo;
 using namespace Platform;
 using namespace Platform::Collections;
 using namespace std;
+using namespace concurrency;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Navigation;
@@ -197,27 +199,41 @@ void ImageBrowserViewModel::NavigateToGroup(Object^ parameter)
     {
         auto photo = dynamic_cast<IPhoto^>(group->Items->GetAt(0));
         assert(photo != nullptr);
-        ImageNavigationData imageData(photo);
-        ViewModelBase::GoToPage(PageType::Image, imageData.SerializeToString());
+        
+        create_task(photo->GetDateTakenAsync()).then([this, photo](DateTime dateTaken)
+    {
+        ImageNavigationData data(photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Image, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
+
     }
 }
 
 void ImageBrowserViewModel::CropImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 void ImageBrowserViewModel::RotateImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 void ImageBrowserViewModel::CartoonizeImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 bool ImageBrowserViewModel::CanProcessImage(Object^ parameter)

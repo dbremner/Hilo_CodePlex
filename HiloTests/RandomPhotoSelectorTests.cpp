@@ -14,7 +14,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace Platform::Collections;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 
 namespace HiloTests
 {

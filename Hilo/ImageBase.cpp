@@ -7,6 +7,7 @@
 #include "pch.h"
 #include "ImageBase.h"
 #include "IPhoto.h"
+#include "IPhotoImage.h"
 #include "HiloCommonDefinitions.h"
 
 using namespace concurrency;

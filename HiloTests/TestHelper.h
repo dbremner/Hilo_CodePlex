@@ -106,6 +106,19 @@ namespace HiloTests
             return;
         }
 
+        static void RunMessagePumpUntil(std::function<bool ()> stopWhen)
+        {
+            Windows::UI::Core::CoreWindow^ wnd = Windows::ApplicationModel::Core::CoreApplication::MainView->CoreWindow;
+            Windows::UI::Core::CoreDispatcher^ dispatcher = wnd->Dispatcher;
+
+            // Spin wait and exercise message pump until the stopping condition is met
+            while(!stopWhen())
+            {
+                dispatcher->ProcessEvents(Windows::UI::Core::CoreProcessEventsOption::ProcessAllIfPresent);
+            }
+            return;
+        }
+
     private:
         template <typename T>
         static concurrency::task_status TaskWait(concurrency::task<T>& t, bool pump = true);

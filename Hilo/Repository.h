@@ -11,6 +11,7 @@
 namespace Hilo
 {
     interface class IPhoto;
+    interface class IPhotoImage;
     interface class IPhotoGroup;
     interface class IYearGroup;
     class PhotoCache;
@@ -21,7 +22,7 @@ namespace Hilo
     {
     public:
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<IPhotoGroup^>^> GetMonthGroupedPhotosWithCacheAsync(std::shared_ptr<PhotoCache> photoCache, concurrency::cancellation_token token) = 0;
-        virtual concurrency::task<IPhoto^> GetSinglePhotoAsync(Platform::String^ photoPath) = 0;
+        virtual concurrency::task<IPhotoImage^> GetSinglePhotoAsync(Platform::String^ photoPath) = 0;
         virtual concurrency::task<unsigned int> GetFolderPhotoCountAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery) = 0;
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<IPhoto^>^> GetPhotoDataForMonthGroup(IPhotoGroup^ photoGroup, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems) = 0;
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<IPhoto^>^> GetPhotosForDateRangeQueryAsync(Platform::String^ dateRangeQuery) = 0;

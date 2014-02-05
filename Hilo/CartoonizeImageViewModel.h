@@ -12,7 +12,7 @@ struct AmpPixel;
 
 namespace Hilo
 {
-    interface class IPhoto;
+    interface class IPhotoImage;
     class Repository;
     class ExceptionPolicy;
 
@@ -93,7 +93,7 @@ namespace Hilo
         void CheckForCancellation();
         void EvaluateCommands();
         void CopyPixelDataToPlatformArray(Windows::Storage::Streams::IBuffer^ buffer, Platform::Array<unsigned char, 1>^ pixels, unsigned int width, unsigned int height);
-        concurrency::task<IPhoto^> GetImagePhotoAsync();
+        concurrency::task<IPhotoImage^> GetImagePhotoAsync();
         concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> EncodeImageAsync(Windows::Storage::Streams::IRandomAccessStream^ sourceStream);
         bool ScaleImageDimensions(unsigned int origWidth, unsigned int origHeight);
 

@@ -24,7 +24,7 @@ namespace Hilo
         virtual void RemoveObserver(PageType pageType);
 
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<IPhotoGroup^>^> GetMonthGroupedPhotosWithCacheAsync(std::shared_ptr<Hilo::PhotoCache> photoCache, concurrency::cancellation_token token);
-        virtual concurrency::task<IPhoto^> GetSinglePhotoAsync(Platform::String^ photoPath);
+        virtual concurrency::task<IPhotoImage^> GetSinglePhotoAsync(Platform::String^ photoPath);
         virtual concurrency::task<unsigned int> GetFolderPhotoCountAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<IPhoto^>^> GetPhotoDataForMonthGroup(IPhotoGroup^ photoGroup, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems);
         virtual concurrency::task<bool> HasPhotosInRangeAsync(Platform::String^ dateRangeQuery, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);
@@ -44,6 +44,6 @@ namespace Hilo
         QueryChange^ m_monthQueryChange;
 
         inline Windows::Storage::Search::StorageFileQueryResult^ CreateFileQuery(Windows::Storage::Search::IStorageFolderQueryOperations^ folder, Platform::String^ query, Windows::Storage::Search::IndexerOption option = Windows::Storage::Search::IndexerOption::UseIndexerWhenAvailable);
-        concurrency::task<YearGroup^> GetDateTimeForYearFolderAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
+        concurrency::task<YearGroup^> GetYearGroupAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, std::shared_ptr<ExceptionPolicy> exceptionPolicy);
     };
 }

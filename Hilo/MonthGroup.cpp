@@ -95,14 +95,28 @@ task<DateTime> MonthGroup::QueryPhotosAsync()
     }
 
     auto photosTask = m_repository->GetPhotoDataForMonthGroup(this, m_folderQuery, MaxNumberOfPictures);
-    return photosTask.then([this](IVectorView<IPhoto^>^ photos)
+    auto monthPhotos = std::make_shared<IVectorView<IPhoto^>^>(nullptr);
+
+    return photosTask.then([this, monthPhotos](IVectorView<IPhoto^>^ photos) -> task<DateTime>
+    {
+        // Get the date of the first photo in the group. This will give the month and year for the entire group.
+        (*monthPhotos) = photos;
+        if (photos != nullptr && photos->Size > 0)
+        {
+            return create_task(photos->GetAt(0)->GetDateTakenAsync());
+        }
+        else
+        {
+            DateTime defaultDateTime = {0ll};
+            return create_task_from_result(defaultDateTime);
+        }
+    }).then([this, monthPhotos](DateTime monthDate)
     {
         assert(IsMainThread());
         bool first = true;
         shared_ptr<PhotoCache> cache = m_weakPhotoCache.lock();
-        DateTime dateTime = {0ll};
 
-        for (auto item : photos)
+        for (auto item : *monthPhotos)
         {
             // Add this photo to the display graph.
             m_photos->Append(item);
@@ -110,14 +124,11 @@ task<DateTime> MonthGroup::QueryPhotosAsync()
             {
                 // Cache a handle to the first photo. We will need this later when we want to scroll the grid of month
                 // groups to a chosen month. (We can only scroll to a given item, not to a property of that item.)
-                cache->InsertPhoto(item);
-
-                // Remember the date of the first picture. We need this later to correctly display the name of the month group.
-                dateTime = item->DateTaken;
+                cache->InsertPhoto(item, monthDate);
             }
             first = false;
         }
-        return dateTime;
+        return monthDate;
     });
 }
 

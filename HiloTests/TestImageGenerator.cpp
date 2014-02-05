@@ -10,9 +10,9 @@
 using namespace HiloTests;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage::FileProperties;
 
-concurrency::task<FileInformation^> TestImageGenerator::CreateTestImageFileFromLocalFolder( 
+concurrency::task<StorageFile^> TestImageGenerator::CreateTestImageFileFromLocalFolder( 
     Platform::String^ fileName, 
     Platform::String^ newName)
 {
@@ -29,12 +29,10 @@ concurrency::task<FileInformation^> TestImageGenerator::CreateTestImageFileFromL
         queryOptions->FolderDepth = Windows::Storage::Search::FolderDepth::Deep;
         queryOptions->IndexerOption = Windows::Storage::Search::IndexerOption::DoNotUseIndexer;
         queryOptions->ApplicationSearchFilter = "System.FileName:=\"" + file->Name + "\"";
+        queryOptions->SetThumbnailPrefetch(ThumbnailMode::PicturesView, 190, ThumbnailOptions::UseCurrentScale);
         auto fileQuery = picturesFolder->CreateFileQueryWithOptions(queryOptions);
-        auto fileInformationFactory = ref new Windows::Storage::BulkAccess::FileInformationFactory(
-            fileQuery, 
-            Windows::Storage::FileProperties::ThumbnailMode::PicturesView);
-        return fileInformationFactory->GetFilesAsync();
-    }).then([this](Windows::Foundation::Collections::IVectorView<Windows::Storage::BulkAccess::FileInformation^>^ files) {
+        return fileQuery->GetFilesAsync();
+    }).then([this](IVectorView<StorageFile^>^ files) {
         auto file = files->GetAt(0);
         m_createdFiles.push_back(file);
         return file;

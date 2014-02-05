@@ -6,6 +6,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "StubPhoto.h"
+#include "StubPhotoImage.h"
 #include "..\Hilo\IPhotoGroup.h"
 #include "StubPhotoGroup.h"
 
@@ -45,40 +46,9 @@ void StubPhoto::Path::set(String^ value)
     m_path = value;
 }
 
-String^ StubPhoto::FormattedPath::get()
-{
-    std::wstring pathAndFileName = m_name->Data();
-    std::basic_string<char>::size_type index;
-    index = pathAndFileName.rfind('\\');
-    std::wstring path = pathAndFileName.substr(0, index);
-    return ref new String(path.c_str());
-}
-
-String^ StubPhoto::FileType::get()
-{
-    return m_fileType;
-}
-
-DateTime StubPhoto::DateTaken::get()
-{
-    return m_dateTaken;
-}
-
-void StubPhoto::DateTaken::set(DateTime value)
+void StubPhoto::SetDateTaken(DateTime value)
 {
     m_dateTaken = value;
-}
-
-String^ StubPhoto::FormattedDateTaken::get()
-{
-    DateTimeFormatter dtf("shortdate", GlobalizationPreferences::Languages);
-    return dtf.Format(DateTaken);
-}
-
-String^ StubPhoto::FormattedTimeTaken::get()
-{
-    DateTimeFormatter dtf("shorttime", GlobalizationPreferences::Languages);
-    return dtf.Format(DateTaken);
 }
 
 BitmapImage^ StubPhoto::Thumbnail::get()
@@ -86,40 +56,40 @@ BitmapImage^ StubPhoto::Thumbnail::get()
     return m_thumbnail;
 }
 
-BitmapImage^ StubPhoto::Image::get()
-{
-    return m_image;
-}
-
 bool StubPhoto::IsInvalidThumbnail::get()
 {
     return m_isInvalidThumbnail;
 }
 
-String^ StubPhoto::Resolution::get()
+Windows::Foundation::IAsyncOperation<Windows::Foundation::DateTime>^ StubPhoto::GetDateTakenAsync()
 {
-    return m_resolution;
+    assert(false); // not implemented
+    return create_async([]{ DateTime dt = {0ll}; return dt; });
 }
 
-uint64 StubPhoto::FileSize::get()
+IPhotoImage^ StubPhoto::GetPhotoImage()
 {
-    return m_fileSize;
+    return ref new StubPhotoImage(m_path, m_name);
 }
 
-String^ StubPhoto::DisplayType::get()
+int StubPhoto::RowSpan::get()
 {
-    return m_displayType;
+    return m_rowSpan;
 }
 
-void StubPhoto::ClearImageData()
+void StubPhoto::RowSpan::set(int value)
 {
-    // not implemented
+    m_rowSpan = value;
 }
 
-IAsyncOperation<IRandomAccessStreamWithContentType^>^ StubPhoto::OpenReadAsync()
+int StubPhoto::ColumnSpan::get()
 {
-    return create_async([this]
-    {
-       return m_randomAccessStream;
-    });
+    return m_columnSpan;
 }
+
+void StubPhoto::ColumnSpan::set(int value)
+{
+    m_columnSpan = value;
+}
+
+

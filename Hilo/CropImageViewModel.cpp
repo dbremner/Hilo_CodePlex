@@ -9,7 +9,7 @@
 #include "CropImageViewModel.h"
 #include "DelegateCommand.h"
 #include "TaskExceptionsExtensions.h"
-#include "IPhoto.h"
+#include "IPhotoImage.h"
 #include "ImageNavigationData.h"
 #include "NullPhotoGroup.h"
 #include "Repository.h"
@@ -113,7 +113,7 @@ void CropImageViewModel::Initialize(String^ photoPath)
     m_photoPath = photoPath;
     auto photoStream = make_shared<IRandomAccessStreamWithContentType^>(nullptr);
 
-    GetImagePhotoAsync().then([this](IPhoto^ photo)
+    GetImagePhotoAsync().then([this](IPhotoImage^ photo)
     {
         assert(IsMainThread());
         // Return to the hub page if the photo is no longer present
@@ -146,7 +146,7 @@ void CropImageViewModel::Initialize(String^ photoPath)
     }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
-task<IPhoto^> CropImageViewModel::GetImagePhotoAsync()
+task<IPhotoImage^> CropImageViewModel::GetImagePhotoAsync()
 {
     assert(IsMainThread());
     return m_repository->GetSinglePhotoAsync(m_photoPath);
@@ -482,8 +482,8 @@ task<void> CropImageViewModel::CropImageAsync(float64 actualWidth)
     WriteableBitmap^ destImage = ref new WriteableBitmap(newWidth, newHeight);
 
     // Get pointers to the source and destination pixel data
-    byte* pSrcPixels = GetPointerToPixelData(m_image->PixelBuffer);
-    byte* pDestPixels = GetPointerToPixelData(destImage->PixelBuffer);   
+    byte* pSrcPixels = GetPointerToPixelData(m_image->PixelBuffer, nullptr);
+    byte* pDestPixels = GetPointerToPixelData(destImage->PixelBuffer, nullptr);
     auto oldWidth = m_image->PixelWidth;
 
     return create_task([this, xOffset, yOffset, newHeight, newWidth, oldWidth, pSrcPixels, pDestPixels] () {

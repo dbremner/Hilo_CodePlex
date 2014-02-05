@@ -22,7 +22,7 @@ namespace HiloTests
         virtual void RemoveObserver(Hilo::PageType pageType);
 
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhotoGroup^>^> GetMonthGroupedPhotosWithCacheAsync(std::shared_ptr<Hilo::PhotoCache> photoCache, concurrency::cancellation_token token);
-        virtual concurrency::task<Hilo::IPhoto^> GetSinglePhotoAsync(Platform::String^ photoPath);
+        virtual concurrency::task<Hilo::IPhotoImage^> GetSinglePhotoAsync(Platform::String^ photoPath);
         virtual concurrency::task<unsigned int> GetFolderPhotoCountAsync(Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);
         virtual concurrency::task<Windows::Foundation::Collections::IVectorView<Hilo::IPhoto^>^> GetPhotoDataForMonthGroup(Hilo::IPhotoGroup^ photoGroup, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems);
         virtual concurrency::task<bool> HasPhotosInRangeAsync(Platform::String^ dateRangeQuery, Windows::Storage::Search::IStorageFolderQueryOperations^ folderQuery);

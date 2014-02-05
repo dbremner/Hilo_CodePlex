@@ -278,6 +278,7 @@
     <ClInclude Include="StubExceptionPolicy.h" />
     <ClInclude Include="StubPhoto.h" />
     <ClInclude Include="StubPhotoGroup.h" />
+    <ClInclude Include="StubPhotoImage.h" />
     <ClInclude Include="StubRepository.h" />
     <ClInclude Include="StubResourceLoader.h" />
     <ClInclude Include="StubYearGroup.h" />
@@ -307,6 +308,7 @@
     <ClCompile Include="..\Hilo\MonthGroup.cpp" />
     <ClCompile Include="..\Hilo\Photo.cpp" />
     <ClCompile Include="..\Hilo\PhotoCache.cpp" />
+    <ClCompile Include="..\Hilo\PhotoImage.cpp" />
     <ClCompile Include="..\Hilo\PhotoPathComparer.cpp" />
     <ClCompile Include="..\Hilo\RandomPhotoSelector.cpp" />
     <ClCompile Include="..\Hilo\RotateImageViewModel.cpp" />
@@ -342,6 +344,7 @@
     <ClCompile Include="StubExceptionPolicy.cpp" />
     <ClCompile Include="StubPhoto.cpp" />
     <ClCompile Include="StubPhotoGroup.cpp" />
+    <ClCompile Include="StubPhotoImage.cpp" />
     <ClCompile Include="StubRepository.cpp" />
     <ClCompile Include="StubResourceLoader.cpp" />
     <ClCompile Include="StubYearGroup.cpp" />

@@ -170,9 +170,9 @@ namespace HiloTests
             auto dt = cal.GetDateTime();
             auto photo = ref new StubPhoto();
             photo->Path = "path";
-            photo->DateTaken = dt;
+            photo->SetDateTaken(dt);
             (*vm)->Initialize("path", dt, "query");
-            TestHelper::RunUISynced([vm, photo]()
+              TestHelper::RunUISynced([vm, photo]()
             {
                 (*vm)->SelectedItem = photo;
             });
@@ -182,6 +182,7 @@ namespace HiloTests
             Assert::IsTrue(state->HasKey("query"));
             Assert::IsTrue(state->HasKey("fileDate"));
             Assert::IsTrue(state->HasKey("filePath"));
+            Assert::IsTrue(true);
         }
 
         TEST_METHOD(ImageViewModelShouldAddItselfAsObserverOfQuery)

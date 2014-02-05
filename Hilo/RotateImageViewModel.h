@@ -10,7 +10,7 @@
 
 namespace Hilo
 {
-    interface class IPhoto;
+    interface class IPhotoImage;
     class Repository;
     class ExceptionPolicy;
 
@@ -33,9 +33,9 @@ namespace Hilo
         void EndRotation();
 
     public:
-        property IPhoto^ Photo
+        property IPhotoImage^ Photo
         {
-            IPhoto^ get();
+            IPhotoImage^ get();
         }
 
         property Windows::UI::Xaml::Input::ICommand^ RotateCommand
@@ -97,7 +97,7 @@ namespace Hilo
         Platform::String^ m_photoPath;
 
         void ChangeInProgress(bool value);
-        concurrency::task<IPhoto^> GetImagePhotoAsync();
+        concurrency::task<IPhotoImage^> GetImagePhotoAsync();
         concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> RotateImageViewModel::RotateImageAsync(Windows::Storage::Streams::IRandomAccessStream^ sourceStream, float64 angle);       
         unsigned int CheckRotationAngle(unsigned int angle);
         void Rotate90(Platform::Object^ parameter);

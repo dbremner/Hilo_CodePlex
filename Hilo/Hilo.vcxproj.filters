@@ -201,6 +201,9 @@
     <ClCompile Include="CalendarExtensions.cpp">
       <Filter>Models</Filter>
     </ClCompile>
+    <ClCompile Include="PhotoImage.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -358,6 +361,12 @@
     </ClInclude>
     <ClInclude Include="HiloCommonDefinitions.h">
       <Filter>ViewModels</Filter>
+    </ClInclude>
+    <ClInclude Include="IPhotoImage.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="PhotoImage.h">
+      <Filter>Models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

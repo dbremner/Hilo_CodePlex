@@ -11,7 +11,7 @@
 
 namespace Hilo
 {
-    interface class IPhoto;
+    interface class IPhotoImage;
     class ExceptionPolicy;
     class Repository;
 
@@ -52,6 +52,11 @@ namespace Hilo
             void set(Platform::Object^ value);
         }
 
+        property IPhotoImage^ CurrentPhotoImage
+        {
+            IPhotoImage^ get();            
+        }
+
         property Platform::String^ MonthAndYear
         {
             Platform::String^ get();
@@ -76,10 +81,11 @@ namespace Hilo
         std::shared_ptr<Repository> m_repository;
         bool m_runningQuerySinglePhotoAsync;
         bool m_runningQueryPhotosAsync;
-        Windows::Foundation::DateTime m_fileDate;
+        Windows::Foundation::DateTime m_monthDate;
         Platform::String^ m_filePath;
         Platform::String^ m_query;
-        IPhoto^ m_photo;
+        IPhoto^ m_selectedItem;
+        IPhotoImage^ m_currentPhotoImage;
         Platform::Collections::Vector<IPhoto^, PhotoPathComparer>^ m_photos;
         concurrency::cancellation_token_source m_photosCts;
         concurrency::cancellation_token_source m_photoCts;
@@ -93,6 +99,5 @@ namespace Hilo
         void CartoonizeImage(Platform::Object^ parameter);
         bool CanProcessImage(Object^ parameter);
         void OnDataChanged();
-        void ClearCachedData();
     };
 }

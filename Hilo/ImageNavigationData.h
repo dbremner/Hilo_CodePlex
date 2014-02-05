@@ -14,16 +14,16 @@ namespace Hilo
     class ImageNavigationData
     {
     public:
-        ImageNavigationData(IPhoto^ photo);
+        ImageNavigationData::ImageNavigationData(Platform::String^ path, Windows::Foundation::DateTime monthGroupDate);
         ImageNavigationData(Platform::String^ serializationString);
 
         Platform::String^ GetFilePath() const;
-        Windows::Foundation::DateTime GetFileDate() const;
+        Windows::Foundation::DateTime GetMonthGroupDate() const;
         Platform::String^ GetDateQuery();
         Platform::String^ SerializeToString();
 
     private:
-        Windows::Foundation::DateTime m_fileDate;
+        Windows::Foundation::DateTime m_monthGroupDate;
         Platform::String^ m_dateQuery;
         Platform::String^ m_filePath;
     };

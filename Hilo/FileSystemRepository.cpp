@@ -9,6 +9,7 @@
 #include "CalendarExtensions.h"
 #include "NullPhotoGroup.h"
 #include "Photo.h"
+#include "PhotoImage.h"
 #include "QueryChange.h"
 
 using namespace concurrency;
@@ -19,7 +20,6 @@ using namespace std;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Storage;
-using namespace Windows::Storage::BulkAccess;
 using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Search;
 
@@ -105,7 +105,7 @@ void FileSystemRepository::NotifyAllObservers()
     {
         m_imageBrowserViewModelCallback();
     }
-    if (m_imageViewModelCallback = nullptr)
+    if (m_imageViewModelCallback != nullptr)
     {
         m_imageViewModelCallback();
     }
@@ -119,13 +119,11 @@ task<IVectorView<IPhotoGroup^>^> FileSystemRepository::GetMonthGroupedPhotosWith
     queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     queryOptions->Language = CalendarExtensions::ResolvedLanguage();
     auto fileQuery = KnownFolders::PicturesLibrary->CreateFolderQueryWithOptions(queryOptions);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-
     m_monthQueryChange = (m_imageBrowserViewModelCallback != nullptr) ? ref new QueryChange(fileQuery, m_imageBrowserViewModelCallback) : nullptr;
 
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
     auto sharedThis = shared_from_this();
-    return create_task(fileInformationFactory->GetFoldersAsync()).then([this, fileInformationFactory, photoCache, sharedThis, policy](IVectorView<FolderInformation^>^ folders) 
+    return create_task(fileQuery->GetFoldersAsync()).then([this, photoCache, sharedThis, policy](IVectorView<StorageFolder^>^ folders) 
     {
         auto temp = ref new Vector<IPhotoGroup^>();
         for (auto folder : folders)
@@ -137,22 +135,25 @@ task<IVectorView<IPhotoGroup^>^> FileSystemRepository::GetMonthGroupedPhotosWith
     }, token);
 }
 
-// Query the file system using a pathname.
-task<IPhoto^> FileSystemRepository::GetSinglePhotoAsync(String^ photoPath)
+// Query the file system using a pathname. Returns a model object that supports full-image display.
+task<IPhotoImage^> FileSystemRepository::GetSinglePhotoAsync(String^ photoPath)
 {
+    assert(IsMainThread());
     String^ query = "System.ParsingPath:=\"" + photoPath + "\"";    
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, query, IndexerOption::DoNotUseIndexer);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
-    return create_task(fileInformationFactory->GetFilesAsync(0, 1)).then([policy](IVectorView<FileInformation^>^ files) 
+    return create_task(fileQuery->GetFilesAsync(0, 1)).then([policy](IVectorView<StorageFile^>^ files) -> IPhotoImage^
     {
-        IPhoto^ photo = nullptr;
-        auto size = files->Size;
-        if (size > 0)
+        if (files->Size > 0)
         {
-            photo = ref new Photo(files->GetAt(0), ref new NullPhotoGroup(), policy);
+            IPhotoImage^ photo = (ref new Photo(files->GetAt(0), ref new NullPhotoGroup(), policy))->GetPhotoImage();
+            create_task(photo->InitializeAsync());
+            return photo;
         }
-        return photo;
+        else
+        {
+            return nullptr;
+        }
     }, task_continuation_context::use_current());
 }
 
@@ -175,9 +176,8 @@ task<unsigned int> FileSystemRepository::GetFolderPhotoCountAsync(IStorageFolder
 task<IVectorView<IPhoto^>^> FileSystemRepository::GetPhotoDataForMonthGroup(IPhotoGroup^ photoGroup, IStorageFolderQueryOperations^ folderQuery, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(folderQuery, "");
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView, 190, ThumbnailOptions::UseCurrentScale, true);  // speed up query by deferring thumbnails
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
-    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)).then([photoGroup, policy, maxNumberOfItems](IVectorView<FileInformation^>^ files) 
+    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems)).then([photoGroup, policy, maxNumberOfItems](IVectorView<StorageFile^>^ files) 
     {
         auto photos = ref new Vector<IPhoto^>();
         for (auto item : files)
@@ -209,12 +209,11 @@ task<bool> FileSystemRepository::HasPhotosInRangeAsync(Platform::String^ dateRan
 task<IVectorView<IPhoto^>^> FileSystemRepository::GetPhotosForDateRangeQueryAsync(String^ dateRangeQuery)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, dateRangeQuery);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
 
     m_allPhotosQueryChange = (m_imageViewModelCallback != nullptr) ? ref new QueryChange(fileQuery, m_imageViewModelCallback) : nullptr;
 
-    return create_task(fileInformationFactory->GetFilesAsync()).then([policy](IVectorView<FileInformation^>^ files) 
+    return create_task(fileQuery->GetFilesAsync()).then([policy](IVectorView<StorageFile^>^ files) 
     {
         auto photos = ref new Vector<IPhoto^>();
         for (auto file : files)
@@ -230,10 +229,9 @@ task<IVectorView<IPhoto^>^> FileSystemRepository::GetPhotosForDateRangeQueryAsyn
 task<IVectorView<IPhoto^>^> FileSystemRepository::GetPhotosForPictureHubGroupAsync(IPhotoGroup^ photoGroup, unsigned int maxNumberOfItems)
 {
     auto fileQuery = CreateFileQuery(KnownFolders::PicturesLibrary, "");
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
     m_pictureHubGroupQueryChange = (m_hubViewModelCallback != nullptr) ? ref new QueryChange(fileQuery, m_hubViewModelCallback) : nullptr;
     shared_ptr<ExceptionPolicy> policy = m_exceptionPolicy;
-    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)).then([photoGroup, policy](IVectorView<FileInformation^>^ files) 
+    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems)).then([photoGroup, policy](IVectorView<StorageFile^>^ files) 
     {
         auto photos = ref new Vector<IPhoto^>();
         for (auto item : files)
@@ -255,13 +253,12 @@ task<IVectorView<IYearGroup^>^> FileSystemRepository::GetYearGroupedMonthsAsync(
     queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
     queryOptions->Language = CalendarExtensions::ResolvedLanguage();
     auto fileQuery =  KnownFolders::PicturesLibrary->CreateFolderQueryWithOptions(queryOptions);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return create_task(fileInformationFactory->GetFoldersAsync()).then([this, policy](IVectorView<FolderInformation^>^ folders) 
+    return create_task(fileQuery->GetFoldersAsync()).then([this, policy](IVectorView<StorageFolder^>^ folders) 
     {
         vector<task<YearGroup^>> yearGroupTasks;
         for (auto folder : folders)
         {
-            yearGroupTasks.push_back(GetDateTimeForYearFolderAsync(folder, policy));
+            yearGroupTasks.push_back(GetYearGroupAsync(folder, policy));
         }
         return when_all(begin(yearGroupTasks), end(yearGroupTasks)).then([](vector<YearGroup^> groups)
         {
@@ -278,36 +275,61 @@ task<IVectorView<IYearGroup^>^> FileSystemRepository::GetYearGroupedMonthsAsync(
     }, token, task_continuation_context::use_arbitrary());
 }
 
-// Helper method for GetYearGroupedMonthsAsync. Creates a YearGroup object for each folder created by the year query.
-task<YearGroup^> FileSystemRepository::GetDateTimeForYearFolderAsync(IStorageFolderQueryOperations^ folderQuery, shared_ptr<ExceptionPolicy> exceptionPolicy)
+// Returns an image file's DateTaken, or if none, the file's DateModified
+// The result is the same as "System.ItemDate" for image files.
+static task<DateTime> GetFileDateTimeAsync(StorageFile^ file)
 {
-    auto maxNumberOfItems = 1;
-    auto dateTakenProperties = ref new Vector<String^>();
-    dateTakenProperties->Append("System.ItemDate");
-    auto sharedThis = shared_from_this();
+   return create_task(file->Properties->GetImagePropertiesAsync()).then([file](ImageProperties^ imageProperties) -> task<DateTime>
+   {
+      auto dateTaken = imageProperties->DateTaken;
+      if (dateTaken.UniversalTime == 0) 
+      {
+        return create_task(file->GetBasicPropertiesAsync()).then([](BasicProperties^ basicProperties) 
+        { 
+           return basicProperties->DateModified;
+        });
+      }
+      else
+      {
+        return create_task_from_result<DateTime>(dateTaken);
+      }
+    }, task_continuation_context::use_arbitrary());
+}            
+
+// Creates a YearGroup object for each folder created by the year query.
+task<YearGroup^> FileSystemRepository::GetYearGroupAsync(IStorageFolderQueryOperations^ folderQuery, shared_ptr<ExceptionPolicy> exceptionPolicy)
+{
+    auto repository = shared_from_this();
     auto fileTypeFilter = ref new Vector<String^>(items);
     auto queryOptions = ref new QueryOptions(CommonFileQuery::OrderByDate, fileTypeFilter);
     queryOptions->IndexerOption = IndexerOption::UseIndexerWhenAvailable;
-    queryOptions->SetPropertyPrefetch(PropertyPrefetchOptions::ImageProperties, dateTakenProperties);
     queryOptions->Language = CalendarExtensions::ResolvedLanguage();
     auto fileQuery = folderQuery->CreateFileQueryWithOptions(queryOptions);
-    auto fileInformationFactory = ref new FileInformationFactory(fileQuery, ThumbnailMode::PicturesView);
-    return create_task(fileInformationFactory->GetFilesAsync(0, maxNumberOfItems)).then([sharedThis, folderQuery, exceptionPolicy](IVectorView<FileInformation^>^ files) -> YearGroup^
+    auto maxNumberOfItems = 1;
+   
+    return create_task(fileQuery->GetFilesAsync(0, maxNumberOfItems)).then([](task<IVectorView<StorageFile^>^> filesTask) -> task<DateTime>
     {
-        if (files->Size > 0)
-        {
-            auto file = files->GetAt(0);
-            auto yearDate = file->ImageProperties->DateTaken;
-            if (yearDate.UniversalTime == 0)
-            {
-                yearDate = file->BasicProperties->DateModified;
-            }
-            return (yearDate.UniversalTime != 0) ? ref new YearGroup(yearDate, folderQuery, sharedThis, exceptionPolicy) : nullptr; 
-        }
-        else
-        {
-            return nullptr;
-        }
+       try
+       {        
+           auto files = filesTask.get();
+           if (files->Size > 0)
+           {
+             return GetFileDateTimeAsync(files->GetAt(0));
+           }
+           else
+           {
+              DateTime defaultDateTime = {0ll};
+              return create_task_from_result<DateTime>(defaultDateTime);
+           }
+       }
+       catch(Platform::Exception^)
+       {
+         DateTime defaultDateTime = {0ll};
+         return create_task_from_result<DateTime>(defaultDateTime);
+       }
+    }, task_continuation_context::use_arbitrary()).then([repository, folderQuery, exceptionPolicy](DateTime yearDate) -> YearGroup^
+    {
+        return (yearDate.UniversalTime != 0) ? ref new YearGroup(yearDate, folderQuery, repository, exceptionPolicy) : nullptr; 
     }, task_continuation_context::use_arbitrary()).then(ObserveException<YearGroup^>(exceptionPolicy));
 }
 

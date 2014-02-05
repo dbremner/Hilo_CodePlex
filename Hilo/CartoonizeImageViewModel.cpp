@@ -10,7 +10,7 @@
 
 #include "CartoonizeImageViewModel.h"
 #include "DelegateCommand.h"
-#include "IPhoto.h"
+#include "IPhotoImage.h"
 #include "TaskExceptionsExtensions.h"
 #include "ImageNavigationData.h"
 #include "ImageUtilities.h"
@@ -131,7 +131,7 @@ void CartoonizeImageViewModel::Phases::set(float64 value)
     }
 }
 
-concurrency::task<IPhoto^> CartoonizeImageViewModel::GetImagePhotoAsync()
+concurrency::task<IPhotoImage^> CartoonizeImageViewModel::GetImagePhotoAsync()
 {
     assert(IsMainThread());
     return m_repository->GetSinglePhotoAsync(m_photoPath);
@@ -290,7 +290,7 @@ void CartoonizeImageViewModel::Initialize(String^ photoPath)
     m_photoPath = photoPath;
     auto photoStream = make_shared<IRandomAccessStreamWithContentType^>(nullptr);
 
-    m_initializationTask = GetImagePhotoAsync().then([this](IPhoto^ photo)
+    m_initializationTask = GetImagePhotoAsync().then([this](IPhotoImage^ photo)
     {
         assert(IsMainThread());
         // Return to the hub page if the photo is no longer present.
@@ -413,7 +413,7 @@ void CartoonizeImageViewModel::CopyPixelDataToPlatformArray(IBuffer^ buffer, Arr
     assert(IsMainThread());
 
     // Get a pointer to the image pixel data.
-    byte* pPixels = GetPointerToPixelData(buffer);
+    byte* pPixels = GetPointerToPixelData(buffer, nullptr);
 
     // Copy pixel data from C style array to Platform::Array,
     // re-arranging from BGRA to RGBA.
@@ -544,11 +544,11 @@ task<void> CartoonizeImageViewModel::CartoonizeImageAmpAsync(cancellation_token 
     byte* sourcePixels = nullptr;
     if (!m_isAmpPixelArrayPopulated)
     {
-        sourcePixels = GetPointerToPixelData(m_image->PixelBuffer);
+        sourcePixels = GetPointerToPixelData(m_image->PixelBuffer, nullptr);
     }
 
     auto destImage = ref new WriteableBitmap(m_image->PixelWidth, m_image->PixelHeight);
-    byte* destPixels = GetPointerToPixelData(destImage->PixelBuffer);
+    byte* destPixels = GetPointerToPixelData(destImage->PixelBuffer, nullptr);
 
     // Cartoonize source pixels into destination pixels.
     return create_task([this, sourcePixels, destPixels, width, height, size, token]
@@ -601,7 +601,7 @@ task<void> CartoonizeImageViewModel::CartoonizeImagePPLAsync(cancellation_token 
     byte* sourcePixels = nullptr;
     if (!m_isSourcePixelsPopulated)
     {
-        sourcePixels = GetPointerToPixelData(m_image->PixelBuffer);
+        sourcePixels = GetPointerToPixelData(m_image->PixelBuffer, nullptr);
         // Make a copy of the PixelBuffer data.
         if (m_pSourcePixels == nullptr)
         {
@@ -615,7 +615,7 @@ task<void> CartoonizeImageViewModel::CartoonizeImagePPLAsync(cancellation_token 
         // Copy original data back to the PixelBuffer.
         if (sourcePixels == nullptr)
         {
-            sourcePixels = GetPointerToPixelData(m_image->PixelBuffer);
+            sourcePixels = GetPointerToPixelData(m_image->PixelBuffer, nullptr);
             memcpy(sourcePixels,  m_pSourcePixels, size); 
         }
     }

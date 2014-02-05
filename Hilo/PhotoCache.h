@@ -15,7 +15,7 @@ namespace Hilo
     class PhotoCache
     {
     public:
-        void InsertPhoto(IPhoto^ photo);
+        void InsertPhoto(IPhoto^ photo, Windows::Foundation::DateTime);
         IPhoto^ GetForYearAndMonth(int year, int month);
         void Clear();
 

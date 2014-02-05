@@ -23,15 +23,18 @@ inline void ThrowIfFailed(HRESULT hr)
 }
 
 // Retrieves the raw pixel data from the provided IBuffer object.
-byte* GetPointerToPixelData(IBuffer^ buffer)
+// Warning, the lifetime of the returned buffer is controlled by the lifetime of the
+// buffer object passed to this method, once the buffer has been released 
+// pointer will be invalid and must not be used.
+byte* GetPointerToPixelData(IBuffer^ buffer, unsigned int *length)
 {
-    // Cast to Object^, then to its underlying IInspectable interface.
-    Object^ obj = buffer;
-    ComPtr<IInspectable> insp(reinterpret_cast<IInspectable*>(obj));
-
+    if (length != nullptr)
+    {
+        *length = buffer->Length;
+    }
     // Query the IBufferByteAccess interface.
     ComPtr<IBufferByteAccess> bufferByteAccess;
-    ThrowIfFailed(insp.As(&bufferByteAccess));
+    ThrowIfFailed(reinterpret_cast<IInspectable*>(buffer)->QueryInterface(IID_PPV_ARGS(&bufferByteAccess)));
 
     // Retrieve the buffer data.
     byte* pixels = nullptr;

@@ -12,10 +12,13 @@
 #include "HubGroupType.h"
 #include "ImageNavigationData.h"
 #include "IPhoto.h"
+#include "TaskExceptionsExtensions.h"
 
 using namespace Hilo;
 using namespace Platform;
 using namespace std;
+using namespace concurrency;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
@@ -108,20 +111,29 @@ bool MainHubViewModel::CanNavigateToPictures(Object^ parameter)
 
 void MainHubViewModel::CropImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Crop, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 void MainHubViewModel::RotateImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Rotate, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 void MainHubViewModel::CartoonizeImage(Object^ parameter)
 {
-    ImageNavigationData data(m_photo);
-    ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+    create_task(m_photo->GetDateTakenAsync()).then([this](DateTime dateTaken)
+    {
+        ImageNavigationData data(m_photo->Path, dateTaken);
+        ViewModelBase::GoToPage(PageType::Cartoonize, data.SerializeToString());
+    }).then(ObserveException<void>(m_exceptionPolicy));
 }
 
 bool MainHubViewModel::CanProcessImage(Object^ parameter)

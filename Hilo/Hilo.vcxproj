@@ -115,6 +115,7 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -141,6 +142,7 @@
       <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -165,6 +167,7 @@
       <AdditionalIncludeDirectories>../CartoonEffect;$(ProjectDir);$(GeneratedFilesDir);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>NDEBUG;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>CartoonEffect.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -208,6 +211,7 @@
     <ClInclude Include="IMonthBlock.h" />
     <ClInclude Include="IPhoto.h" />
     <ClInclude Include="IPhotoGroup.h" />
+    <ClInclude Include="IPhotoImage.h" />
     <ClInclude Include="IResizable.h" />
     <ClInclude Include="IResourceLoader.h" />
     <ClInclude Include="IYearGroup.h" />
@@ -233,6 +237,7 @@
     </ClInclude>
     <ClInclude Include="Photo.h" />
     <ClInclude Include="PhotoCache.h" />
+    <ClInclude Include="PhotoImage.h" />
     <ClInclude Include="PhotoPathComparer.h" />
     <ClInclude Include="QueryChange.h" />
     <ClInclude Include="RandomPhotoSelector.h" />
@@ -329,6 +334,7 @@
     </ClCompile>
     <ClCompile Include="Photo.cpp" />
     <ClCompile Include="PhotoCache.cpp" />
+    <ClCompile Include="PhotoImage.cpp" />
     <ClCompile Include="PhotoPathComparer.cpp" />
     <ClCompile Include="RandomPhotoSelector.cpp" />
     <ClCompile Include="RotateImageView.xaml.cpp">

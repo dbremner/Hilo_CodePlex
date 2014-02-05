@@ -6,8 +6,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 #include "pch.h"
 #include "Photo.h"
+#include "PhotoImage.h"
 #include "ExceptionPolicy.h"
 #include "TaskExceptionsExtensions.h"
+#include "CalendarExtensions.h"
 
 using namespace concurrency;
 using namespace Hilo;
@@ -16,55 +18,29 @@ using namespace std;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Globalization::DateTimeFormatting;
-using namespace Windows::Storage::BulkAccess;
+using namespace Windows::Storage;
 using namespace Windows::Storage::FileProperties;
 using namespace Windows::Storage::Streams;
 using namespace Windows::System::UserProfile;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
+using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Media::Imaging;
 
-Photo::Photo(FileInformation^ fileInfo, IPhotoGroup^ photoGroup, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_fileInfo(fileInfo), m_weakPhotoGroup(photoGroup), 
+Photo::Photo(StorageFile^ fileInfo, IPhotoGroup^ photoGroup, shared_ptr<ExceptionPolicy> exceptionPolicy) : m_file(fileInfo), m_weakPhotoGroup(photoGroup), 
     m_exceptionPolicy(exceptionPolicy), 
-    m_columnSpan(1), m_rowSpan(1), m_queryPhotoImageAsyncIsRunning(false), m_isInvalidThumbnail(false)
+    m_columnSpan(1), m_rowSpan(1), m_thumbnailStatus(UpdateStatus::Uninitialized)
 {
-    m_thumbnailUpdatedEventToken = m_fileInfo->ThumbnailUpdated::add(ref new TypedEventHandler<IStorageItemInformation^, Object^>(this, &Photo::OnThumbnailUpdated));
 }
 
 Photo::~Photo()
 {
-    if (nullptr != m_fileInfo)
-    {
-        m_fileInfo->ThumbnailUpdated::remove(m_thumbnailUpdatedEventToken);
-    }
-
-    if (nullptr != m_image && m_imageFailedEventToken.Value != 0)
-    {
-        // Remove the event handler on the UI thread because BitmapImage methods
-        // must be called on the UI thread.
-        auto image = m_image;
-        auto imageFailedEventToken = m_imageFailedEventToken;
-        run_async_non_interactive([image, imageFailedEventToken]()
-        {
-            image->ImageFailed::remove(imageFailedEventToken);
-        });
-    }
 }
 
 void Photo::OnPropertyChanged(String^ propertyName)
 {
     assert(IsMainThread());
-    PropertyChanged(this, ref new Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
-}
-
-void Photo::OnThumbnailUpdated(IStorageItemInformation^ sender, Object^ e)
-{
-    CoreWindow^ wnd = CoreApplication::MainView->CoreWindow;
-    CoreDispatcher^ dispatcher = wnd->Dispatcher;
-    dispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([this] () 
-    {
-        OnPropertyChanged("Thumbnail");
-    }));
+    PropertyChanged(this, ref new PropertyChangedEventArgs(propertyName));
 }
 
 IPhotoGroup^ Photo::Group::get()
@@ -74,146 +50,144 @@ IPhotoGroup^ Photo::Group::get()
 
 String^ Photo::Name::get()
 {
-    return m_fileInfo->Name;
+    assert(IsMainThread());
+    return m_file->Name;
 }
 
 String^ Photo::Path::get()
 {
-    return m_fileInfo->Path;
+    return m_file->Path;
 }
 
-String^ Photo::FormattedPath::get()
+// Public wrapper (converts C++ types to Windows Runtime types)
+IAsyncOperation<DateTime>^ Photo::GetDateTakenAsync()
 {
-    wstring pathAndFileName = m_fileInfo->Path->Data();
-    basic_string<char>::size_type index;
-    index = pathAndFileName.rfind('\\');
-    wstring path = pathAndFileName.substr(0, index);
-    return ref new String(path.c_str());
+    assert(IsMainThread());
+    return create_async([this]() -> task<DateTime> { return GetDateTakenAsyncInternal(); });
 }
 
-String^ Photo::FileType::get()
+// Calculates the "System.ItemDate" property. For images, this is the "DateTaken" image property,
+// but if that property isn't available, the file's "DateModified" property is used instead. 
+task<DateTime> Photo::GetDateTakenAsyncInternal()
 {
-    return m_fileInfo->FileType;
-}
-
-DateTime Photo::DateTaken::get()
-{
-    auto dateTaken = m_fileInfo->ImageProperties->DateTaken;
-    if (dateTaken.UniversalTime == 0)
+    return create_task(m_file->Properties->GetImagePropertiesAsync()).then([this](task<ImageProperties^> imagePropertiesTask) -> task<DateTime>
     {
-        dateTaken = m_fileInfo->BasicProperties->DateModified;
-    }
-    return dateTaken;
-}
+        bool sawException = false;
+        DateTime dateTaken = {0ll};
+        try
+        {
+            auto imageProperties = imagePropertiesTask.get();
+            if (imageProperties != nullptr)
+            {
+                dateTaken = imageProperties->DateTaken;
+            }
+        }
+        catch (Exception^)
+        {
+            sawException = true;
+        }
 
-String^ Photo::FormattedDateTaken::get()
-{
-    DateTimeFormatter dtf("shortdate", GlobalizationPreferences::Languages);
-    return dtf.Format(DateTaken);
-}
-
-String^ Photo::FormattedTimeTaken::get()
-{
-    DateTimeFormatter dtf("shorttime", GlobalizationPreferences::Languages);
-    return dtf.Format(DateTaken);
-}
-
-String^ Photo::Resolution::get()
-{
-    return m_fileInfo->ImageProperties->Width + " x " + m_fileInfo->ImageProperties->Height;
-}
-
-uint64 Photo::FileSize::get()
-{
-    return m_fileInfo->BasicProperties->Size;
-}
-
-String^ Photo::DisplayType::get()
-{
-    return m_fileInfo->DisplayType;
+        if (sawException || dateTaken.UniversalTime == 0) 
+        {
+            return create_task(m_file->GetBasicPropertiesAsync()).then([this](task<BasicProperties^> basicPropertiesTask) 
+            { 
+                BasicProperties^ basicProperties(nullptr);
+                bool sawException = false;
+                DateTime result = {0ll};
+                try
+                {
+                    basicProperties = basicPropertiesTask.get();
+                }
+                catch (Exception^)
+                {
+                    sawException = true;
+                }
+                if (!sawException && basicProperties != nullptr)
+                {
+                    result = basicProperties->DateModified;
+                }
+                if (result.UniversalTime == 0ll)
+                {
+                    result = CalendarExtensions::GetCurrentDateTime();
+                }
+                return result;
+            }, task_continuation_context::use_arbitrary());
+        }
+        else
+        {
+            return create_task_from_result<DateTime>(dateTaken);
+        }
+    }, task_continuation_context::use_arbitrary());
 }
 
 BitmapImage^ Photo::Thumbnail::get()
 {
     assert(IsMainThread());
-    IRandomAccessStream^ thumbnailStream = dynamic_cast<IRandomAccessStream^>(m_fileInfo->Thumbnail);
-    if (nullptr == thumbnailStream)
+    if (m_thumbnailStatus ==  UpdateStatus::Uninitialized)
     {
-        m_isInvalidThumbnail = true;
-        return ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));
+        StartThumbnailGet();
     }
-
-    auto thumbnail = ref new BitmapImage();
-    create_task(thumbnail->SetSourceAsync(thumbnailStream)).then(ObserveException<void>(m_exceptionPolicy));
- 
-    m_isInvalidThumbnail = false;
-    return thumbnail;
-}
-
-BitmapImage^ Photo::Image::get()
-{
-    assert(IsMainThread());
-    if (nullptr == m_image && !m_queryPhotoImageAsyncIsRunning)
-    {
-        m_queryPhotoImageAsyncIsRunning = true;
-        QueryPhotoImageAsync().then([this](task<void> priorTask)
-            {
-                m_queryPhotoImageAsyncIsRunning = false;
-                priorTask.get();
-                OnPropertyChanged("Image");
-            }).then(ObserveException<void>(m_exceptionPolicy));        
-    }
-    return m_image;
+    return m_thumbnail;
 }
 
 bool Photo::IsInvalidThumbnail::get()
 {
-    return m_isInvalidThumbnail;
+    return (m_thumbnailStatus == UpdateStatus::Error);
 }
 
-task<void> Photo::QueryPhotoImageAsync()
+// Start getting the thumbnail for this image.
+// Completion is signaled with a PropertyChanged event.
+void Photo::StartThumbnailGet()
 {
-    auto imageStreamTask = create_task(m_fileInfo->OpenReadAsync());
-    return imageStreamTask.then([this](task<IRandomAccessStreamWithContentType^> priorTask) -> task<void>
+    assert(IsMainThread());
+    assert(m_thumbnailStatus == UpdateStatus::Uninitialized);
+
+    m_thumbnailStatus = UpdateStatus::Running;
+    create_task(m_file->GetThumbnailAsync(ThumbnailMode::PicturesView, 190, ThumbnailOptions::UseCurrentScale)).then([this] (StorageItemThumbnail^ storageThumbnail) -> task<void>
     {
         assert(IsMainThread());
-        IRandomAccessStreamWithContentType^ imageData = priorTask.get();
-        m_image = ref new BitmapImage();
-        m_imageFailedEventToken = m_image->ImageFailed::add(ref new ExceptionRoutedEventHandler(this, &Photo::OnImageFailedToOpen));
-        return create_task(m_image->SetSourceAsync(imageData));
-    }).then([this](task<void> priorTask) {
-        assert(IsMainThread());
+        IRandomAccessStream^ thumbnailStream = dynamic_cast<IRandomAccessStream^>(storageThumbnail);
+        if (nullptr == thumbnailStream)
+        {
+            // Use default image if no thumbnail is available.
+            UseDefaultThumbnail();
+            return create_task([]{});
+        }
+        else
+        {
+            // Convert thumbnail file stream into a bitmap image that can be bound in XAML. 
+            auto thumbnail = ref new BitmapImage(); 
+            return create_task(thumbnail->SetSourceAsync(thumbnailStream)).then([this, thumbnail]()
+            {
+                assert(IsMainThread());
+                m_thumbnail = thumbnail;
+                m_thumbnailStatus = UpdateStatus::Ready;
+                OnPropertyChanged("Thumbnail");
+            }, task_continuation_context::use_current());
+        }
+    }, task_continuation_context::use_current()).then([this](task<void> priorTask)
+    {
         try
         {
             priorTask.get();
         }
-        catch (Exception^ e)
+        // If GetThumbnailAsync or SetSourceAsync fails, just use the default thumbnail.
+        catch(Exception^)
         {
-           OnImageFailedToOpen(nullptr, nullptr);
+            UseDefaultThumbnail();
+            throw;
         }
-    });
+    }, task_continuation_context::use_current()).then(ObserveException<void>(m_exceptionPolicy));
 }
 
-void Photo::OnImageFailedToOpen(Object^ sender, ExceptionRoutedEventArgs^ e)
+// When no thumbnail is available for this image file, use a default thumbnail.
+void Photo::UseDefaultThumbnail()
 {
-    assert(IsMainThread());
-
-    // Load a default image.
-    m_image = ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));  
-}
-
-void Photo::ClearImageData()
-{
-    if (nullptr != m_image && m_imageFailedEventToken.Value != 0)
-    {
-        m_image->ImageFailed::remove(m_imageFailedEventToken);
-    }
-    m_image = nullptr;
-}
-
-IAsyncOperation<IRandomAccessStreamWithContentType^>^ Photo::OpenReadAsync()
-{
-    return m_fileInfo->OpenReadAsync();
+    assert(IsMainThread());  
+    m_thumbnail = ref new BitmapImage(ref new Uri("ms-appx:///Assets/HiloLogo.png"));
+    m_thumbnailStatus = UpdateStatus::Error;
+    OnPropertyChanged("Thumbnail");
+    OnPropertyChanged("IsInvalidThumbnail");
 }
 
 int Photo::RowSpan::get()
@@ -234,4 +208,14 @@ int Photo::ColumnSpan::get()
 void Photo::ColumnSpan::set(int value)
 {
     m_columnSpan = value;
+}
+
+IPhotoImage^ Photo::GetPhotoImage()
+{
+    return ref new PhotoImage(this, m_exceptionPolicy);
+}
+
+StorageFile^  Photo::File::get()
+{
+    return m_file;
 }

@@ -11,7 +11,7 @@ namespace HiloTests
     class TestImageGenerator
     {
     public:
-        concurrency::task<Windows::Storage::BulkAccess::FileInformation^> CreateTestImageFileFromLocalFolder(
+        concurrency::task<Windows::Storage::StorageFile^> CreateTestImageFileFromLocalFolder(
             Platform::String^ fileName, 
             Platform::String^ newName = "test.png");
 

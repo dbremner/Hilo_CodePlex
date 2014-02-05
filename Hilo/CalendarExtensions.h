@@ -22,6 +22,7 @@ namespace Hilo
         static void WriteLocalizedYearAndMonth(const Windows::Foundation::DateTime date, int& yearResult, int& monthResult);
         static Platform::String^ ResolvedLanguage();
         static Platform::String^ ResolvedGeographicRegion();
+        static Windows::Foundation::DateTime GetCurrentDateTime();
 
     private:
         static std::wstring GetAqsFormattedDate(const Windows::Foundation::DateTime date);

@@ -6,4 +6,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 #pragma once
 
-byte* GetPointerToPixelData(Windows::Storage::Streams::IBuffer^ buffer);
+byte* GetPointerToPixelData(Windows::Storage::Streams::IBuffer^ buffer, unsigned int *length);

@@ -10,7 +10,7 @@
 
 namespace Hilo
 {
-    interface class IPhoto;
+    interface class IPhotoImage;
     class ImageNavigationData;
     class Repository;
     class ExceptionPolicy;
@@ -88,7 +88,7 @@ namespace Hilo
         unsigned int m_cropY;
 
         void ChangeInProgress(bool value);
-        concurrency::task<IPhoto^> GetImagePhotoAsync();
+        concurrency::task<IPhotoImage^> GetImagePhotoAsync();
         concurrency::task<Windows::Storage::Streams::IRandomAccessStream^> EncodeImageAsync(Windows::Storage::Streams::IRandomAccessStream^ sourceStream);
         void DoCrop(uint32_t xOffset, uint32_t yOffset, uint32_t newHeight, uint32_t newWidth, uint32_t oldWidth, byte* pSrcPixels, byte* pDestPixels);
 

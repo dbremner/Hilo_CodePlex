@@ -109,7 +109,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding Path=SelectedItem.Thumbnail}" 
+                            <Image Source="{Binding Path=CurrentPhotoImage.Thumbnail}" 
                                    Height="105" 
                                    Width="105" 
                                    Stretch="UniformToFill" />
@@ -117,24 +117,24 @@
                                         Margin="10,0,10,0">
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}" 
                                            FontWeight="Bold"
-                                           Text="{Binding Path=SelectedItem.Name}" 
+                                           Text="{Binding Path=CurrentPhotoImage.Name}" 
                                            TextWrapping="Wrap"/>
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}"
-                                           Text="{Binding Path=SelectedItem.DisplayType}"/>
+                                           Text="{Binding Path=CurrentPhotoImage.DisplayType}"/>
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}" 
-                                           Text="{Binding Path=SelectedItem.Resolution}" />
+                                           Text="{Binding Path=CurrentPhotoImage.Resolution}" />
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}" 
-                                               Text="{Binding Path=SelectedItem.FormattedDateTaken}" />
+                                               Text="{Binding Path=CurrentPhotoImage.FormattedDateTaken}" />
                                     <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}"
                                                Margin="4,0,0,0"
-                                               Text="{Binding Path=SelectedItem.FormattedTimeTaken}" />
+                                               Text="{Binding Path=CurrentPhotoImage.FormattedTimeTaken}" />
                                 </StackPanel>
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}" 
-                                           Text="{Binding Path=SelectedItem.FileSize, Converter={StaticResource FileSizeConverter}}" />
+                                           Text="{Binding Path=CurrentPhotoImage.FileSize, Converter={StaticResource FileSizeConverter}}" />
                                 <TextBlock Foreground="{StaticResource ApplicationForegroundThemeBrush}"
                                            Margin="0,20,0,0"
-                                           Text="{Binding Path=SelectedItem.FormattedPath}" />
+                                           Text="{Binding Path=CurrentPhotoImage.FormattedPath}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -146,7 +146,7 @@
                        PointerPressed="OnImagePointerPressed"
                        PointerReleased="OnImagePointerReleased"
                        PointerMoved="OnImagePointerMoved"
-                       Source="{Binding Path=SelectedItem.Image}"
+                       Source="{Binding Path=CurrentPhotoImage.Image}"
                        VerticalAlignment="Center">
                 </Image>
             </Border>

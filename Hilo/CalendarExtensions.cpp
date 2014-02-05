@@ -225,3 +225,10 @@ Platform::String^ CalendarExtensions::ResolvedGeographicRegion()
 {
    return (ref new DateTimeFormatter("shortdate"))->ResolvedGeographicRegion;
 }
+
+Windows::Foundation::DateTime CalendarExtensions::GetCurrentDateTime()
+{
+    auto cal = GetCalendar();
+    cal->SetToNow();
+    return cal->GetDateTime();
+}
